@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2020. Code made by Radi3nt. Do not decompile. All right reserved
+ */
+
 package fr.radi3nt.loupgarouuhc;
 
+import com.sun.deploy.config.AutoUpdater;
 import fr.radi3nt.loupgarouuhc.classes.config.Config;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.message.Logger;
@@ -22,6 +27,7 @@ import fr.radi3nt.loupgarouuhc.commands.LGcommands;
 import fr.radi3nt.loupgarouuhc.customlisteners.*;
 import fr.radi3nt.loupgarouuhc.listeners.*;
 import fr.radi3nt.loupgarouuhc.listeners.gui.ClickEvent;
+import fr.radi3nt.loupgarouuhc.utilis.Updater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -51,6 +57,7 @@ public final class LoupGarouUHC extends JavaPlugin {
     public static Chat DeadChatI;
 
     public static Plugin plugin;
+    private static final String VERSION = "1.0.0";
 
     HashMap<RoleSort, Boolean> MaxRoles = new HashMap<>();
 
@@ -61,16 +68,15 @@ public final class LoupGarouUHC extends JavaPlugin {
     public static File RoleConfigFile;
 
     public static LGGame GameInstance;
+    private static Updater updater;
 
     // Plugin startup logic
     //--------------------------------------------------//
-    public static final String VERSION = "1.0";
     public static final ConsoleCommandSender console = Bukkit.getConsoleSender();
     //--------------------------------------------------//
 
     public static String prefix = ChatColor.AQUA + "[" + ChatColor.GOLD + ChatColor.BOLD + "LG UHC" + ChatColor.AQUA + "]" + ChatColor.RESET;
     public static String prefixPrivé = ChatColor.BLUE + "[Privé]" + ChatColor.RESET;
-
 
 
     @Override
@@ -222,5 +228,50 @@ public final class LoupGarouUHC extends JavaPlugin {
         } catch (NoSuchMethodException | SecurityException e) {
             System.out.println("Error while enabling roles");
         }
+    }
+
+
+    public static Parameters getParameters() {
+        return parameters;
+    }
+
+    public static LangWarper getLangWarperInstance() {
+        return langWarperInstance;
+    }
+
+    public static Plugin getPlugin() {
+        return plugin;
+    }
+
+    public static HashMap<String, Integer> getRoleNumber() {
+        return roleNumber;
+    }
+
+    public static ArrayList<LGPlayer> getPlayers() {
+        return players;
+    }
+
+    public static HashMap<String, Constructor<? extends Role>> getRolesLink() {
+        return rolesLink;
+    }
+
+    public static LGGame getGameInstance() {
+        return GameInstance;
+    }
+
+    public static String getPrefix() {
+        return prefix;
+    }
+
+    public static String getPrefixPrivé() {
+        return prefixPrivé;
+    }
+
+    public static Updater getUpdater() {
+        return updater;
+    }
+
+    public static String getVersion() {
+        return VERSION;
     }
 }

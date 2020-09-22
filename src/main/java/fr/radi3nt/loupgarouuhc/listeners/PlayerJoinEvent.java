@@ -1,8 +1,10 @@
 package fr.radi3nt.loupgarouuhc.listeners;
 
+import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
 import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
+import fr.radi3nt.loupgarouuhc.utilis.Updater;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.Entity;
 import org.bukkit.Bukkit;
@@ -69,5 +71,14 @@ public class PlayerJoinEvent implements Listener {
                 stats.setKills(config.getConfiguration().getInt(e.getPlayer().getName() + ".kills"));
                 stats.setPoints(config.getConfiguration().getInt(e.getPlayer().getName() + ".points"));
                 lgp.setStats(stats);
+
+
+                /*
+        Updater.UpdateResults results = LoupGarouUHC.getUpdater().checkForUpdates();
+        if (results.getResult().equals(Updater.UpdateResult.UPDATE_AVAILABLE) && p.hasPermission("lg.updater")) {
+            p.sendMessage(prefix + ChatColor.GREEN + " Update found:" + results.getVersion() + ". Current is " + LoupGarouUHC.getVersion());
+        }
+
+                 */
     }
 }
