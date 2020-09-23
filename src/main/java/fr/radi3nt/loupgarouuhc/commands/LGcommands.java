@@ -2,7 +2,6 @@ package fr.radi3nt.loupgarouuhc.commands;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.GUIs.MainGUI;
 import fr.radi3nt.loupgarouuhc.classes.message.m.NoPermission;
 import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
@@ -21,7 +20,6 @@ import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -30,9 +28,6 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.security.SecureRandom;
-import java.util.Locale;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 
@@ -82,8 +77,8 @@ public class LGcommands implements CommandExecutor {
                             if (args.length>1) {
                                 Player target = Bukkit.getPlayerExact(args[1]);
                                 if (target!=null) {
-                                    if (!GameInstance.getGamePlayers().contains(LGPlayer.thePlayer((Player) target))) {
-                                        GameInstance.join(LGPlayer.thePlayer((Player) target));
+                                    if (!GameInstance.getGamePlayers().contains(LGPlayer.thePlayer(target))) {
+                                        GameInstance.join(LGPlayer.thePlayer(target));
                                         target.sendMessage(prefix + ChatColor.GOLD + " Joined current game");
                                     }
                                 }
@@ -495,7 +490,7 @@ public class LGcommands implements CommandExecutor {
                                             } catch (NumberFormatException e) {
                                                 //error
                                             }
-                                            int damage = life/100*20;
+                                            int damage = (int) (((float) life / 100) * 20);
 
                                             if (lgp.getPlayer().getHealth()-damage > 0) {
                                                 if (lgp.getCouple().getPlayer().getHealth() + damage <= lgp.getCouple().getPlayer().getMaxHealth() && lgp.getCouple().getPlayer().getHealth()!=lgp.getCouple().getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
