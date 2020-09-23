@@ -75,7 +75,6 @@ public class Cupidon extends Role {
             @Override
             public void run() {
                 if (i==60*5*20) {
-                    cancel();
                     canCouple = false;
                     if (game.getGamePlayers().size() >= 2) {
                         ArrayList<LGPlayer> players1 = (ArrayList<LGPlayer>) game.getGamePlayers().clone();
@@ -111,6 +110,9 @@ public class Cupidon extends Role {
 
 
                     }
+                }
+                if (canCouple = false) {
+                    cancel();
                 }
                 i++;
             }
