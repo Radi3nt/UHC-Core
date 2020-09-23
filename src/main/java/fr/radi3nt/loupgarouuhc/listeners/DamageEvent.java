@@ -2,11 +2,11 @@ package fr.radi3nt.loupgarouuhc.listeners;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.Reason;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.classes.Reason;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
 import fr.radi3nt.loupgarouuhc.events.OnKill;
 import fr.radi3nt.loupgarouuhc.events.OnKilled;
@@ -16,7 +16,6 @@ import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -192,20 +191,27 @@ public class DamageEvent implements Listener {
                             }
 
                             if (i==5*20) {
-                                Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
-                                Bukkit.broadcastMessage(ChatColor.GREEN+ "Le village a perdu un de ses membres:");
-                                Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getRole().getName());
-                                Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
+                                if (lgp.getCouple() == null) {
+                                    Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
+                                    Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
+                                    Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getRole().getName());
+                                    Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
+                                } else {
+                                    Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
+                                    Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
+                                    Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " qui c'est suicidé, il était " + ChatColor.ITALIC + lgp.getRole().getName());
+                                    Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
+                                }
                                 lgp.setCanVote(false);
                                 lgp.setDiamondMined(0);
                                 for (ItemStack item : player.getInventory().getContents()) {
-                                    if (item!=null) {
+                                    if (item != null) {
                                         player.getWorld().dropItem(playerloc, item.clone());
                                         item.setAmount(0);
                                     }
                                 }
                                 for (ItemStack item : player.getInventory().getArmorContents()) {
-                                    if (item!=null) {
+                                    if (item != null) {
                                         player.getWorld().dropItem(playerloc, item.clone());
                                         item.setAmount(0);
                                     }

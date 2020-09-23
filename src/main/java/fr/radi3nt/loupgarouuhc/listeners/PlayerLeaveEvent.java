@@ -68,7 +68,7 @@ public class PlayerLeaveEvent implements Listener {
                         lgp.setDead(true);
                         if (lgp.getCouple()!=null) {
                             lgp.getCouple().getPlayer().damage(20);
-                            lgp.getCouple().setCouple(null);
+                            //lgp.getCouple().setCouple(null);
                             lgp.setCouple(null);
                         }
                         lgp.getGame().getGamePlayers().remove(lgp);
