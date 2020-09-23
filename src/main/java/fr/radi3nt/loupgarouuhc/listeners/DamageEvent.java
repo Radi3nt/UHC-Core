@@ -37,27 +37,31 @@ public class DamageEvent implements Listener {
         if (e.getEntity() instanceof Player) {
             LGGame game = LGPlayer.thePlayer((Player) e.getEntity()).getGame();
             if (game!=null) {
-                if (game.getGameTimer()!=null && e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
-                    EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
-                    if (e1.getDamager() instanceof Player) {
-                        if (!game.getGameTimer().isPvp()) {
-                            e.setCancelled(true);
-                        }
-                    } else if (e1.getDamager() instanceof Projectile) {
-                        Projectile projectile = (Projectile) e.getEntity();
-                        if (projectile.getShooter() instanceof Player) {
+                if (game.getGameTimer() != null) {
+                    if (e instanceof EntityDamageByEntityEvent || e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
+                        EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
+                        if (e1.getDamager() instanceof Player) {
                             if (!game.getGameTimer().isPvp()) {
                                 e.setCancelled(true);
                             }
-                        } else {
-                            if (!game.getGameTimer().isDegas()) {
+                        }
+                        if (e1.getDamager() instanceof Projectile) {
+                            Projectile projectile = (Projectile) e1.getDamager();
+                            if (projectile.getShooter() instanceof Player) {
+                                if (!game.getGameTimer().isPvp()) {
+                                    e.setCancelled(true);
+                                }
+                            } else if (!game.getGameTimer().isDegas()) {
                                 e.setCancelled(true);
                             }
-                        }                    } else {
-                        if (!game.getGameTimer().isDegas()) {
+                        } else if (!game.getGameTimer().isDegas()) {
                             e.setCancelled(true);
                         }
+                    } else if (!game.getGameTimer().isDegas()) {
+                        e.setCancelled(true);
                     }
+                } else if (!game.getGameTimer().isDegas()) {
+                    e.setCancelled(true);
                 }
             }
             if (e.getEntity().isDead() || ((Player) e.getEntity()).getHealth()-e.getDamage()<=0) {
@@ -110,14 +114,19 @@ public class DamageEvent implements Listener {
                         npc.addRecipient(onlinePlayer);
                     }
                     EntityPlayer playerNMS = ((CraftPlayer) lgp.getPlayer()).getHandle();
-                    GameProfile profile = playerNMS.getProfile();
-                    Property property = profile.getProperties().get("textures").iterator().next();
-                    String texture = property.getValue();
-                    String signature = property.getSignature();
-                    npc.setSkin(texture, signature);
+                    if (playerNMS.getProfile() != null) {
+                        try {
+                            GameProfile profile = playerNMS.getProfile();
+                            Property property = profile.getProperties().get("textures").iterator().next();
+                            String texture = property.getValue();
+                            String signature = property.getSignature();
+                            npc.setSkin(texture, signature);
+                        } catch (Exception e1) {
+
+                        }
+                    }
                     npc.spawn(false, true);
                     npc.setSleep(true, npc.getDirectionInversed(lgp.getPlayer().getLocation()), false);
-
 
 
                     Location playerloc = lgp.getPlayer().getLocation();
@@ -133,12 +142,21 @@ public class DamageEvent implements Listener {
                         }
                     }
                     lgp.setChat(DeadChatI);
+
+
                     new BukkitRunnable(){
                         int i = 0;
 
                         @Override
                         public void run() {
-                            if (i<5*20 && !lgp.canBeRespawned() || (game.getGameTimer().getDays()<game.getParameters().getDayRoleDivulged() == game.getParameters().isRespawnBeforeRoleDivulged())) {
+                            if (lgp.getGame() == null) {
+                                cancel();
+                                npc.spectate(lgp.getPlayer(), false);
+                                npc.destroy();
+                            }
+
+
+                            if (i < 5 * 20 && !lgp.canBeRespawned() || (game.getGameTimer().getDays() < game.getParameters().getDayRoleDivulged() == game.getParameters().isRespawnBeforeRoleDivulged())) {
                                 cancel();
                                 npc.spectate(lgp.getPlayer(), false);
                                 player.setGameMode(GameMode.SURVIVAL);
@@ -191,7 +209,7 @@ public class DamageEvent implements Listener {
                             }
 
                             if (i==5*20) {
-                                if (lgp.getCouple() == null) {
+                                if (lgp.getCouple() == null || lgp.getCouple().getCouple() != null) {
                                     Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
                                     Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
                                     Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getRole().getName());
@@ -223,29 +241,45 @@ public class DamageEvent implements Listener {
                                     }
                                 }
                                 for (ItemStack item : player.getInventory().getStorageContents()) {
-                                    if (item!=null) {
+                                    if (item != null) {
                                         player.getWorld().dropItem(playerloc, item.clone());
                                         item.setAmount(0);
                                     }
                                 }
-                                if (lgp.getGame().getGameTimer()!=null && e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
-                                    EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
-                                    if (e1.getDamager() instanceof Player) {
-                                        Bukkit.getPluginManager().callEvent(new OnKilled(lgp.getGame(), lgp, LGPlayer.thePlayer((Player) e1.getDamager()), playerloc));
-                                        lgp.setKiller(LGPlayer.thePlayer((Player) e1.getDamager()));
+
+                                if (game.getGameTimer() != null) {
+                                    if (e instanceof EntityDamageByEntityEvent || e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
+                                        EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
+                                        if (e1.getDamager() instanceof Player) {
+                                            if (!game.getGameTimer().isPvp()) {
+                                                Bukkit.getPluginManager().callEvent(new OnKilled(lgp.getGame(), lgp, LGPlayer.thePlayer((Player) e1.getDamager()), playerloc));
+                                                lgp.setKiller(LGPlayer.thePlayer((Player) e1.getDamager()));
+
+                                            }
+                                        }
+                                        if (e1.getDamager() instanceof Projectile) {
+                                            Projectile projectile = (Projectile) e1.getDamager();
+                                            if (projectile.getShooter() instanceof Player) {
+                                                if (!game.getGameTimer().isPvp()) {
+                                                    Bukkit.getPluginManager().callEvent(new OnKilled(lgp.getGame(), lgp, LGPlayer.thePlayer((Player) projectile.getShooter()), playerloc));
+                                                    lgp.setKiller(LGPlayer.thePlayer((Player) projectile.getShooter()));
+
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 
                                 lgp.getGame().kill(lgp, Reason.TUÉ, false, playerloc);
                                 lgp.setCanBeRespawned(false);
-                                if (lgp.getCouple()!=null && lgp.isDead() && !lgp.getCouple().isDead()) {
+                                if (lgp.getCouple() != null && lgp.isDead() && !lgp.getCouple().isDead()) {
                                     lgp.getCouple().getPlayer().damage(20);
-                                    lgp.getCouple().setCouple(null);
+                                    //lgp.getCouple().setCouple(null);
                                     lgp.setCouple(null);
                                 }
                                 if (lgp.getCouple()!=null && !lgp.isDead() && lgp.getCouple().isDead()) {
                                     lgp.getPlayer().damage(20);
-                                    lgp.getCouple().setCouple(null);
+                                    //lgp.getCouple().setCouple(null);
                                     lgp.setCouple(null);
                                 }
                                 lgp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
