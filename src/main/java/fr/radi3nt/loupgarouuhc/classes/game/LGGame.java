@@ -1,15 +1,15 @@
 package fr.radi3nt.loupgarouuhc.classes.game;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.Reason;
-import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
-import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
+import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.classes.roles.WinType;
+import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
+import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
@@ -21,11 +21,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Constructor;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 import static org.bukkit.Bukkit.broadcastMessage;
-import static org.bukkit.Bukkit.recipeIterator;
 
 public class LGGame {
 
@@ -385,6 +386,7 @@ public class LGGame {
                 Player p = lgp.getPlayer();
                 p.resetMaxHealth();
                 p.setFoodLevel(20);
+                p.setSaturation(20);
                 p.setHealth(20);
                 p.setWalkSpeed(0);
                 p.setGameMode(Bukkit.getDefaultGameMode());
