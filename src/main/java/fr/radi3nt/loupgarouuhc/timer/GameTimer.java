@@ -13,19 +13,19 @@ import fr.radi3nt.loupgarouuhc.events.OnNight;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_12_R1.ChatComponentText;
-import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.langWarperInstance;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
 
 public class GameTimer extends BukkitRunnable {
 
@@ -267,7 +267,7 @@ public class GameTimer extends BukkitRunnable {
                     if (checkDay(ticks)>=game.getParameters().getDayRoleDivulged())
                         setScore(ChatColor.DARK_BLUE + "Role: " + ChatColor.BLUE +lgp.getRole().getName(), i, objective);
                     else
-                        setScore(ChatColor.DARK_BLUE + "Role: " + ChatColor.BLUE +ChatColor.MAGIC + String.valueOf(Math.pow(10, new SecureRandom().nextInt(10)+7)), i, objective);
+                        setScore(ChatColor.DARK_BLUE + "Role: " + ChatColor.BLUE + ChatColor.MAGIC + Math.pow(10, new SecureRandom().nextInt(10) + 7), i, objective);
                     i--;
 
 
@@ -518,11 +518,11 @@ public class GameTimer extends BukkitRunnable {
     }
 
     public void setNight(Integer days) {
-        for ( ; ticks < ((days-1)*(24000/game.getParameters().getTimeMultiplication())-20)+(24000/2-shift); ticks++) {
+        for (; ticks < ((days - 1) * (24000 / game.getParameters().getTimeMultiplication()) - 20) + (24000 / 2 + shift); ticks++) {
             checkForMessage(ticks);
         }
-        ticksday=(24000/2-shift)-20;
-        ticks=((days-1)*(24000/game.getParameters().getTimeMultiplication())-20)+(24000/2-shift);
+        ticksday = (24000 / 2 + shift) - 20;
+        ticks = ((days - 1) * (24000 / game.getParameters().getTimeMultiplication()) - 20) + (24000 / 2 + shift);
         if (!degas) {
             degas = true;
         }

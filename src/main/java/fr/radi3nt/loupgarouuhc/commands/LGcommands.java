@@ -253,7 +253,7 @@ public class LGcommands implements CommandExecutor {
                                     case "night":
                                         //todo night warp
                                         if (lgp.getGame() != null && lgp.getGame().getGameTimer()!=null) {
-                                            lgp.getGame().getGameTimer().setNight(lgp.getGame().getGameTimer().getDays() + 1);
+                                            lgp.getGame().getGameTimer().setNight(lgp.getGame().getGameTimer().getDays());
                                         }
                                         break;
                                 }
