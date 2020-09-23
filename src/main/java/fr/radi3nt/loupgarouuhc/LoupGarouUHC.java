@@ -57,7 +57,6 @@ public final class LoupGarouUHC extends JavaPlugin {
     public static Chat DeadChatI;
 
     public static Plugin plugin;
-    private static final String VERSION = "1.0.0";
 
     HashMap<RoleSort, Boolean> MaxRoles = new HashMap<>();
 
@@ -272,6 +271,6 @@ public final class LoupGarouUHC extends JavaPlugin {
     }
 
     public static String getVersion() {
-        return VERSION;
+        return plugin.getDescription().getVersion();
     }
 }

@@ -16,6 +16,7 @@ import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -43,25 +44,20 @@ public class DamageEvent implements Listener {
                         if (!game.getGameTimer().isPvp()) {
                             e.setCancelled(true);
                         }
-                    } else {
+                    } else if (e1.getDamager() instanceof Projectile) {
+                        Projectile projectile = (Projectile) e.getEntity();
+                        if (projectile.getShooter() instanceof Player) {
+                            if (!game.getGameTimer().isPvp()) {
+                                e.setCancelled(true);
+                            }
+                        } else {
+                            if (!game.getGameTimer().isDegas()) {
+                                e.setCancelled(true);
+                            }
+                        }                    } else {
                         if (!game.getGameTimer().isDegas()) {
                             e.setCancelled(true);
                         }
-                    }
-                } else if (game.getGameTimer()!=null && e.getEntity() instanceof Projectile) {
-                    Projectile projectile = (Projectile) e.getEntity();
-                    if (projectile.getShooter() instanceof Player) {
-                        if (!game.getGameTimer().isPvp()) {
-                            e.setCancelled(true);
-                        }
-                    } else {
-                        if (!game.getGameTimer().isDegas()) {
-                            e.setCancelled(true);
-                        }
-                    }
-                } else {
-                    if (game.getGameTimer()!=null && !game.getGameTimer().isDegas()) {
-                        e.setCancelled(true);
                     }
                 }
             }

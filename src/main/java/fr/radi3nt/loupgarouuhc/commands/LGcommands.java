@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -235,7 +236,7 @@ public class LGcommands implements CommandExecutor {
                             if (args.length > 1) {
                                 switch (args[1]) {
                                     case "skip":
-                                        if (lgp.getGame() != null) {
+                                        if (lgp.getGame() != null && lgp.getGame().getGameTimer()!=null) {
                                             lgp.getGame().getGameTimer().setDay(lgp.getGame().getGameTimer().getDays() + 1);
                                         }
                                         break;
@@ -251,6 +252,9 @@ public class LGcommands implements CommandExecutor {
 
                                     case "night":
                                         //todo night warp
+                                        if (lgp.getGame() != null && lgp.getGame().getGameTimer()!=null) {
+                                            lgp.getGame().getGameTimer().setNight(lgp.getGame().getGameTimer().getDays() + 1);
+                                        }
                                         break;
                                 }
                             }
@@ -479,6 +483,39 @@ public class LGcommands implements CommandExecutor {
                                         }
                                     } else {
                                         lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu n'est pas cupidon");
+                                    }
+                                    break;
+
+                                case "don":
+                                    if (lgp.getGame() != null && lgp.getGame().getGameTimer()!=null) {
+                                        if (lgp.getCouple()!=null && lgp.getCouple().getPlayer()!=null) {
+                                            int life = 0;
+                                            try {
+                                                life= Integer.parseInt(args[2]);
+                                            } catch (NumberFormatException e) {
+                                                //error
+                                            }
+                                            int damage = life/100*20;
+
+                                            if (lgp.getPlayer().getHealth()-damage > 0) {
+                                                if (lgp.getCouple().getPlayer().getHealth() + damage <= lgp.getCouple().getPlayer().getMaxHealth() && lgp.getCouple().getPlayer().getHealth()!=lgp.getCouple().getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+                                                    if (life != 0) {
+                                                        lgp.getPlayer().setHealth(lgp.getPlayer().getHealth() - damage);
+                                                        lgp.getCouple().getPlayer().setHealth(lgp.getCouple().getPlayer().getHealth() + damage);
+                                                        lgp.sendMessage(prefix + " " + ChatColor.GREEN + "Tu a donné " + ChatColor.DARK_GREEN + life + ChatColor.GREEN + "% de vie a " + ChatColor.AQUA + lgp.getCouple().getName());
+                                                        lgp.getCouple().sendMessage(prefix + " " + ChatColor.DARK_GREEN + lgp.getName() + ChatColor.GREEN + " vous a donné " + ChatColor.DARK_GREEN + life + ChatColor.GREEN + "% de vie");
+                                                    } else {
+                                                        lgp.sendMessage(prefix + " " + ChatColor.RED + "Impossible de donner 0% de vie a " + ChatColor.AQUA + lgp.getCouple().getName());
+                                                    }
+                                                } else {
+                                                    lgp.sendMessage(prefix + " " + ChatColor.RED + lgp.getCouple().getName() + " ne peut recevoir tant de vie");
+                                                }
+                                            } else {
+                                                lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu n'a pas assez de vie");
+                                            }
+                                        } else {
+                                            lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu n'est pas en couple");
+                                        }
                                     }
                                     break;
                             }

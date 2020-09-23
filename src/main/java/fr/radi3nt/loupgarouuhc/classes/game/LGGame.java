@@ -255,8 +255,6 @@ public class LGGame {
     }
 
     public void scatter(LGPlayer player) {
-        //TODO biome check for ocean
-
         Location location = new Location(gameSpawn.getWorld(), Math.random() * radius*2 +gameSpawn.getX() - radius, 0, Math.random() * radius*2+gameSpawn.getX() - radius);
         int y = gameSpawn.getWorld().getHighestBlockYAt(location);
         location.setY(y-2);

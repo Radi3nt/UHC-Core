@@ -284,7 +284,7 @@ public class GameTimer extends BukkitRunnable {
                         text = ChatColor.DARK_GREEN + "Border: " + ChatColor.GREEN + game.getRadius();
 
                     setScore(text, i, objective);
-                    i--;
+                    //i--;
                     /*
                     setScore("   ", i, objective);
                     i--;
@@ -298,10 +298,11 @@ public class GameTimer extends BukkitRunnable {
 
                     //TABLIST
 
-                    PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
-
 
                     try {
+                        Object packet = NMSBase.getNMSClass("PacketPlayOutPlayerListHeaderFooter").newInstance();
+
+
                         Field a = packet.getClass().getDeclaredField("a");
                         a.setAccessible(true);
                         Field b = packet.getClass().getDeclaredField("b");
@@ -316,8 +317,6 @@ public class GameTimer extends BukkitRunnable {
                         NMSBase.sendPacket(packet);
 
 
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
-                        e.printStackTrace();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -516,6 +515,26 @@ public class GameTimer extends BukkitRunnable {
 
     public int checkDay(int ticks) {
         return ticks/(24000/game.getParameters().getTimeMultiplication())+1;
+    }
+
+    public void setNight(Integer days) {
+        for ( ; ticks < ((days-1)*(24000/game.getParameters().getTimeMultiplication())-20)+(24000/2-shift); ticks++) {
+            checkForMessage(ticks);
+        }
+        ticksday=(24000/2-shift)-20;
+        ticks=((days-1)*(24000/game.getParameters().getTimeMultiplication())-20)+(24000/2-shift);
+        if (!degas) {
+            degas = true;
+        }
+        if (waiting) {
+            for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
+                lgp.getPlayer().setWalkSpeed(0.2F);
+                lgp.getPlayer().removePotionEffect(PotionEffectType.JUMP);
+                lgp.getPlayer().removePotionEffect(PotionEffectType.SLOW);
+            }
+            waiting = false;
+        }
+        game.getVoted().clear();
     }
 
     public void setDay(Integer days) {
