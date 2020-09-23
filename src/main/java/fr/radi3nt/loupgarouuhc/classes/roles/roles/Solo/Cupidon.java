@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.classes.roles.roles.Solo;
 
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
@@ -12,7 +12,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefixPrivé;
 
 public class Cupidon extends Role {
 
@@ -72,8 +76,41 @@ public class Cupidon extends Role {
             public void run() {
                 if (i==60*5*20) {
                     cancel();
-                    canCouple=false;
-                    //todo auto role
+                    canCouple = false;
+                    if (game.getGamePlayers().size() >= 2) {
+                        ArrayList<LGPlayer> players1 = (ArrayList<LGPlayer>) game.getGamePlayers().clone();
+                        LGPlayer lgp1 = null;
+                        LGPlayer lgp2 = null;
+
+                        int i = 0;
+                        while ((lgp1 == null || lgp1.getCouple() != null) && i <= 1000) {
+                            lgp1 = players1.get(new SecureRandom().nextInt(players1.size()));
+                            i++;
+                        }
+                        if (lgp1 == null) {
+                            return;
+                        }
+
+                        players1.remove(lgp1);
+                        i = 0;
+                        while ((lgp2 == null || lgp2.getCouple() != null) && i <= 1000) {
+                            lgp2 = players1.get(new SecureRandom().nextInt(players1.size()));
+                            i++;
+                        }
+                        if (lgp2 == null) {
+                            return;
+                        }
+
+                        lgp1.setCouple(lgp2);
+                        lgp2.setCouple(lgp1);
+
+
+                        lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu n'a pas su te decider, ton instinct l'a fait pour toi: tu a uni " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + " et " + ChatColor.DARK_AQUA + lgp2.getName());
+                        lgp1.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp2.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
+                        lgp2.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
+
+
+                    }
                 }
                 i++;
             }
