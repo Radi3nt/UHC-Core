@@ -210,6 +210,7 @@ public class LGGame {
             p.getPlayer().setGameMode(GameMode.ADVENTURE);
             p.resetMaxHealth();
             p.setFoodLevel(20);
+            p.setSaturation(20);
             p.setHealth(20);
             p.setWalkSpeed(0);
             player.getPlayer().setExp(0);
