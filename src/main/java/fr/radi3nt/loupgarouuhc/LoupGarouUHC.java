@@ -4,18 +4,17 @@
 
 package fr.radi3nt.loupgarouuhc;
 
-import com.sun.deploy.config.AutoUpdater;
-import fr.radi3nt.loupgarouuhc.classes.config.Config;
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.message.Logger;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
 import fr.radi3nt.loupgarouuhc.classes.chats.DeadChat;
 import fr.radi3nt.loupgarouuhc.classes.chats.GameChat;
 import fr.radi3nt.loupgarouuhc.classes.chats.GeneralChat;
+import fr.radi3nt.loupgarouuhc.classes.config.Config;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.lang.LangWarper;
 import fr.radi3nt.loupgarouuhc.classes.lang.Language;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
+import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
 import fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou.*;
@@ -158,6 +157,8 @@ public final class LoupGarouUHC extends JavaPlugin {
 
 
         getServer().getPluginManager().registerEvents(new OnPlayerChatEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerMoveEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnPlayerDie(), this);
         getServer().getPluginManager().registerEvents(new DamageEvent(), this);
         getServer().getPluginManager().registerEvents(new OnBreakBlockEvent(), this);
         getServer().getPluginManager().registerEvents(new PlayerPreProcessCommand(), this);

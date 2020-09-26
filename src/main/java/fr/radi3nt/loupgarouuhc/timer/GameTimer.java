@@ -208,7 +208,6 @@ public class GameTimer extends BukkitRunnable {
                     final Scoreboard board = manager.getNewScoreboard();
                     final Objective objective = board.registerNewObjective("LG UHC", "uhc");
 
-                    //TODO kills, border amelioration
                     int i = 30;
                     objective.setDisplaySlot(DisplaySlot.SIDEBAR);
                     objective.setDisplayName(ChatColor.translateAlternateColorCodes('&', game.getData().getDisplayName()));
@@ -379,14 +378,17 @@ public class GameTimer extends BukkitRunnable {
 
     private void checkForMessage(int ticks) {
 
-        if (ticksday==12750 && checkDay(ticks)>1) {
+        int ticksday = ticks - ((checkDay(ticks - shift) - 1) * 24000) - shift;
+        System.out.println(ticksday);
+
+        if (ticksday == 13000 && checkDay(ticks) > 1) {
             Bukkit.getPluginManager().callEvent(new OnNight(game));
         }
-        if (ticksday==-shift && checkDay(ticks)>1) {
+        if (ticksday == 23000 && checkDay(ticks) > 1) {
             Bukkit.getPluginManager().callEvent(new OnDay(game));
         }
 
-        if (ticks==3*20) {
+        if (ticks == 3 * 20) {
             for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
                 try {
                     lgp.getPlayer().setWalkSpeed(0.2F);
