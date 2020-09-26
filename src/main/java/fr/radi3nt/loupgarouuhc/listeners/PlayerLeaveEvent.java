@@ -1,6 +1,8 @@
 package fr.radi3nt.loupgarouuhc.listeners;
 
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
+import fr.radi3nt.loupgarouuhc.classes.stats.Hologram;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,6 +20,13 @@ public class PlayerLeaveEvent implements Listener {
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
+        //PACKETS THINGS
+        for (HoloStats holoStats : HoloStats.getCachedHolo()) {
+            for (Hologram hologram : holoStats.getHologramsStand()) {
+                hologram.hide(e.getPlayer());
+            }
+        }
+
         Player p = e.getPlayer();
         LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer());
         Location playerloc = p.getLocation();
