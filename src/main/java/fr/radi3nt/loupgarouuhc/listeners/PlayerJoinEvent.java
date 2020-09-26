@@ -1,24 +1,16 @@
 package fr.radi3nt.loupgarouuhc.listeners;
 
-import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
+import fr.radi3nt.loupgarouuhc.classes.stats.Hologram;
 import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
-import fr.radi3nt.loupgarouuhc.utilis.Updater;
-import net.minecraft.server.v1_12_R1.BlockPosition;
-import net.minecraft.server.v1_12_R1.Entity;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.potion.PotionEffectType;
-
-import java.io.File;
-import java.io.IOException;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 
@@ -33,10 +25,17 @@ public class PlayerJoinEvent implements Listener {
             players.add(lgp);
         }
 
+        //PACKETS THINGS
+        for (HoloStats holoStats : HoloStats.getCachedHolo()) {
+            for (Hologram hologram : holoStats.getHologramsStand()) {
+                hologram.display(e.getPlayer());
+            }
+        }
+
 
         e.setJoinMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getDisplayName() + " (" + ChatColor.YELLOW + players.size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
         HoloStats.updateAll();
-        if ((lgp.getGame() == null || lgp.isDead() ) || lgp.getGame().getGameTimer().getTicks() >= lgp.getGame().getParameters().getPvpActivate()) {
+        if ((lgp.getGame() == null || lgp.isDead()) || lgp.getGame().getGameTimer().getTicks() >= lgp.getGame().getParameters().getPvpActivate()) {
             p.resetMaxHealth();
             p.setFoodLevel(20);
             p.setHealth(20);

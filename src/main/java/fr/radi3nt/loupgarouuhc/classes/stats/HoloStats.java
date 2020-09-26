@@ -1,48 +1,34 @@
 package fr.radi3nt.loupgarouuhc.classes.stats;
 
 import fr.radi3nt.loupgarouuhc.classes.config.Config;
-import fr.radi3nt.loupgarouuhc.classes.roles.Role;
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.plugin;
 
 public class HoloStats {
 
-    private static ArrayList<HoloStats> cachedHolo = new ArrayList<>();
+    private static final ArrayList<HoloStats> cachedHolo = new ArrayList<>();
+
+    private final String text = ChatColor.translateAlternateColorCodes('&', ChatColor.AQUA + "#%place%" + ChatColor.GRAY + " » " + ChatColor.YELLOW + "%name%" + ChatColor.GRAY + "-" + ChatColor.GREEN + "%points%");
 
     private Location location;
-    private ArrayList<ArmorStand> standArrayList = new ArrayList<>();
-    private Integer maxPlayers;
+    private final ArrayList<Hologram> holograms = new ArrayList<>();
+    private final Integer maxPlayers;
 
     public HoloStats(Location location, Integer maxPlayers) {
         this.location = location;
-        this.maxPlayers=maxPlayers;
+        this.maxPlayers = maxPlayers;
         cachedHolo.add(this);
         double shift = 0;
         ArrayList<String> notRanked = new ArrayList<>();
         for (int i = 0; i < maxPlayers; i++) {
             Location armorLoc = new Location(location.getWorld(), location.getX(), location.getY() - shift, location.getZ());
-            ArmorStand armorStand = (ArmorStand) location.getWorld().spawnEntity(armorLoc, EntityType.ARMOR_STAND);
-            armorStand.setVisible(false);
-            armorStand.setGravity(false);
-            armorStand.setMarker(true);
-            armorStand.setSmall(true);
-            armorStand.setBasePlate(false);
-            armorStand.setInvulnerable(true);
             String name = " ";
             int value = 0;
             fr.radi3nt.loupgarouuhc.classes.config.Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "players.yml");
@@ -57,18 +43,25 @@ public class HoloStats {
             } catch (NullPointerException e) {
 
             }
-            if (name.equals(" ")) {
-                armorStand.remove();
-            } else {
+            if (!name.equals(" ")) {
                 notRanked.add(name);
-                fr.radi3nt.loupgarouuhc.classes.config.Config config1 = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", name + ".yml");
-                standArrayList.add(armorStand);
-                int games = config1.getConfiguration().getInt( name + ".games");
-                int wins = config1.getConfiguration().getInt( name + ".wins");
-                int kills = config1.getConfiguration().getInt( name + ".kills");
-                int points = config1.getConfiguration().getInt( name + ".points");
-                armorStand.setCustomName(ChatColor.GOLD + "" + (notRanked.size()) + ". " + ChatColor.BOLD + name + ChatColor.GOLD + " |" + ChatColor.GRAY + " points: " + ChatColor.AQUA + points +ChatColor.GRAY + ", game: " + ChatColor.AQUA + games + ChatColor.GRAY + ", wins: " + ChatColor.AQUA + wins + ChatColor.GRAY + ", kills: " + ChatColor.AQUA + kills);
-                armorStand.setCustomNameVisible(true);
+                Config config1 = Config.createConfig(plugin.getDataFolder() + "/players", name + ".yml");
+                int games = config1.getConfiguration().getInt(name + ".games");
+                int wins = config1.getConfiguration().getInt(name + ".wins");
+                int kills = config1.getConfiguration().getInt(name + ".kills");
+                int points = config1.getConfiguration().getInt(name + ".points");
+
+                //points.toString().for
+                DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+                symbols.setGroupingSeparator(' ');
+                DecimalFormat df = new DecimalFormat("###,###", symbols);
+                //DecimalFormat df = new DecimalFormat("###,###.00", symbols);
+                String pointsS = df.format(points);
+
+                //Hologram hologram = new Hologram(armorLoc, ChatColor.GOLD + "" + (notRanked.size()) + ". " + ChatColor.BOLD + name + ChatColor.GOLD + " |" + ChatColor.GRAY + " points: " + ChatColor.AQUA + points +ChatColor.GRAY + ", game: " + ChatColor.AQUA + games + ChatColor.GRAY + ", wins: " + ChatColor.AQUA + wins + ChatColor.GRAY + ", kills: " + ChatColor.AQUA + kills);
+                Hologram hologram = new Hologram(armorLoc, text.replace("%place%", String.valueOf(notRanked.size())).replace("%name%", name).replace("%points%", ChatColor.RESET + " points: " + ChatColor.GREEN + pointsS + ChatColor.RESET + ", game: " + ChatColor.GREEN + games + ChatColor.RESET + ", wins: " + ChatColor.GREEN + wins + ChatColor.RESET + ", kills: " + ChatColor.GREEN + kills));
+                hologram.displayForAll();
+                holograms.add(hologram);
                 shift = shift + 0.3;
             }
         }
@@ -126,10 +119,10 @@ public class HoloStats {
         }
 
          */
-        for (int i = 0; i < standArrayList.size(); i++) {
-            ArmorStand armorStand = standArrayList.get(i);
-            armorStand.remove();
-            standArrayList.remove(armorStand);
+        for (int i = 0; i < holograms.size(); i++) {
+            Hologram hologram = holograms.get(i);
+            hologram.hideFromAll();
+            holograms.remove(hologram);
             i--;
         }
         cachedHolo.remove(this);
@@ -162,13 +155,13 @@ public class HoloStats {
         new HoloStats(location, this.maxPlayers);
     }
 
-    public ArrayList<ArmorStand> getStandArrayList() {
-        return standArrayList;
+    public ArrayList<Hologram> getHologramsStand() {
+        return holograms;
     }
 
     public static HoloStats theHoloStats(Location location) {
         for (HoloStats holo : cachedHolo) {
-            if (holo.getLocation()==location) {
+            if (holo.getLocation() == location) {
                 return holo;
             }
         }
