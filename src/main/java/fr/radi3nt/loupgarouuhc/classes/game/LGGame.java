@@ -38,8 +38,8 @@ public class LGGame {
 
     private LGGameData data;
 
-    private Boolean isStarted = false;
-    private Boolean compoCaché = false;
+    private final ArrayList<LGPlayer> spectators = new ArrayList<>(); //todo spactators
+    private boolean isStarted = false;
 
     private ArrayList<Role> roles = new ArrayList<>();
     private ArrayList<Role> rolesWithDeads = new ArrayList<>();
@@ -336,18 +336,31 @@ public class LGGame {
                         winners.add(lgp);
                     }
                 }
-                lgp.getPlayer().setGameMode(Bukkit.getServer().getDefaultGameMode());
-                lgp.getPlayer().teleport(spawn);
             }
             lgp.setChat(GeneralChatI);
         }
-        for (LGPlayer lgp : players) {
-            lgp.setChat(GeneralChatI);
-        }
 
+        new BukkitRunnable() {
+            int i = 0;
 
-        if (winType==null) {
-            winType=WinType.NONE;
+            @Override
+            public void run() {
+                i++;
+                if (i == 10 * 20) {
+                    for (LGPlayer lgp : gamePlayersWithDeads) {
+                        lgp.getPlayer().getInventory().clear();
+                        lgp.getPlayer().teleport(spawn);
+                        lgp.getPlayer().setGameMode(Bukkit.getServer().getDefaultGameMode());
+                    }
+                    gamePlayers.clear();
+                    gamePlayersWithDeads.clear();
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 1, 1);
+
+        if (winType == null) {
+            winType = WinType.NONE;
         }
 
         Bukkit.broadcastMessage(prefix + " " + ChatColor.BLUE + winType.getMessage());
@@ -381,7 +394,6 @@ public class LGGame {
                 }
 
                 lgp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-                lgp.getPlayer().getInventory().clear();
 
 
                 Player p = lgp.getPlayer();
@@ -390,7 +402,6 @@ public class LGGame {
                 p.setSaturation(20);
                 p.setHealth(20);
                 p.setWalkSpeed(0);
-                p.setGameMode(Bukkit.getDefaultGameMode());
                 p.setExp(0);
                 p.setLevel(0);
                 for (PotionEffectType ption : PotionEffectType.values()) {
@@ -415,8 +426,7 @@ public class LGGame {
         }
 
         HoloStats.updateAll();
-        gamePlayers.clear();
-        gamePlayersWithDeads.clear();
+
         GameInstance=new LGGame(parameters);
     }
 
@@ -440,12 +450,12 @@ public class LGGame {
         isStarted = started;
     }
 
-    public Boolean getCompoCaché() {
-        return compoCaché;
+    public Boolean getCompoCache() {
+        return compoCache;
     }
 
-    public void setCompoCaché(Boolean compoCaché) {
-        this.compoCaché = compoCaché;
+    public void setCompoCache(Boolean compoCache) {
+        this.compoCache = compoCache;
     }
 
     public GameTimer getGameTimer() {
@@ -516,4 +526,7 @@ public class LGGame {
         return data.getHost();
     }
 
+    public ArrayList<LGPlayer> getSpectators() {
+        return spectators;
+    }
 }
