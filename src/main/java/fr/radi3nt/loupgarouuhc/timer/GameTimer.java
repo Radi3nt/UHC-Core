@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.langWarperInstance;
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
 
 public class GameTimer extends BukkitRunnable {
@@ -113,6 +112,33 @@ public class GameTimer extends BukkitRunnable {
         if (waiting) {
             game.getGameSpawn().getWorld().setTime(24000 - shift);
             game.getGameSpawn().getWorld().setFullTime(24000 - shift);
+            ticksday = -shift;
+            if (ticks == 0) {
+                for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                    gamePlayer.sendTitle(ChatColor.GOLD + "3", "", 10, 20, 10);
+                    gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_NOTE_HARP, SoundCategory.AMBIENT, 1f, 1f);
+                }
+            }
+
+            if (ticks == 20) {
+                for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                    gamePlayer.sendTitle(ChatColor.GOLD + "2", "", 10, 20, 10);
+                    gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_NOTE_HARP, SoundCategory.AMBIENT, 1f, 1f);
+                }
+            }
+            if (ticks == 2 * 20) {
+                for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                    gamePlayer.sendTitle(ChatColor.GOLD + "1", "", 10, 20, 10);
+                    gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_NOTE_HARP, SoundCategory.AMBIENT, 1f, 1f);
+
+                }
+            }
+            if (ticks == 3 * 20) {
+                for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                    gamePlayer.sendTitle(ChatColor.GOLD + "GO", ChatColor.GRAY + "The UHC begin", 20, 20 * 3, 20);
+                    gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_END_PORTAL_SPAWN, SoundCategory.AMBIENT, 1f, 1f);
+                }
+            }
         }
 
         checkForMessage(ticks);
@@ -254,6 +280,12 @@ public class GameTimer extends BukkitRunnable {
                         int minutes1 = ((ticksPvp / 20 - (ticksPvp / 20 / 3600) * 3600) / 60);
                         int seconds1 = ticksPvp / 20 - (heures1 * 3600 + minutes1 * 60);
 
+                        if (waiting) {
+                            heures1 = 0;
+                            minutes1 = 0;
+                            seconds1 = 0;
+                        }
+
                         setScore(ChatColor.GOLD + "Pvp: " + ChatColor.YELLOW + String.format("%02d", heures1) + ":" + String.format("%02d", minutes1) + ":" + String.format("%02d", seconds1), i, objective);
                     } else {
                         setScore(ChatColor.GOLD + "Pvp: " + ChatColor.GREEN + "Activated", i, objective);
@@ -379,16 +411,15 @@ public class GameTimer extends BukkitRunnable {
     private void checkForMessage(int ticks) {
 
         int ticksday = ticks - ((checkDay(ticks - shift) - 1) * 24000) - shift;
-        System.out.println(ticksday);
 
-        if (ticksday == 13000 && checkDay(ticks) > 1) {
+        if (ticksday == 12000 && checkDay(ticks) > 1) {
             Bukkit.getPluginManager().callEvent(new OnNight(game));
         }
         if (ticksday == 23000 && checkDay(ticks) > 1) {
             Bukkit.getPluginManager().callEvent(new OnDay(game));
         }
 
-        if (ticks == 3 * 20) {
+        if (ticks == 3 * 20 && waiting) {
             for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
                 try {
                     lgp.getPlayer().setWalkSpeed(0.2F);
@@ -399,14 +430,8 @@ public class GameTimer extends BukkitRunnable {
                     lgp.getPlayer().setGameMode(GameMode.SURVIVAL);
                 } catch (NullPointerException e) {}
             }
-            if (waiting) {
-                game.getGameSpawn().getWorld().setTime(24000 - shift);
-                game.getGameSpawn().getWorld().setFullTime(24000 - shift);
-                waiting = false;
-                ticksday = -shift;
-                ticks = 0;
-                this.ticks = 0;
-            }
+            this.ticks = 0;
+            waiting = false;
         }
 
         if (ticks==60*20) {
@@ -443,7 +468,7 @@ public class GameTimer extends BukkitRunnable {
         }
 
         if (ticks==24000*(checkDay(ticks))-23999 && checkDay(ticks)>game.getParameters().getMinDayForVote()) { // debut
-            if (game.getGamePlayers().size()>=game.getParameters().getMinPlayerForVotes()) {
+            if (game.getGamePlayers().size() <= game.getParameters().getMinPlayerForVotes()) {
                 Bukkit.broadcastMessage(prefix + " " + ChatColor.RED + "Il reste moins de " + game.getParameters().getMinPlayerForVotes() + " joueurs en vie, le vote est désomais désactivé.");
             } else {
                 for (LGPlayer lgp : game.getGamePlayers()) {
@@ -477,7 +502,7 @@ public class GameTimer extends BukkitRunnable {
             }
         }
         if (ticks-((checkDay(ticks)-1)*24000)==game.getParameters().getGetTimeForVote() && checkDay(ticks)>game.getParameters().getMinDayForVote()) { // 5min
-            if (game.getGamePlayers().size() < game.getParameters().getMinPlayerForVotes()) {
+            if (game.getGamePlayers().size() > game.getParameters().getMinPlayerForVotes()) {
                 if (!game.getVoted().isEmpty()) {
                     ArrayList<LGPlayer> votes = new ArrayList<>();
                     game.getVoted().forEach((lgPlayer, lgPlayer2) -> votes.add(lgPlayer2));
@@ -499,6 +524,7 @@ public class GameTimer extends BukkitRunnable {
                             result = lgp;
                         }
                         lgp.setCanVote(false);
+                        lgp.getPlayer().playSound(lgp.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, SoundCategory.AMBIENT, 1f, 1f);
                     }
                     Bukkit.broadcastMessage(prefix + ChatColor.GOLD + " " + ChatColor.BOLD + "RESULTAT DU VOTE :");
                     Bukkit.broadcastMessage(prefix + ChatColor.AQUA + " Le joueur " + ChatColor.BOLD + result.getName() + ChatColor.AQUA + " est le joueur ayant le plus de votes : " + ChatColor.BLUE + ChatColor.BOLD + max + ChatColor.AQUA + ". Il perd la moitié de sa vie.");
