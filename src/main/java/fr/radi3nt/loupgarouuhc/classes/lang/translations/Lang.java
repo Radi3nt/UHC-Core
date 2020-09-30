@@ -16,16 +16,20 @@ public enum Lang {
     LOUP_PERFIDE("LoupPerfide"),
     SORCIERE("Sorciere"),
     MINEUR("Mineur"),
-    LOUP_FEUTRE("LoupFeutré"),
+    LOUP_FEUTRE("LoupFeutre"),
+    RENARD("Renard"),
+    GUARD("Guard"),
+    LG_INFECTE("LGInfect"),
+    CUPIDON("Cupidon"),
     ;
 
     private String name;
     private String short_desc;
     private String desc;
-    private String id;
+    private final String id;
 
     Lang(String id) {
-        this.id=id;
+        this.id = id;
     }
 
     public String getName() {

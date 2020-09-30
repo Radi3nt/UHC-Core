@@ -144,10 +144,13 @@ public class GameTimer extends BukkitRunnable {
         checkForMessage(ticks);
 
         if (ticksday>=24000-shift) {
-            Bukkit.broadcastMessage(ChatColor.AQUA + "--------- " + langWarperInstance.TIMER_FIN_EP + " " + checkDay(ticks-1) + " ---------");
-            Bukkit.getPluginManager().callEvent(new OnNewEpisode(game, checkDay(ticks-1)));
-            game.getGameSpawn().getWorld().setTime(24000-shift);
-            ticksday=-shift;
+            for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                gamePlayer.sendMessage(gamePlayer.getLanguage().getMessage("gameTimerNewEpisode", gamePlayer));
+                gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, SoundCategory.AMBIENT, 1f, 2f);
+            }
+            Bukkit.getPluginManager().callEvent(new OnNewEpisode(game, checkDay(ticks - 1)));
+            game.getGameSpawn().getWorld().setTime(24000 - shift);
+            ticksday = -shift;
         }
 
 
@@ -194,39 +197,35 @@ public class GameTimer extends BukkitRunnable {
 
                 int distance = (int) getDistanceBetween2Points(lgp.getPlayer().getLocation(), game.getGameSpawn());
 
-                String disM = "";
-                if (distance <= 100) {
-                    disM = "Entre 0 et 100 block du centre";
+                String disM = lgp.getLanguage().getMessage("gameTimerActionBar", lgp);
+                String disS = "NaN";
+                int maxNumber = 0;
+                HashMap<Integer, Integer> numbers = new HashMap<>();
+
+                numbers.put(-1, 100);
+                numbers.put(100, 250);
+                numbers.put(250, 500);
+                numbers.put(500, 750);
+                numbers.put(1000, 1250);
+                numbers.put(1250, 1500);
+                numbers.put(1500, 1750);
+                numbers.put(1750, 2000);
+
+
+                ArrayList<Integer> base = new ArrayList<>();
+                numbers.forEach((integer, integer2) -> base.add(integer));
+                for (Integer integer : base) {
+                    if (integer > distance && numbers.get(integer) <= distance) {
+                        disS = disM.replace("%1%", String.valueOf(integer)).replace("%2%", String.valueOf(numbers.get(integer)));
+                    }
+                    if (maxNumber < numbers.get(integer)) {
+                        maxNumber = numbers.get(integer);
+                    }
                 }
-                if (distance >= 100 && distance < 250) {
-                    disM = "Entre 100 et 250 block du centre";
+                if (disS.equals("NaN")) {
+                    disS = lgp.getLanguage().getMessage("gameTimerActionBarMax").replace("%1%", String.valueOf(maxNumber));
                 }
-                if (distance >= 250 && distance < 500) {
-                    disM = "Entre 250 et 500 block du centre";
-                }
-                if (distance >= 500 && distance < 750) {
-                    disM = "Entre 500 et 750 block du centre";
-                }
-                if (distance >= 750 && distance < 1000) {
-                    disM = "Entre 750 et 1000 block du centre";
-                }
-                if (distance >= 1000 && distance < 1250) {
-                    disM = "Entre 1000 et 1250 block du centre";
-                }
-                if (distance >= 1250 && distance < 1500) {
-                    disM = "Entre 1250 et 1500 block du centre";
-                }
-                if (distance >= 1500 && distance < 1750) {
-                    disM = "Entre 1500 et 1500 block du centre";
-                }
-                if (distance >= 1750 && distance < 2000) {
-                    disM = "Entre 1750 et 2000 block du centre";
-                }
-                if (distance >= 2000) {
-                    disM = "Plus de 2000 block du centre";
-                }
-                String message = ChatColor.LIGHT_PURPLE + "Distance du centre: " + ChatColor.AQUA + disM;
-                lgp.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
+                lgp.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(disS));
 
 
                 if (isDivibleBy20(ticks)) {
@@ -296,7 +295,7 @@ public class GameTimer extends BukkitRunnable {
                     i--;
 
                     if (checkDay(ticks)>=game.getParameters().getDayRoleDivulged())
-                        setScore(ChatColor.DARK_BLUE + "Role: " + ChatColor.BLUE +lgp.getRole().getName(), i, objective);
+                        setScore(ChatColor.DARK_BLUE + "Role: " + ChatColor.BLUE + lgp.getRole().getName(lgp.getLanguage()), i, objective);
                     else
                         setScore(ChatColor.DARK_BLUE + "Role: " + ChatColor.BLUE + ChatColor.MAGIC + Math.pow(10, new SecureRandom().nextInt(10) + 7), i, objective);
                     i--;
@@ -428,19 +427,24 @@ public class GameTimer extends BukkitRunnable {
                     lgp.getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
                     lgp.getPlayer().removePotionEffect(PotionEffectType.SLOW_DIGGING);
                     lgp.getPlayer().setGameMode(GameMode.SURVIVAL);
-                } catch (NullPointerException e) {}
+                } catch (NullPointerException e) {
+                }
             }
             this.ticks = 0;
             waiting = false;
         }
 
         if (ticks==60*20) {
-            degas=true;
-            Bukkit.broadcastMessage(prefix + ChatColor.DARK_AQUA + " " + langWarperInstance.TIMER_DEGA);
+            degas = true;
+            for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                gamePlayer.sendMessage(gamePlayer.getLanguage().getMessage("gameTimerDega", gamePlayer));
+            }
         }
 
         if (ticks==game.getParameters().getPvpActivate()-(10*60*20)) {
-            Bukkit.broadcastMessage(prefix + ChatColor.DARK_AQUA + " " + langWarperInstance.TIMER_PVP_SOON);
+            for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                gamePlayer.sendMessage(gamePlayer.getLanguage().getMessage("gameTimerPvpSoon", gamePlayer));
+            }
         }
 
         if (ticks==24000*(game.getParameters().getDayRoleDivulged())-23999) {
@@ -464,7 +468,9 @@ public class GameTimer extends BukkitRunnable {
 
         if (ticks>=game.getParameters().getPvpActivate() && !pvp) {
             pvp = true;
-            Bukkit.broadcastMessage(prefix + ChatColor.DARK_AQUA + " " + langWarperInstance.TIMER_PVP);
+            for (LGPlayer gamePlayer : game.getGamePlayersWithDeads()) {
+                gamePlayer.sendMessage(gamePlayer.getLanguage().getMessage("gameTimerPvp"));
+            }
         }
 
         if (ticks==24000*(checkDay(ticks))-23999 && checkDay(ticks)>game.getParameters().getMinDayForVote()) { // debut

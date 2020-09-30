@@ -1,8 +1,8 @@
 package fr.radi3nt.loupgarouuhc.listeners.gui;
 
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.GUIs.*;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
@@ -97,7 +97,7 @@ public class ClickEvent implements Listener {
                     return;
                 }
                 for (RoleSort sort : RoleSort.values()) {
-                    if (e.getCurrentItem().getItemMeta() != null && sort.name.equals(ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()))) {
+                    if (e.getCurrentItem().getItemMeta() != null && sort.getName(LGPlayer.thePlayer(player).getLanguage()).equals(ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()))) {
                         String key = "";
                         try {
                             for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet()) {

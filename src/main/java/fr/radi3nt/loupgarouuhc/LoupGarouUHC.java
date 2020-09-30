@@ -10,8 +10,8 @@ import fr.radi3nt.loupgarouuhc.classes.chats.GameChat;
 import fr.radi3nt.loupgarouuhc.classes.chats.GeneralChat;
 import fr.radi3nt.loupgarouuhc.classes.config.Config;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.lang.LangWarper;
-import fr.radi3nt.loupgarouuhc.classes.lang.Language;
+import fr.radi3nt.loupgarouuhc.classes.lang.translations.Reader;
+import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
@@ -49,8 +49,6 @@ public final class LoupGarouUHC extends JavaPlugin {
 
     public static Parameters parameters;
 
-    public static LangWarper langWarperInstance;
-
     public static Chat GeneralChatI;
     public static Chat GameChatI;
     public static Chat DeadChatI;
@@ -85,15 +83,22 @@ public final class LoupGarouUHC extends JavaPlugin {
 
             console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Starting up !");
             console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "LG UHC Plugin by " + ChatColor.AQUA + ChatColor.BOLD + "Radi3nt");
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "If you have any issues, please report it");
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "If you have any issues, please report it");
 
-            parameters=new Parameters();
-            GameInstance = new LGGame(parameters);
+        parameters = new Parameters();
+        GameInstance = new LGGame(parameters);
 
-
+            /*
             LangWarper langWarper = new LangWarper();
             langWarper.InitLang(Language.FRANCAIS);
             langWarperInstance = langWarper;
+
+             */
+
+        new Languages("Default", Languages.DEFAULTID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        Reader reader = new Reader();
+        if (!reader.loadAllLanguage())
+            console.sendMessage(ChatColor.DARK_RED + "Error while loading languages configs");
 
         loadRoles();
         registerConfigs();
@@ -101,18 +106,20 @@ public final class LoupGarouUHC extends JavaPlugin {
 
         HoloStats.createHoloStatsScoreboards();
 
-            GeneralChatI=new GeneralChat();
-            GameChatI=new GameChat();
-            DeadChatI=new DeadChat();
+        GeneralChatI = new GeneralChat();
+        GameChatI = new GameChat();
+        DeadChatI = new DeadChat();
 
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Languages");
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Languages");
 
-            RegisterEvents();
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Events");
-            RegisterCommands();
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Commands");
-            RegisterRunnables();
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Runnables");
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered PlaceHolders");
+
+        RegisterEvents();
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Events");
+        RegisterCommands();
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Commands");
+        RegisterRunnables();
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Runnables");
 
 
         for (String rolesKeys : RolesConfig.getConfigurationSection("Roles").getKeys(false)) {
@@ -122,6 +129,8 @@ public final class LoupGarouUHC extends JavaPlugin {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             LGPlayer lgp = LGPlayer.thePlayer(player);
+            lgp.loadStats();
+            lgp.loadSavedLang();
             players.add(lgp);
             lgp.setChat(GeneralChatI);
             Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + player.getDisplayName() + " (" + ChatColor.YELLOW + players.size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
@@ -193,6 +202,13 @@ public final class LoupGarouUHC extends JavaPlugin {
             e.printStackTrace();
         }
 
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
+            lgp.saveLang();
+            lgp.saveStats();
+        }
+
         /*
         Iterator<HoloStats> it = HoloStats.getCachedHolo().iterator();
         while (it.hasNext()) {
@@ -210,9 +226,10 @@ public final class LoupGarouUHC extends JavaPlugin {
     }
     private void loadRoles() {
         try {
-            rolesLink.put(RoleSort.LOUP_GAROU.id, LoupGarou.class.getConstructor(LGGame.class));
-            rolesLink.put(RoleSort.VILLAGER.id, Villager.class.getConstructor(LGGame.class));
-            rolesLink.put(RoleSort.PETITE_FILLE.id, PetiteFille.class.getConstructor(LGGame.class));
+
+            rolesLink.put(RoleSort.LOUP_GAROU.getId(), LoupGarou.class.getConstructor(LGGame.class));
+            rolesLink.put(RoleSort.VILLAGER.getId(), Villager.class.getConstructor(LGGame.class));
+            rolesLink.put(RoleSort.PETITE_FILLE.getId(), PetiteFille.class.getConstructor(LGGame.class));
             rolesLink.put("VPLoup", VPLoup.class.getConstructor(LGGame.class));
             rolesLink.put("Voyante", Voyante.class.getConstructor(LGGame.class));
             rolesLink.put("LGBlanc", LGBlanc.class.getConstructor(LGGame.class));
@@ -225,6 +242,8 @@ public final class LoupGarouUHC extends JavaPlugin {
             rolesLink.put("Cupidon", Cupidon.class.getConstructor(LGGame.class));
             rolesLink.put("LGFeutre", LGFeutre.class.getConstructor(LGGame.class));
             rolesLink.put("Mineur", Mineur.class.getConstructor(LGGame.class));
+            rolesLink.put("Renard", Renard.class.getConstructor(LGGame.class));
+
         } catch (NoSuchMethodException | SecurityException e) {
             System.out.println("Error while enabling roles");
         }
@@ -233,10 +252,6 @@ public final class LoupGarouUHC extends JavaPlugin {
 
     public static Parameters getParameters() {
         return parameters;
-    }
-
-    public static LangWarper getLangWarperInstance() {
-        return langWarperInstance;
     }
 
     public static Plugin getPlugin() {

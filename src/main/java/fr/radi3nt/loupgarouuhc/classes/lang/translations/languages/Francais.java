@@ -1,4 +1,4 @@
-package fr.radi3nt.loupgarouuhc.classes.lang.translations.lang;
+package fr.radi3nt.loupgarouuhc.classes.lang.translations.languages;
 
 public enum Francais {
 
@@ -15,9 +15,10 @@ public enum Francais {
     VP_LOUP("Vilain petit loup", "Tu a un effet de speed la nuit", "Tu dois tuer tous les villageois, tu as l'effet Strength 1 la nuit ainsi que l'effet Speed 2 la nuit, à chaque kill que tu fais tu obtiens 2 coeurs en plus pendant 1 min."),
     MINEUR("Mineur", "Tu mine bien !!", "Tu gagne avec le village, tu te souviens d'avoir laissé tombé une pioche en diamand tout pres d'ici .... Tiens la voilà."),
     LOUP_FEUTRE("Loup feutré", "Tu es discret", "A chaque episode, tu a un role d'affichage. Si la voyante, le montreur d'ours, ou un role permettant de voir ceux des autres, il ne verra que ton role d'achage."),
+    RENARD("Renard", "Sniff sniff ..", "A chaque episode, tu peut flairer un joueur et savoir si c'est un loup garou ou pas. Si c'est un role solo, tu le considereras comme non loup garou."),
     ;
 
-    public static String id = "Francais";
+    public static String id = "Francais.yml";
 
     private final String name;
     private final String short_desc;

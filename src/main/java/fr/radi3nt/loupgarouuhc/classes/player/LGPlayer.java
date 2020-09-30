@@ -1,12 +1,13 @@
 package fr.radi3nt.loupgarouuhc.classes.player;
 
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
 import fr.radi3nt.loupgarouuhc.classes.config.Config;
-import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
+import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.classes.roles.WinType;
+import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -14,12 +15,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.plugin;
 
 
 public class LGPlayer {
-	private static HashMap<UUID, LGPlayer> cachedPlayers = new HashMap<UUID, LGPlayer>();
 
+	private static final HashMap<UUID, LGPlayer> cachedPlayers = new HashMap<UUID, LGPlayer>();
+	private final UUID uuid;
+	private Stats stats;
+	private Languages language;
+	private Player player;
+	private boolean dead;
+	private LGGame game;
+	private Role role;
+	private boolean canVote;
+	private Chat chat;
+	private LGPlayer couple;
+	private boolean canBeRespawned = false;
+	private Integer diamondMined = 0;
+	private LGPlayer killer;
+	private Integer kills = 0;
 
 	public static LGPlayer thePlayer(Player player) {
 		LGPlayer lgp = cachedPlayers.get(player.getUniqueId());
@@ -27,7 +42,7 @@ public class LGPlayer {
 			lgp = new LGPlayer(player);
 			cachedPlayers.put(player.getUniqueId(), lgp);
 		}
-		lgp.player=player;
+		lgp.player = player;
 		return lgp;
 	}
 
@@ -39,21 +54,6 @@ public class LGPlayer {
 		}
 		return lgp;
 	}
-
-
-	private Stats stats;
-	private Player player;
-	private UUID uuid;
-	private boolean dead;
-	private LGGame game;
-	private Role role;
-	private boolean canVote;
-	private Chat chat;
-	private LGPlayer couple;
-	private boolean canBeRespawned = false;
-	private Integer diamondMined = 0;
-	private LGPlayer killer;
-	private Integer kills = 0;
 
 
 	public LGPlayer getCouple() {
@@ -103,6 +103,12 @@ public class LGPlayer {
 		this.player = player;
 		this.uuid = player.getUniqueId();
 		stats = new Stats();
+
+		for (Languages languages : Languages.getLanguages()) {
+			if (languages.getId().equals(Languages.DEFAULTID)) {
+				language = languages;
+			}
+		}
 	}
 
 	public LGPlayer(UUID uuid) {
@@ -203,13 +209,13 @@ public class LGPlayer {
 	}
 
 	public void saveStats() {
-		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName()+".yml");
+		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
 
 
-		config.getConfiguration().set(getName() + ".games", this.getStats().getGameNumber());
-		config.getConfiguration().set(getName() + ".wins", this.getStats().getWinnedGames());
-		config.getConfiguration().set(getName() + ".kills", this.getStats().getKills());
-		config.getConfiguration().set(getName() + ".points", this.getStats().getPoints());
+		config.getConfiguration().set("Stats" + ".games", this.getStats().getGameNumber());
+		config.getConfiguration().set("Stats" + ".wins", this.getStats().getWinnedGames());
+		config.getConfiguration().set("Stats" + ".kills", this.getStats().getKills());
+		config.getConfiguration().set("Stats" + ".points", this.getStats().getPoints());
 		config.saveConfig();
 
 		Config config1 = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "players.yml");
@@ -229,8 +235,62 @@ public class LGPlayer {
 		config1.saveConfig();
 	}
 
+	public void loadStats() {
+		Config config = Config.createConfig(plugin.getDataFolder() + "/players", player.getName() + ".yml");
+
+		Stats stats = new Stats();
+		stats.setGameNumber(config.getConfiguration().getInt(player.getName() + ".games"));
+		stats.setWinnedGames(config.getConfiguration().getInt(player.getName() + ".wins"));
+		stats.setKills(config.getConfiguration().getInt(player.getName() + ".kills"));
+		stats.setPoints(config.getConfiguration().getInt(player.getName() + ".points"));
+		this.setStats(stats);
+	}
+
+	public void saveLang() {
+		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+
+
+		config.getConfiguration().set("Lang", language.getId());
+		config.saveConfig();
+
+		Config config1 = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "players.yml");
+
+
+		ArrayList<String> arrayList = new ArrayList<>();
+		try {
+			arrayList = (ArrayList<String>) config1.getConfiguration().getStringList("Players");
+		} catch (NullPointerException e) {
+
+		}
+		if (!arrayList.contains(getName())) {
+			arrayList.add(getName());
+		}
+		config1.getConfiguration().set("Players", arrayList);
+
+		config1.saveConfig();
+	}
+
+	public void loadSavedLang() {
+		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+
+		String id = config.getConfiguration().getString("Lang");
+
+		for (Languages value : Languages.getLanguages()) {
+			if (id.equals(value.getId()))
+				language = value;
+		}
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof LGPlayer && ((LGPlayer) obj).getUuid() == this.getUuid();
+	}
+
+	public Languages getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(Languages language) {
+		this.language = language;
 	}
 }

@@ -65,11 +65,13 @@ public class PlayerJoinEvent implements Listener {
         fr.radi3nt.loupgarouuhc.classes.config.Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", e.getPlayer().getName() + ".yml");
 
         Stats stats = new Stats();
-                stats.setGameNumber(config.getConfiguration().getInt(e.getPlayer().getName() + ".games"));
-                stats.setWinnedGames(config.getConfiguration().getInt(e.getPlayer().getName() + ".wins"));
-                stats.setKills(config.getConfiguration().getInt(e.getPlayer().getName() + ".kills"));
-                stats.setPoints(config.getConfiguration().getInt(e.getPlayer().getName() + ".points"));
-                lgp.setStats(stats);
+        stats.setGameNumber(config.getConfiguration().getInt(e.getPlayer().getName() + ".games"));
+        stats.setWinnedGames(config.getConfiguration().getInt(e.getPlayer().getName() + ".wins"));
+        stats.setKills(config.getConfiguration().getInt(e.getPlayer().getName() + ".kills"));
+        stats.setPoints(config.getConfiguration().getInt(e.getPlayer().getName() + ".points"));
+        lgp.setStats(stats);
+
+        lgp.loadSavedLang();
 
 
                 /*

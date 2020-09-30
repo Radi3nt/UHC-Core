@@ -13,6 +13,7 @@ import fr.radi3nt.loupgarouuhc.classes.roles.WinType;
 import fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou.LGFeutre;
 import fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou.LGInfect;
 import fr.radi3nt.loupgarouuhc.classes.roles.roles.Solo.Cupidon;
+import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.Renard;
 import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.Sorciere;
 import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.Voyante;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
@@ -20,6 +21,7 @@ import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,12 +31,43 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
+
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 
 public class LGcommands implements CommandExecutor {
+    private static ArrayList<Location> generateSphere(Location center, int radius) {
+        ArrayList<Location> circlesBlocks = new ArrayList<>();
+        int bX = center.getBlockX();
+        int bY = center.getBlockY();
+        int bZ = center.getBlockZ();
+
+        for (int x = bX - radius; x <= bX + radius; x++) {
+            for (int y = bY - radius; y <= bY + radius; y++) {
+                for (int z = bZ - radius; z <= bZ + radius; z++) {
+                    double distance = ((bX - x) * (bX - x) + ((bZ - z) * (bZ - z)) + ((bY - y) * (bY - y)));
+                    if (distance < radius * radius) {
+                        Location block = new Location(center.getWorld(), x, y, z);
+                        circlesBlocks.add(block);
+                    }
+                }
+            }
+        }
+        return circlesBlocks;
+    }
+
+
+    private boolean checkPermission(CommandSender sender, String perm, String comments) {
+        if (sender.hasPermission(perm)) {
+            return true;
+        }
+        new NoPermission().sendMessage((Player) sender, ((Player) sender).getUniqueId() + ": " + perm + (comments.trim().isEmpty() ? ("") : (" " + comments)), true);
+        return false;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length>0) {
+        if (args.length > 0) {
             switch (args[0]) {
                 case "kill":
                     if (checkPermission(sender, "lg.admin", "")) {
@@ -80,13 +113,13 @@ public class LGcommands implements CommandExecutor {
                                 if (target != null) {
                                     if (!GameInstance.getGamePlayers().contains(LGPlayer.thePlayer(target))) {
                                         GameInstance.join(LGPlayer.thePlayer(target));
-                                        target.sendMessage(prefix + ChatColor.GOLD + " Joined current game");
+                                        target.sendMessage(LGPlayer.thePlayer(target).getLanguage().getMessage("commandsJoinMessage"));
                                     }
                                 }
                             } else {
                                 if (!GameInstance.getGamePlayers().contains(LGPlayer.thePlayer((Player) sender))) {
                                     GameInstance.join(LGPlayer.thePlayer((Player) sender));
-                                    sender.sendMessage(prefix + ChatColor.GOLD + " Joined current game");
+                                    sender.sendMessage(LGPlayer.thePlayer((Player) sender).getLanguage().getMessage("commandsJoinMessage"));
                                 }
                             }
                         }
@@ -118,7 +151,7 @@ public class LGcommands implements CommandExecutor {
                                 case "place":
                                     if (sender instanceof Player) {
                                         if (sender.hasPermission("lg.stats.place"))
-                                            HoloStats.createHoloStats(((Player) sender).getLocation(), 5);
+                                            HoloStats.createHoloStats(((Player) sender).getLocation(), 9);
                                         else {
                                             new NoPermission().sendMessage((Player) sender, ((Player) sender).getUniqueId().toString() + "/ stats place command", true);
                                         }
@@ -298,9 +331,9 @@ public class LGcommands implements CommandExecutor {
                             if (!lgp.getGame().getCompoCache()) {
                                 for (Role role : lgp.getGame().getRolesWithDeads()) {
                                     if (lgp.getGame().getRoles().contains(role)) {
-                                        lgp.sendMessage(role.getName());
+                                        lgp.sendMessage(role.getName(lgp.getLanguage()));
                                     } else {
-                                        lgp.sendMessage(ChatColor.STRIKETHROUGH + role.getName());
+                                        lgp.sendMessage(ChatColor.STRIKETHROUGH + role.getName(lgp.getLanguage()));
                                     }
                                 }
                             }
@@ -324,9 +357,36 @@ public class LGcommands implements CommandExecutor {
                                                     LGPlayer tlgp = LGPlayer.thePlayer(target);
                                                     if (tlgp.getGame() != null && tlgp.getRole() != null && !tlgp.isDead()) {
                                                         if (tlgp.getRole().getRoleSort()==RoleSort.LG_FEUTRE) {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + ((LGFeutre) tlgp.getRole()).affichage.getName());
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + ((LGFeutre) tlgp.getRole()).affichage.getName(lgp.getLanguage()));
                                                         } else {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + tlgp.getRole().getName());
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + tlgp.getRole().getName(lgp.getLanguage()));
+
+                                                        }
+                                                        voyante.setCanSee(false);
+                                                    } else {
+                                                        lgp.sendMessage(prefix + " " + ChatColor.RED + "Ce joueur est invalide");
+                                                    }
+                                                } else {
+                                                    lgp.sendMessage(prefix + " " + ChatColor.RED + "Ce joueur n'existe pas");
+                                                }
+                                            } else {
+                                                lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu doit mettre un joueur valide !");
+                                            }
+                                        } else {
+                                            lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
+                                        }
+                                    } else if (lgp.getGame() != null && lgp.getRole().getRoleSort() == RoleSort.RENARD && lgp.getGame().getGameTimer().getDays() > 1) {
+                                        Renard voyante = (Renard) lgp.getRole();
+                                        if (voyante.canSee()) {
+                                            if (args.length > 2) {
+                                                Player target = Bukkit.getServer().getPlayerExact(args[2]);
+                                                if (target != null) {
+                                                    LGPlayer tlgp = LGPlayer.thePlayer(target);
+                                                    if (tlgp.getGame() != null && tlgp.getRole() != null && !tlgp.isDead() && generateSphere(lgp.getPlayer().getLocation(), voyante.getRadius()).contains(tlgp.getPlayer().getLocation())) {
+                                                        if (tlgp.getRole().getRoleSort() == RoleSort.LG_FEUTRE) {
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (((LGFeutre) tlgp.getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup Garou"));
+                                                        } else {
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (tlgp.getRole().getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup garou"));
 
                                                         }
                                                         voyante.setCanSee(false);
@@ -343,7 +403,7 @@ public class LGcommands implements CommandExecutor {
                                             lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
                                         }
                                     } else {
-                                        lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu n'est pas voyante");
+                                        lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu n'est pas voyante ni renard");
                                     }
                                     break;
 
@@ -531,15 +591,6 @@ public class LGcommands implements CommandExecutor {
             sender.sendMessage(prefix + ChatColor.RED + " Cette commande requierd argument !");
         }
         return true;
-    }
-
-
-    private boolean checkPermission(CommandSender sender, String perm, String comments) {
-        if (sender.hasPermission(perm)) {
-            return true;
-        }
-        new NoPermission().sendMessage((Player) sender, ((Player) sender).getUniqueId() + ": " + perm + (comments.trim().isEmpty() ? ("") : (" " + comments)), true);
-        return false;
     }
 
 }

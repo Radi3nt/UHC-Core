@@ -32,6 +32,7 @@ public class PlayerLeaveEvent implements Listener {
         Location playerloc = p.getLocation();
         PlayerInventory inventory = p.getInventory();
         lgp.saveStats();
+        lgp.saveLang();
         e.setQuitMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_RED + "-" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getName());
         if (lgp.getGame() != null && lgp.getRole() != null && !lgp.isDead()) {
             new BukkitRunnable() {
@@ -41,7 +42,7 @@ public class PlayerLeaveEvent implements Listener {
                     if (i>=lgp.getGame().getParameters().getDisconnectTimeout() || lgp.getGame().getGameTimer().getTicks() >= lgp.getGame().getParameters().getPvpActivate()) {
                         Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
                         Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
-                        Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getRole().getName());
+                        Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getRole().getName(lgp.getLanguage()));
                         Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
                         for (ItemStack item : inventory.getContents()) {
                             if (item != null) {

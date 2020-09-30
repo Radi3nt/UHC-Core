@@ -1,6 +1,4 @@
-package fr.radi3nt.loupgarouuhc.classes.lang.translations.lang;
-
-import fr.radi3nt.loupgarouuhc.classes.lang.Language;
+package fr.radi3nt.loupgarouuhc.classes.lang.translations.languages;
 
 public enum English {
     ASSASSIN("Assassin", "You win alone", "Ton but est de gagner seul, tu a les livres power 3, sharpness 3, protection 3 et aussi un effet de force le jour."),
@@ -13,9 +11,8 @@ public enum English {
     SORCIERE("Witch", "You can respawn someone", "Tu gagne avec le village, tu peux voir les messages morts avant tout le monde et tu as une possibilité d’en ressusciter une par partie, tu possède aussi 3 splash potion de damage, 3 splash potions de heal et une splash potion regeneration."),
     VILLAGER("Villager", "You don't have special power", "You don't have any special powers, only your deductive abilities will enable you to identify the werewolves."),
     VOYANTE("Seer", "You can see roles of players", "Tu peux voir le rôle d’une personne a chaque début d’épisode. Tu as aussi 4 bibliothèques et 4 block d’obsidienne."),
-    VP_LOUP("Nasty little wolf", "You have speed the night", "You have to kill all the villagers, during the night you've got the Strength 1 effect and you also got Speed 1 effect la nuit. Every time you kill someone, you get 2 additional heart for 1 min.");
-
-    ;
+    VP_LOUP("Nasty little wolf", "You have speed the night", "You have to kill all the villagers, during the night you've got the Strength 1 effect and you also got Speed 1 effect la nuit. Every time you kill someone, you get 2 additional heart for 1 min."),
+    RENARD("Renard", "You have speed", "You hauring th you've got the Strength 1 effect and you also got Speed 1 effect la nuit. Every time you kill someone, you get 2 additional heart for 1 min."); //todo
 
 
     public static String id = "English";
