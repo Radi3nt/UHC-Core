@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.lang.Language;
+import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
 import org.bukkit.Bukkit;
@@ -26,11 +26,11 @@ public class RoleConfigGui {
     static String MainGuiName = ChatColor.AQUA + "Config UHC > Options > " + ChatColor.BOLD + "Roles";
 
     public static Inventory createGUI(Player player, Integer page) {
-        Language language = langWarperInstance.language;
+        LGPlayer lgp = LGPlayer.thePlayer(player);
+
         ArrayList<Role> roles = new ArrayList<>();
         ArrayList<RoleSort> rolesSorts = new ArrayList<>();
         ArrayList<ItemStack> items = new ArrayList<>();
-
 
 
         try {
@@ -52,7 +52,7 @@ public class RoleConfigGui {
             ItemMeta rolesMeta = rolesItem.getItemMeta();
             if (rolesSorts.contains(roleSort)) {
                 rolesItem.setType(Material.EMERALD_BLOCK);
-                rolesMeta.setDisplayName(ChatColor.DARK_GREEN + roleSort.name);
+                rolesMeta.setDisplayName(ChatColor.DARK_GREEN + roleSort.getName(lgp.getLanguage()));
                 int i = 0;
                 for (RoleSort rolesSort : rolesSorts) {
                     if (rolesSort == roleSort) {
@@ -61,7 +61,7 @@ public class RoleConfigGui {
                 }
                 rolesItem.setAmount(i);
             } else {
-                rolesMeta.setDisplayName(ChatColor.DARK_RED + roleSort.name);
+                rolesMeta.setDisplayName(ChatColor.DARK_RED + roleSort.getName(lgp.getLanguage()));
             }
             rolesMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
             rolesItem.setItemMeta(rolesMeta);
@@ -88,11 +88,12 @@ public class RoleConfigGui {
     }
 
     public static Inventory createGUI(Player player, Integer page, Inventory inventory) {
-        Language language = langWarperInstance.language;
+        LGPlayer lgp = LGPlayer.thePlayer(player);
+
+
         ArrayList<Role> roles = new ArrayList<>();
         ArrayList<RoleSort> rolesSorts = new ArrayList<>();
         ArrayList<ItemStack> items = new ArrayList<>();
-
 
 
         try {
@@ -114,7 +115,7 @@ public class RoleConfigGui {
             ItemMeta rolesMeta = rolesItem.getItemMeta();
             if (rolesSorts.contains(roleSort)) {
                 rolesItem.setType(Material.EMERALD_BLOCK);
-                rolesMeta.setDisplayName(ChatColor.DARK_GREEN + roleSort.name);
+                rolesMeta.setDisplayName(ChatColor.DARK_GREEN + roleSort.getName(lgp.getLanguage()));
                 int i = 0;
                 for (RoleSort rolesSort : rolesSorts) {
                     if (rolesSort == roleSort) {
@@ -123,7 +124,7 @@ public class RoleConfigGui {
                 }
                 rolesItem.setAmount(i);
             } else {
-                rolesMeta.setDisplayName(ChatColor.DARK_RED + roleSort.name);
+                rolesMeta.setDisplayName(ChatColor.DARK_RED + roleSort.getName(lgp.getLanguage()));
             }
             rolesMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
             rolesItem.setItemMeta(rolesMeta);

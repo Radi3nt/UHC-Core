@@ -8,9 +8,11 @@ import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 public class LGGameData {
 
     private LGPlayer host;
+
     private Chat logChat;
     private DeadChat deathChat;
     private GameChat gameChat;
+
     private String name;
     private String displayName = "&4Loup Garou UHC";
 

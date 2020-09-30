@@ -45,6 +45,7 @@ public class LGGame {
     private ArrayList<Role> rolesWithDeads = new ArrayList<>();
 
     private ArrayList<LGPlayer> gamePlayers = new ArrayList<>();
+    private boolean compoCache = false;
     private ArrayList<LGPlayer> gamePlayersWithDeads = new ArrayList<>();
 
     private HashMap<LGPlayer, LGPlayer> voted = new HashMap<>();
@@ -228,7 +229,7 @@ public class LGGame {
             p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 99999, 5, true, false));
             scatter(player);
 
-            Bukkit.broadcastMessage(prefix + ChatColor.GRAY +" Téléportaion de " + ChatColor.WHITE + player.getName());
+            Bukkit.broadcastMessage(prefix + ChatColor.GRAY + " Téléportation de " + ChatColor.WHITE + player.getName());
             for (LGPlayer player1 : gamePlayersWithDeads) {
                 player1.getPlayer().playSound(player1.getPlayer().getLocation(), Sound.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 100, 1);
             }
@@ -319,7 +320,6 @@ public class LGGame {
         }
     }
 
-
     public void endGame(WinType winType) {
 
         ArrayList<LGPlayer> winners = new ArrayList<LGPlayer>();
@@ -328,10 +328,10 @@ public class LGGame {
         for(LGPlayer lgp : gamePlayersWithDeads) {//Avoid bugs
             if (lgp.getPlayer() != null) {
                 lgp.getPlayer().closeInventory();
-                if (lgp.getRole()!=null && lgp.getRoleWinType()==winType && winType!=WinType.SOLO) {
+                if (lgp.getRole() != null && lgp.getRoleWinType() == winType && winType != WinType.SOLO) {
                     winners.add(lgp);
                 }
-                if (lgp.getRole()!=null && lgp.getRoleWinType()==winType) {
+                if (lgp.getRole() != null && lgp.getRoleWinType() == winType) {
                     if (!lgp.isDead()) {
                         winners.add(lgp);
                     }
@@ -348,9 +348,11 @@ public class LGGame {
                 i++;
                 if (i == 10 * 20) {
                     for (LGPlayer lgp : gamePlayersWithDeads) {
-                        lgp.getPlayer().getInventory().clear();
-                        lgp.getPlayer().teleport(spawn);
-                        lgp.getPlayer().setGameMode(Bukkit.getServer().getDefaultGameMode());
+                        if (lgp.getPlayer() != null) {
+                            lgp.getPlayer().getInventory().clear();
+                            lgp.getPlayer().teleport(spawn);
+                            lgp.getPlayer().setGameMode(Bukkit.getServer().getDefaultGameMode());
+                        }
                     }
                     gamePlayers.clear();
                     gamePlayersWithDeads.clear();
@@ -366,9 +368,15 @@ public class LGGame {
         Bukkit.broadcastMessage(prefix + " " + ChatColor.BLUE + winType.getMessage());
         for (Role role : rolesWithDeads) {
             if (roles.contains(role)) {
-                Bukkit.broadcastMessage(role.getName());
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
+                    lgp.sendMessage(role.getName(lgp.getLanguage()));
+                }
             } else {
-                Bukkit.broadcastMessage(ChatColor.STRIKETHROUGH + role.getName());
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
+                    lgp.sendMessage(ChatColor.STRIKETHROUGH + role.getName(lgp.getLanguage()));
+                }
             }
         }
         for(LGPlayer lgp : gamePlayersWithDeads) {

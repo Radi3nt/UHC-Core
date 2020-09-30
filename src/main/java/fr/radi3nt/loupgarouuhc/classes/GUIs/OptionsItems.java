@@ -1,6 +1,5 @@
 package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
-import fr.radi3nt.loupgarouuhc.classes.lang.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,14 +10,12 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.langWarperInstance;
 
 public class OptionsItems {
 
     static String MainGuiName = ChatColor.AQUA + "Config UHC > " + ChatColor.BOLD + "Options";
 
     public static Inventory createGUI(Player player) {
-        Language language = langWarperInstance.language;
         Inventory inventory = Bukkit.createInventory(player, 9, MainGuiName);
 
         inventory.setItem(0, createRolesItem());

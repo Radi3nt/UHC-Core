@@ -1,9 +1,8 @@
 package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import fr.radi3nt.loupgarouuhc.classes.lang.Language;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -11,20 +10,13 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Skull;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.langWarperInstance;
 
 public class ManageGui {
 
     static String MainGuiName = ChatColor.AQUA + "Config UHC > " + ChatColor.BOLD + "Manage";
 
     public static Inventory createGUI(Player player) {
-        Language language = langWarperInstance.language;
         Inventory inventory = Bukkit.createInventory(player, 9, MainGuiName);
 
         inventory.setItem(0, createGameItem());
@@ -37,8 +29,8 @@ public class ManageGui {
     public static ItemStack createPlayerItem() {
         ItemStack itemStack = new ItemStack(Material.BARRIER);
         try {
-            itemStack.setType(Material.PLAYER_HEAD);
-        } catch (NoSuchFieldError error) {
+            itemStack.setType(Material.getMaterial("PLAYER_HEAD"));
+        } catch (NoClassDefFoundError error) {
             try {
                 itemStack = new ItemStack(Material.getMaterial("SKULL_ITEM"), 1, (short) 0, (byte) 3);
             } catch (NoClassDefFoundError error1) {

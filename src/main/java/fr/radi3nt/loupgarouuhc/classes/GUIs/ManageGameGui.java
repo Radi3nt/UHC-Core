@@ -1,6 +1,5 @@
 package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
-import fr.radi3nt.loupgarouuhc.classes.lang.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -12,14 +11,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.langWarperInstance;
-
 public class ManageGameGui {
 
     static String MainGuiName = ChatColor.AQUA + "Config UHC > " + "Manage >" +  ChatColor.BOLD + "Game";
 
     public static Inventory createGUI(Player player) {
-        Language language = langWarperInstance.language;
         Inventory inventory = Bukkit.createInventory(player, 9, MainGuiName);
 
         inventory.setItem(0, createSkipItem());
@@ -31,8 +27,8 @@ public class ManageGameGui {
     public static ItemStack createSkipItem() {
         ItemStack rolesItem = new ItemStack(Material.BARRIER);
         try {
-            rolesItem.setType(Material.PLAYER_HEAD);
-        } catch (NoSuchFieldError error) {
+            rolesItem.setType(Material.getMaterial("PLAYER_HEAD"));
+        } catch (NoClassDefFoundError error) {
             try {
                 rolesItem = new ItemStack(Material.getMaterial("SKULL_ITEM"), 1, (short) 0, (byte) 3);
             } catch (NoClassDefFoundError error1) {
