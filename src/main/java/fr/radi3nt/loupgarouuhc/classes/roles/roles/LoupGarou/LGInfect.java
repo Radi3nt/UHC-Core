@@ -7,10 +7,6 @@ public class LGInfect extends LoupGarou {
 
     public boolean hasrespwaned = false;
 
-    public String getName() {
-        return RoleSort.LG_INFECTE.name;
-    }
-
 
     public RoleSort getRoleSort() {
         return RoleSort.LG_INFECTE;

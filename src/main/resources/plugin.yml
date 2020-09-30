@@ -4,7 +4,7 @@ main: fr.radi3nt.loupgarouuhc.LoupGarouUHC
 api-version: 1.13
 prefix: LG UHC
 authors: [Radi3nt]
-description: Play to LG UHC in minecraft
+description: Play to the Loup Garou UHC in minecraft
 commands:
   lg:
     description: "Main command of the lg plugin"

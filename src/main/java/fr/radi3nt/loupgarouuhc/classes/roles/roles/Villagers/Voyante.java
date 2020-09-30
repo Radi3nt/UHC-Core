@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers;
 
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
@@ -13,7 +13,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefixPrivé;
 
 public class Voyante extends Role {
 
@@ -44,9 +45,12 @@ public class Voyante extends Role {
             int i = 0;
             @Override
             public void run() {
-                if (i==60*5*20) {
+                if (!canSee) {
                     cancel();
-                    canSee=false;
+                }
+                if (i == 60 * 5 * 20) {
+                    cancel();
+                    canSee = false;
                 }
                 i++;
             }

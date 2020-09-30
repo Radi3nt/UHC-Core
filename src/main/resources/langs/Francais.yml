@@ -1,0 +1,112 @@
+Language:
+  name: "Francais"
+  id: "fr"
+
+Roles:
+  Villager:
+    name: "Villageois"
+    short desc: ""
+    desc: ""
+
+  LoupGarou:
+    name: "Loup garou"
+    short desc: ""
+    desc: ""
+
+  PetiteFille:
+    name: "Petite fille"
+    short desc: ""
+    desc: ""
+
+  VPLoup:
+    name: "Vilain petit loup"
+    short desc: ""
+    desc: ""
+
+  Voyante:
+    name: "Voyante"
+    short desc: ""
+    desc: ""
+
+  LGBlanc:
+    name: "Loup garou blanc"
+    short desc: ""
+    desc: ""
+
+  MontreurOurs:
+    name: "Montreur d'ours"
+    short desc: ""
+    desc: ""
+
+  Assassin:
+    name: "Assassin"
+    short desc: ""
+    desc: ""
+
+  LoupPerfide:
+    name: "Loup perfide"
+    short desc: ""
+    desc: ""
+
+  Sorciere:
+    name: "Sorcière"
+    short desc: ""
+    desc: ""
+
+  Mineur:
+    name: "Mineur"
+    short desc: ""
+    desc: ""
+
+  LoupFeutre:
+    name: "Loup Feutré"
+    short desc: ""
+    desc: ""
+
+  Renard:
+    name: "Renard"
+    short desc: ""
+    desc: ""
+
+  Guard:
+    name: "Garde"
+    short desc: ""
+    desc: ""
+
+  LGInfect:
+    name: "Loup garou infect"
+    short desc: ""
+    desc: ""
+
+  Cupidon:
+    name: "Cupidon"
+    short desc: ""
+    desc: ""
+
+Messages:
+
+  commandsJoinMessage: "$prefix$ &6Joined current game"
+
+  joinRoleMessage: "$prefix$ $prefixP$ &9Tu es %roleName%.\n&9%roleDesc%"
+  joinRoleTitleTitle: "&6Tu es %roleName%"
+  joinRoleTitleSubtitle: "&e%roleShortDesc%"
+
+  gameTimerNewEpisode: "&b--------- Fin episode %gameTimerDays% ---------"
+  gameTimerDega: "$prefix$ &3Les dégats (sauf PVP) sont activés !"
+  gameTimerPvpSoon: "$prefix$ &3PVP activé dans 10 minutes !"
+  gameTimerPvp: "$prefix$ &3PVP activé !"
+  gameTimerVoteDeactivated: "$prefix$ &4Il reste moins de %paramVoteMinPlayer% joueurs en vie, le vote est désomais désactivé."
+
+
+  gameTimerActionBar: "&dDistance du centre: &bEntre %1% et %2% blocks du centre"
+  gameTimerActionBarMax: "&dDistance du centre: &bPlus de %1% blocks du centre"
+
+PlaceHolders:
+  #To use placeholders, just add them here,
+  #and to use it add $ at the start and the end
+  #of the placeholder id
+
+  prefix: "&b[&6&lLG UHC&b]&r"
+  prefixP: "&9[Privé]&r"
+
+Author: [ Radi3nt ]

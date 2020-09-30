@@ -15,7 +15,7 @@ public class HoloStats {
 
     private static final ArrayList<HoloStats> cachedHolo = new ArrayList<>();
 
-    private final String text = ChatColor.translateAlternateColorCodes('&', ChatColor.AQUA + "#%place%" + ChatColor.GRAY + " » " + ChatColor.YELLOW + "%name%" + ChatColor.GRAY + "-" + ChatColor.GREEN + "%points%");
+    private final String text = ChatColor.translateAlternateColorCodes('&', ChatColor.AQUA + "#%place%" + ChatColor.GRAY + " » " + ChatColor.YELLOW + "%name% " + ChatColor.GRAY + "-" + ChatColor.GREEN + "%points%");
 
     private Location location;
     private final ArrayList<Hologram> holograms = new ArrayList<>();
@@ -73,7 +73,7 @@ public class HoloStats {
         for (String locations : loc) {
             String [] coords = locations.split(" ");
             Location holoLoc = new Location(Bukkit.getWorld(coords[0]), Float.parseFloat(coords[1]), Float.parseFloat(coords[2]), Float.parseFloat(coords[3]));
-            new HoloStats(holoLoc, 5);
+            new HoloStats(holoLoc, 9);
         }
     }
 

@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou;
 
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.roles.Role;
 import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
@@ -37,7 +37,7 @@ public class LGFeutre extends LoupGarou {
         }
         affichage=role;
         super.OnNewEpisode(game, lgp);
-        lgp .sendMessage(LoupGarouUHC.prefix + ChatColor.GOLD + " Ton role d'affichage est " + ChatColor.RED + affichage.getName());
+        lgp.sendMessage(LoupGarouUHC.prefix + ChatColor.GOLD + " Ton role d'affichage est " + ChatColor.RED + affichage.getName(lgp.getLanguage()));
     }
 
     public Role searchRole () {
