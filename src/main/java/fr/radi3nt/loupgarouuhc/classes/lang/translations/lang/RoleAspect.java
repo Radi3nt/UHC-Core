@@ -1,6 +1,6 @@
 package fr.radi3nt.loupgarouuhc.classes.lang.translations.lang;
 
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 
 public class RoleAspect {
 

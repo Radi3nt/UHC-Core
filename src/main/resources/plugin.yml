@@ -8,3 +8,5 @@ description: Play to the Loup Garou UHC in minecraft
 commands:
   lg:
     description: "Main command of the lg plugin"
+  uhc:
+    description: "Scenarios command"

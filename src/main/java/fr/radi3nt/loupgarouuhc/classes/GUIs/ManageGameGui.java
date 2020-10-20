@@ -27,7 +27,7 @@ public class ManageGameGui {
     public static ItemStack createSkipItem() {
         ItemStack rolesItem = new ItemStack(Material.BARRIER);
         try {
-            rolesItem.setType(Material.getMaterial("PLAYER_HEAD"));
+            rolesItem = new ItemStack(Material.getMaterial("PLAYER_HEAD"));
         } catch (NoClassDefFoundError error) {
             try {
                 rolesItem = new ItemStack(Material.getMaterial("SKULL_ITEM"), 1, (short) 0, (byte) 3);

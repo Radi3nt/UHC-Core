@@ -1,12 +1,12 @@
 package fr.radi3nt.loupgarouuhc.classes.lang.translations;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.config.Config;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Message;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.PlaceHolder;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.RoleAspect;
 import fr.radi3nt.loupgarouuhc.classes.message.Logger;
+import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.ChatColor;
 
 import java.io.File;

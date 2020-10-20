@@ -4,11 +4,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NMSBase {
 
-    static public Class<?> getNMSClass(String clazz) throws Exception {
-        return Class.forName("net.minecraft.server." + getVersion() + "." + clazz);
+    static public Class<?> getNMSClass(String clazz) {
+        try {
+            return Class.forName("net.minecraft.server." + getVersion() + "." + clazz);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String getVersion() {
@@ -35,8 +42,13 @@ public class NMSBase {
         return con;
     }
 
-    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... args) throws Exception {
-        Constructor<?> c = clazz.getConstructor(args);
+    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... args) {
+        Constructor<?> c = null;
+        try {
+            c = clazz.getConstructor(args);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
         c.setAccessible(true);
         return c;
     }
@@ -49,7 +61,7 @@ public class NMSBase {
         return "org.bukkit.craftbukkit." + getVersion() + ".";
     }
 
-    public static Object getEnumConstant(Class<?> enumClass, String name) throws Exception {
+    public static Object getEnumConstant(Class<?> enumClass, String name) {
         if (!enumClass.isEnum())
             return null;
         for (Object o : enumClass.getEnumConstants())
@@ -58,7 +70,7 @@ public class NMSBase {
         return null;
     }
 
-    public static Method getMethod(Class<?> clazz, String mname) throws Exception {
+    public static Method getMethod(Class<?> clazz, String mname) {
         Method m = null;
         try {
             m = clazz.getDeclaredMethod(mname);
@@ -83,12 +95,28 @@ public class NMSBase {
         return m;
     }
 
-    public static Object invokeConstructor(Class<?> clazz, Class<?>[] args, Object... initargs) throws Exception {
-        return getConstructor(clazz, args).newInstance(initargs);
+    public static Object invokeConstructor(Class<?> clazz, Class<?>[] args, Object... initargs) {
+        try {
+            return getConstructor(clazz, args).newInstance(initargs);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public static Object invokeMethod(Object obj, String method, Object[] initargs) throws Exception {
-        return getMethod(obj.getClass(), method).invoke(obj, initargs);
+    public static Object invokeMethod(Object obj, String method, Object[] initargs) {
+        try {
+            return getMethod(obj.getClass(), method).invoke(obj, initargs);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static Object serializeString(String s) {
@@ -105,14 +133,89 @@ public class NMSBase {
     }
 
 
-
-
-    public static void sendPacket(Object packet) throws Exception {
-        Method sendPacket = getNMSClass("PlayerConnection").getMethod("sendPacket", getNMSClass("Packet"));
+    public static void sendPacket(Object packet) {
+        Method sendPacket = null;
+        try {
+            sendPacket = getNMSClass("PlayerConnection").getMethod("sendPacket", getNMSClass("Packet"));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
         for (Player player : Bukkit.getOnlinePlayers()) {
-            sendPacket.invoke(getConnection(player), packet);
+            try {
+                sendPacket.invoke(getConnection(player), packet);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    public static void sendPacket(Object packet, Player player) {
+        Method sendPacket = null;
+        try {
+            sendPacket = getNMSClass("PlayerConnection").getMethod("sendPacket", getNMSClass("Packet"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            sendPacket.invoke(getConnection(player), packet);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Class<?> getOBCClass(String className) {
+        try {
+            return Class.forName("org.bukkit.craftbukkit." + getVersion() + "." + className);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException("An error occurred while finding OBC class.", ex);
+        }
+    }
+
+
+    public static Object getHandle(Object object) {
+        try {
+            return object.getClass().getMethod("getHandle").invoke(object);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static class IChatBaseComponent {
+
+        public static final Class<?> IChatBaseComponent = getNMSClass("IChatBaseComponent");
+        private static final Logger logger = Logger.getLogger(IChatBaseComponent.class.getName());
+        private static Method newIChatBaseComponent = null;
+
+        static {
+            try {
+                newIChatBaseComponent = IChatBaseComponent.getDeclaredClasses()[0].getMethod("a", String.class);
+            } catch (NoSuchMethodException e) {
+                logger.log(Level.SEVERE, "An error occurred while initializing IChatBaseComponent.");
+            }
+        }
+
+        public static Object of(String string) {
+            try {
+                return newIChatBaseComponent.invoke(null, "{\"text\": \"" + string + "\"}");
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+    }
 
 }

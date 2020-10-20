@@ -1,6 +1,6 @@
 package fr.radi3nt.loupgarouuhc.classes.message;
 
-import fr.radi3nt.loupgarouuhc.classes.config.Config;
+import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.command.ConsoleCommandSender;
 
 import java.io.File;
@@ -11,7 +11,8 @@ public class Logger {
 
     private static Logger logger;
 
-    private Config config;
+    private final Config config;
+    private boolean debug = false;
 
     public Logger(String path, String name) {
         config = Config.createConfig(path, name);
@@ -51,7 +52,7 @@ public class Logger {
         String name = now.getYear() + "-" + now.getMonthValue() + "-" + now.getDayOfMonth() + "-";
         boolean found = false;
         int i = 1;
-        while (found) {
+        while (!found) {
             File file = new File(config.getFile().getPath() + name + i + ".yml");
             if (file.exists()) {
                 i++;
@@ -64,11 +65,33 @@ public class Logger {
         config1.saveConfig();
     }
 
+    public void logWhenDebug(String text, ConsoleCommandSender console) {
+        if (debug) {
+            ArrayList<String> logs = (ArrayList<String>) config.getConfiguration().getStringList("Logs");
+            LocalDateTime now = LocalDateTime.now();
+            int hour = now.getHour();
+            int minute = now.getMinute();
+            int second = now.getSecond();
+            logs.add("[" + hour + ":" + minute + ":" + second + "] " + text);
+            config.getConfiguration().set("Logs", logs);
+            config.saveConfig();
+            console.sendMessage(text);
+        }
+    }
+
     public Config getConfig() {
         return config;
     }
 
     public static Logger getLogger() {
         return logger;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 }

@@ -3,20 +3,22 @@ package fr.radi3nt.loupgarouuhc.commands;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import fr.radi3nt.loupgarouuhc.classes.GUIs.MainGUI;
+import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
+import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.message.m.NoPermission;
 import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.classes.roles.Role;
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.classes.roles.WinType;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou.LGFeutre;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou.LGInfect;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Solo.Cupidon;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.Renard;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.Sorciere;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.Voyante;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGFeutre;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGInfect;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Renard;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Sorciere;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Voyante;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +33,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
@@ -65,10 +69,29 @@ public class LGcommands implements CommandExecutor {
         return false;
     }
 
+    public void hey() {
+
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length > 0) {
             switch (args[0]) {
+                case "lang":
+                    if (sender instanceof Player) {
+                        if (checkPermission(sender, "lg.lang", "")) {
+                            if (args.length > 1) {
+                                for (Languages language : Languages.getLanguages()) {
+                                    if (args[1].equalsIgnoreCase(language.getId()) || args[1].equalsIgnoreCase(language.getName())) {
+                                        LGPlayer lgp = LGPlayer.thePlayer((Player) sender);
+                                        lgp.setLanguage(language);
+                                        lgp.saveLang();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
                 case "kill":
                     if (checkPermission(sender, "lg.admin", "")) {
                         LGPlayer lgp4 = LGPlayer.thePlayer((Player) sender);
@@ -106,7 +129,6 @@ public class LGcommands implements CommandExecutor {
                     break;
 
                 case "join":
-                    if (sender instanceof Player) {
                         if (checkPermission(sender, "lg.join", "")) {
                             if (args.length > 1) {
                                 Player target = Bukkit.getPlayerExact(args[1]);
@@ -117,13 +139,14 @@ public class LGcommands implements CommandExecutor {
                                     }
                                 }
                             } else {
-                                if (!GameInstance.getGamePlayers().contains(LGPlayer.thePlayer((Player) sender))) {
-                                    GameInstance.join(LGPlayer.thePlayer((Player) sender));
-                                    sender.sendMessage(LGPlayer.thePlayer((Player) sender).getLanguage().getMessage("commandsJoinMessage"));
+                                if (sender instanceof Player) {
+                                    if (!GameInstance.getGamePlayers().contains(LGPlayer.thePlayer((Player) sender))) {
+                                        GameInstance.join(LGPlayer.thePlayer((Player) sender));
+                                        sender.sendMessage(LGPlayer.thePlayer((Player) sender).getLanguage().getMessage("commandsJoinMessage"));
+                                    }
                                 }
                             }
                         }
-                    }
                     break;
                 case "leave":
                     if (sender instanceof Player) {
@@ -177,7 +200,12 @@ public class LGcommands implements CommandExecutor {
                         }
                     } else if (checkPermission(sender, "lg.stats", "")) {
                         sender.sendMessage(ChatColor.BOLD + "STATS:\n");
-                        sender.sendMessage(ChatColor.GRAY + "- Points: " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getPoints());
+                        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+                        symbols.setGroupingSeparator(' ');
+                        DecimalFormat df = new DecimalFormat("###,###", symbols);
+                        //DecimalFormat df = new DecimalFormat("###,###.00", symbols);
+                        String pointsS = df.format(LGPlayer.thePlayer((Player) sender).getStats().getPoints());
+                        sender.sendMessage(ChatColor.GRAY + "- Points: " + ChatColor.RED + ChatColor.BOLD + pointsS);
                         sender.sendMessage(ChatColor.GRAY + "- Nombre de game: " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getGameNumber());
                         sender.sendMessage(ChatColor.GRAY + "- Nombre de game gagné: " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getWinnedGames());
                         sender.sendMessage(ChatColor.GRAY + "- Ratio de win (" + ChatColor.GREEN + "game gagné" + ChatColor.GOLD + "/" + ChatColor.GREEN + "game" + ChatColor.GRAY + ") : " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getPercentageOfWin());
@@ -214,15 +242,14 @@ public class LGcommands implements CommandExecutor {
                                     String msg2 = ChatColor.AQUA + "[" + ChatColor.GOLD + ((Player) sender).getPlayerListName() + ChatColor.RED + " -> " + ChatColor.GOLD + player.getPlayerListName() + ChatColor.AQUA + "]" + ChatColor.RESET + message;
                                     player.sendMessage(msg1);
                                     sender.sendMessage(msg);
-                                    if (LGPlayer.thePlayer((Player) sender).getGame()!=null || LGPlayer.thePlayer(player).getGame()!=null) {
+                                    if (LGPlayer.thePlayer((Player) sender).isInGame() || LGPlayer.thePlayer(player).isInGame()) {
                                         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                             if (onlinePlayer.hasPermission("lg.admin")) {
                                                 onlinePlayer.sendMessage(prefixPrivé + ChatColor.BLUE + " [Admin] " + msg2);
                                             }
-                                            if (LGPlayer.thePlayer(player).getGame()!=null && LGPlayer.thePlayer(onlinePlayer).equals(LGPlayer.thePlayer(player).getGame().getHost())) {
-                                                onlinePlayer.sendMessage(prefixPrivé + " [Host] " + msg2);
-                                            }
-                                            if (LGPlayer.thePlayer((Player) sender).getGame()!=null && LGPlayer.thePlayer(onlinePlayer).equals(LGPlayer.thePlayer((Player) sender).getGame().getHost())) {
+                                            if (LGPlayer.thePlayer(player).isInGame() && LGPlayer.thePlayer(onlinePlayer).equals(LGPlayer.thePlayer(player).getGameData().getGame().getHost())) {
+                                                onlinePlayer.sendMessage(prefixPrivé + ChatColor.BLUE + " [Host] " + msg2);
+                                            } else if (LGPlayer.thePlayer((Player) sender).isInGame() && LGPlayer.thePlayer(onlinePlayer).equals(LGPlayer.thePlayer((Player) sender).getGameData().getGame().getHost())) {
                                                 onlinePlayer.sendMessage(prefixPrivé + ChatColor.BLUE + " [Host] " + msg2);
                                             }
                                         }
@@ -236,9 +263,9 @@ public class LGcommands implements CommandExecutor {
                 case "spectate":
                     if (sender instanceof Player) {
                         if (checkPermission(sender, "lg.spectate", "")) {
-                            if (LGPlayer.thePlayer((Player) sender).getGame() == null || (LGPlayer.thePlayer((Player) sender).getGame() != null && LGPlayer.thePlayer((Player) sender).isDead()))
+                            if (LGPlayer.thePlayer((Player) sender).isInGame() || (LGPlayer.thePlayer((Player) sender).isInGame() && LGPlayer.thePlayer((Player) sender).getGameData().isDead()))
                                 for (LGPlayer lgp : players) {
-                                    if (lgp.getGame() != null) {
+                                    if (lgp.isInGame()) {
                                         ((Player) sender).teleport(lgp.getPlayer().getLocation(), PlayerTeleportEvent.TeleportCause.SPECTATE);
                                         ((Player) sender).setGameMode(GameMode.SPECTATOR);
                                         break;
@@ -255,31 +282,88 @@ public class LGcommands implements CommandExecutor {
                             if (args.length > 1) {
                                 switch (args[1]) {
                                     case "skip":
-                                        if (lgp.getGame() != null && lgp.getGame().getGameTimer() != null) {
-                                            lgp.getGame().getGameTimer().setDay(lgp.getGame().getGameTimer().getDays() + 1);
+                                        if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer() != null) {
+                                            lgp.getGameData().getGame().getGameTimer().setDay(lgp.getGameData().getGame().getGameTimer().getDays() + 1);
                                         }
                                         break;
 
                                     case "scatter":
-                                        if (args.length>2) {
+                                        if (args.length > 2) {
                                             Player player = Bukkit.getPlayerExact(args[2]);
-                                            if (player!=null && lgp.getGame()!=null) {
-                                                lgp.getGame().scatter(lgp);
+                                            if (player != null) {
+                                                LGPlayer lgT = LGPlayer.thePlayer(player);
+                                                if (lgT.isInGame())
+                                                    lgT.getGameData().getGame().scatter(lgT);
                                             }
+                                        } else {
+                                            if (lgp.isInGame())
+                                                lgp.getGameData().getGame().scatter(lgp);
                                         }
                                         break;
 
                                     case "night":
-                                        if (lgp.getGame() != null && lgp.getGame().getGameTimer() != null) {
-                                            lgp.getGame().getGameTimer().setNight(lgp.getGame().getGameTimer().getDays());
+                                        if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer() != null) {
+                                            lgp.getGameData().getGame().getGameTimer().setNight(lgp.getGameData().getGame().getGameTimer().getDays());
                                         }
                                         break;
 
-                                    //todo setTime
+                                    case "name":
+                                        if (args.length > 2) {
+                                            String name = "";
+                                            for (int i = 0; i < args.length; i++) {
+                                                if (i == 2) {
+                                                    name += args[i];
+                                                }
+                                                if (i > 2) {
+                                                    name += " " + args[i];
+                                                }
+                                            }
+                                            name = ChatColor.translateAlternateColorCodes('&', name);
+                                            if (name.length() <= 25) {
+                                                if (lgp.isInGame()) {
+                                                    lgp.getGameData().getGame().getData().setDisplayName(name);
+                                                } else {
+                                                    GameInstance.getData().setDisplayName(name);
+                                                }
+                                            } else {
+                                                //todo error
+                                            }
+                                        }
+                                        break;
 
+                                    case "host":
+                                        if (args.length > 2) {
+                                            Player player = Bukkit.getPlayerExact(args[2]);
+                                            if (player != null) {
+                                                LGPlayer lgT = LGPlayer.thePlayer(player);
+                                                if (lgT.isInGame()) {
+                                                    lgT.getGameData().getGame().getData().setHost(lgT);
+                                                } else {
+                                                    GameInstance.getData().setHost(lgT);
+                                                }
+                                            }
+                                            //todo message
+                                        } else {
+                                            if (lgp.isInGame()) {
+                                                lgp.getGameData().getGame().getData().setHost(null);
+                                            } else {
+                                                GameInstance.getData().setHost(null);
+                                            }
+                                        }
+                                        break;
+
+                                    case "regen":
+                                        GameInstance = new LGGame(parameters);
+                                        break;
+
+                                    case "stop":
+                                        if (lgp.isInGame()) {
+                                            lgp.getGameData().getGame().endGame(WinType.NONE, false);
+                                        }
+                                        break;
 
                                     default:
-                                        sender.sendMessage(prefix + ChatColor.RED + " Command inconnue !");
+                                        sender.sendMessage(prefix + ChatColor.RED + " Commande inconnue !");
                                         break;
                                 }
                             }
@@ -293,15 +377,15 @@ public class LGcommands implements CommandExecutor {
                     if (sender instanceof Player) {
                         Player player = (Player) sender;
                         LGPlayer lgp = LGPlayer.thePlayer(player);
-                        if (lgp.canVote() && lgp.getGame() != null) {
-                            if (args.length>1) {
+                        if (lgp.getGameData().canVote() && lgp.isInGame()) {
+                            if (args.length > 1) {
                                 Player target = Bukkit.getServer().getPlayerExact(args[1]);
                                 if (target != null) {
                                     LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                    if (tlgp.getGame() != null && tlgp.getGame() == lgp.getGame()) {
-                                        if (!tlgp.isDead()) {
-                                            if (!lgp.getGame().getVoted().containsKey(lgp)) {
-                                                lgp.getGame().getVoted().put(lgp, tlgp);
+                                    if (tlgp.isInGame() && tlgp.getGameData().getGame() == lgp.getGameData().getGame()) {
+                                        if (!tlgp.getGameData().isDead()) {
+                                            if (!lgp.getGameData().getGame().getVoted().containsKey(lgp)) {
+                                                lgp.getGameData().getGame().getVoted().put(lgp, tlgp);
                                                 lgp.sendMessage(prefix + ChatColor.DARK_GREEN + " Votre vote a bien été comptabilisé.");
                                             } else {
                                                 lgp.sendMessage(prefix + ChatColor.DARK_RED + " Vous avez dejà voté !");
@@ -327,10 +411,10 @@ public class LGcommands implements CommandExecutor {
                 case "list":
                     if (sender instanceof Player) {
                         LGPlayer lgp = LGPlayer.thePlayer((Player) sender);
-                        if (lgp.getGame() != null) {
-                            if (!lgp.getGame().getCompoCache()) {
-                                for (Role role : lgp.getGame().getRolesWithDeads()) {
-                                    if (lgp.getGame().getRoles().contains(role)) {
+                        if (lgp.isInGame()) {
+                            if (!lgp.getGameData().getGame().getParameters().isHiddenCompo()) {
+                                for (Role role : lgp.getGameData().getGame().getRolesWithDeads()) {
+                                    if (lgp.getGameData().getGame().getRoles().contains(role)) {
                                         lgp.sendMessage(role.getName(lgp.getLanguage()));
                                     } else {
                                         lgp.sendMessage(ChatColor.STRIKETHROUGH + role.getName(lgp.getLanguage()));
@@ -348,18 +432,18 @@ public class LGcommands implements CommandExecutor {
                         if (args.length > 1) {
                             switch (args[1]) {
                                 case "see":
-                                    if (lgp.getGame() != null && lgp.getRole().getRoleSort() == RoleSort.VOYANTE && lgp.getGame().getGameTimer().getDays() > 1) {
-                                        Voyante voyante = (Voyante) lgp.getRole();
+                                    if (lgp.isInGame() && lgp.getGameData().getRole().getRoleSort() == RoleSort.VOYANTE && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                        Voyante voyante = (Voyante) lgp.getGameData().getRole();
                                         if (voyante.canSee()) {
                                             if (args.length > 2) {
                                                 Player target = Bukkit.getServer().getPlayerExact(args[2]);
                                                 if (target != null) {
                                                     LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                                    if (tlgp.getGame() != null && tlgp.getRole() != null && !tlgp.isDead()) {
-                                                        if (tlgp.getRole().getRoleSort()==RoleSort.LG_FEUTRE) {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + ((LGFeutre) tlgp.getRole()).affichage.getName(lgp.getLanguage()));
+                                                    if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && !tlgp.getGameData().isDead()) {
+                                                        if (tlgp.getGameData().getRole().getRoleSort() == RoleSort.LG_FEUTRE) {
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + ((LGFeutre) tlgp.getGameData().getRole()).affichage.getName(lgp.getLanguage()));
                                                         } else {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + tlgp.getRole().getName(lgp.getLanguage()));
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + tlgp.getGameData().getRole().getName(lgp.getLanguage()));
 
                                                         }
                                                         voyante.setCanSee(false);
@@ -375,18 +459,18 @@ public class LGcommands implements CommandExecutor {
                                         } else {
                                             lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
                                         }
-                                    } else if (lgp.getGame() != null && lgp.getRole().getRoleSort() == RoleSort.RENARD && lgp.getGame().getGameTimer().getDays() > 1) {
-                                        Renard voyante = (Renard) lgp.getRole();
+                                    } else if (lgp.isInGame() && lgp.getGameData().getRole().getRoleSort() == RoleSort.RENARD && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                        Renard voyante = (Renard) lgp.getGameData().getRole();
                                         if (voyante.canSee()) {
                                             if (args.length > 2) {
                                                 Player target = Bukkit.getServer().getPlayerExact(args[2]);
                                                 if (target != null) {
                                                     LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                                    if (tlgp.getGame() != null && tlgp.getRole() != null && !tlgp.isDead() && generateSphere(lgp.getPlayer().getLocation(), voyante.getRadius()).contains(tlgp.getPlayer().getLocation())) {
-                                                        if (tlgp.getRole().getRoleSort() == RoleSort.LG_FEUTRE) {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (((LGFeutre) tlgp.getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup Garou"));
+                                                    if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && !tlgp.getGameData().isDead() && generateSphere(lgp.getPlayer().getLocation(), voyante.getRadius()).contains(tlgp.getPlayer().getLocation())) {
+                                                        if (tlgp.getGameData().getRole().getRoleSort() == RoleSort.LG_FEUTRE) {
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (((LGFeutre) tlgp.getGameData().getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup Garou"));
                                                         } else {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (tlgp.getRole().getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup garou"));
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (tlgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup garou"));
 
                                                         }
                                                         voyante.setCanSee(false);
@@ -408,16 +492,16 @@ public class LGcommands implements CommandExecutor {
                                     break;
 
                                 case "respawn":
-                                    if (lgp.getGame() != null && lgp.getGame().getGameTimer().getDays() > lgp.getGame().getParameters().getDayRoleDivulged()-1) {
-                                        if (lgp.getRole().getRoleSort() == RoleSort.SORCIERE) {
-                                            Sorciere sorciere = (Sorciere) lgp.getRole();
+                                    if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged() - 1) {
+                                        if (lgp.getGameData().getRole().getRoleSort() == RoleSort.SORCIERE) {
+                                            Sorciere sorciere = (Sorciere) lgp.getGameData().getRole();
                                             if (!sorciere.hasrespwaned) {
                                                 if (args.length > 2) {
                                                     Player target = Bukkit.getServer().getPlayerExact(args[2]);
                                                     if (target != null) {
                                                         LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                                        if (tlgp.getGame() != null && tlgp.getRole() != null && tlgp.canBeRespawned()) {
-                                                            tlgp.setCanBeRespawned(false);
+                                                        if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && tlgp.getGameData().canBeRespawned()) {
+                                                            tlgp.getGameData().setCanBeRespawned(false);
                                                             tlgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.GOLD + " Tu a été ressussié");
                                                             lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " a été réssuscité !");
                                                             sorciere.hasrespwaned = true;
@@ -434,20 +518,19 @@ public class LGcommands implements CommandExecutor {
                                             } else {
                                                 lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu a déjà ressucité quelqu'un");
                                             }
-                                        } else if (lgp.getRole().getRoleSort() == RoleSort.LG_INFECTE){
-                                            LGInfect infecte = (LGInfect) lgp.getRole();
+                                        } else if (lgp.getGameData().getRole().getRoleSort() == RoleSort.LG_INFECTE) {
+                                            LGInfect infecte = (LGInfect) lgp.getGameData().getRole();
                                             if (!infecte.hasrespwaned) {
                                                 if (args.length > 2) {
                                                     Player target = Bukkit.getServer().getPlayerExact(args[2]);
                                                     if (target != null) {
                                                         LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                                        if (tlgp.getGame() != null && tlgp.getRole() != null && tlgp.canBeRespawned() && tlgp.getRoleType()!=RoleType.LOUP_GAROU && tlgp.getKiller().getRole().getRoleType()==RoleType.LOUP_GAROU) {
-                                                            tlgp.setCanBeRespawned(false);
-                                                            tlgp.getRole().setWinType(WinType.LOUP_GAROU);
-                                                            tlgp.getRole().setRoleType(RoleType.LOUP_GAROU);
+                                                        if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && tlgp.getGameData().canBeRespawned() && tlgp.getGameData().getRoleType() != RoleType.LOUP_GAROU && tlgp.getGameData().getKiller().getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU) {
+                                                            tlgp.getGameData().setCanBeRespawned(false);
                                                             lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " a été infecté !");
                                                             tlgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.GOLD + " Tu a été infecté, tu gagne maintenant avec les loups garous");
-                                                            tlgp.setKiller(null);
+                                                            tlgp.getGameData().setKiller(null);
+                                                            tlgp.getGameData().setInfected(true);
                                                             infecte.hasrespwaned = true;
                                                             return true;
                                                         } else {
@@ -471,19 +554,19 @@ public class LGcommands implements CommandExecutor {
                                     break;
 
                                 case "lg":
-                                    if (lgp.getGame() != null && lgp.getRole().getRoleType() == RoleType.LOUP_GAROU && lgp.getGame().getGameTimer().getDays() > 1) {
+                                    if (lgp.isInGame() && lgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
                                         String message = prefix + ChatColor.RED + " ";
                                         boolean empty = true;
-                                        for (LGPlayer player : lgp.getGame().getGamePlayersWithDeads()) {
-                                            if (player.getRole().getRoleType()==RoleType.LOUP_GAROU) {
+                                        for (LGPlayer player : lgp.getGameData().getGame().getGamePlayersWithDeads()) {
+                                            if (player.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU) {
                                                 if (empty) {
-                                                    if (player.isDead()) {
-                                                        message=message + ChatColor.STRIKETHROUGH + player.getName() + ChatColor.RED;
+                                                    if (player.getGameData().isDead()) {
+                                                        message = message + ChatColor.STRIKETHROUGH + player.getName() + ChatColor.RED;
                                                     } else {
-                                                        message=message + player.getName();
+                                                        message = message + player.getName();
                                                     }
-                                                }else {
-                                                    if (player.isDead()) {
+                                                } else {
+                                                    if (player.getGameData().isDead()) {
                                                         message = message + ", " + ChatColor.STRIKETHROUGH + player.getName() + ChatColor.RED;
                                                     } else
                                                         message = message + ", " + player.getName();
@@ -501,21 +584,21 @@ public class LGcommands implements CommandExecutor {
                                     break;
 
                                 case "couple":
-                                    if (lgp.getGame() != null && lgp.getGame().getGameTimer().getDays() > 1) {
-                                        if (lgp.getRole().getRoleSort() == RoleSort.CUPIDON) {
-                                            Cupidon cupidon = (Cupidon) lgp.getRole();
+                                    if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                        if (lgp.getGameData().getRole().getRoleSort() == RoleSort.CUPIDON) {
+                                            Cupidon cupidon = (Cupidon) lgp.getGameData().getRole();
                                             if (cupidon.canCouple) {
-                                                if (args.length>3) {
+                                                if (args.length > 3) {
                                                     Player target1 = Bukkit.getServer().getPlayerExact(args[2]);
                                                     Player target2 = Bukkit.getServer().getPlayerExact(args[3]);
-                                                    if (target1!=target2) {
-                                                        if (target1 != null && target2 !=null) {
+                                                    if (target1 != target2) {
+                                                        if (target1 != null && target2 != null) {
                                                             LGPlayer lgp1 = LGPlayer.thePlayer(target1);
                                                             LGPlayer lgp2 = LGPlayer.thePlayer(target2);
 
 
-                                                            lgp1.setCouple(lgp2);
-                                                            lgp2.setCouple(lgp1);
+                                                            lgp1.getGameData().setCouple(lgp2);
+                                                            lgp2.getGameData().setCouple(lgp1);
                                                             lgp1.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp2.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
                                                             lgp2.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
                                                         } else {
@@ -539,28 +622,28 @@ public class LGcommands implements CommandExecutor {
                                     break;
 
                                 case "don":
-                                    if (lgp.getGame() != null && lgp.getGame().getGameTimer()!=null) {
-                                        if (lgp.getCouple()!=null && lgp.getCouple().getPlayer()!=null) {
+                                    if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer() != null) {
+                                        if (lgp.getGameData().isInCouple() && lgp.getGameData().getCouple().getPlayer() != null) {
                                             int life = 0;
                                             try {
-                                                life= Integer.parseInt(args[2]);
+                                                life = Integer.parseInt(args[2]);
                                             } catch (NumberFormatException e) {
                                                 //error
                                             }
                                             int damage = (int) (((float) life / 100) * 20);
 
-                                            if (lgp.getPlayer().getHealth()-damage > 0) {
-                                                if (lgp.getCouple().getPlayer().getHealth() + damage <= lgp.getCouple().getPlayer().getMaxHealth() && lgp.getCouple().getPlayer().getHealth()!=lgp.getCouple().getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+                                            if (lgp.getPlayer().getHealth() - damage > 0) {
+                                                if (lgp.getGameData().getCouple().getPlayer().getHealth() + damage <= lgp.getGameData().getCouple().getPlayer().getMaxHealth() && lgp.getGameData().getCouple().getPlayer().getHealth() != lgp.getGameData().getCouple().getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
                                                     if (life != 0) {
                                                         lgp.getPlayer().setHealth(lgp.getPlayer().getHealth() - damage);
-                                                        lgp.getCouple().getPlayer().setHealth(lgp.getCouple().getPlayer().getHealth() + damage);
-                                                        lgp.sendMessage(prefix + " " + ChatColor.GREEN + "Tu a donné " + ChatColor.DARK_GREEN + life + ChatColor.GREEN + "% de vie a " + ChatColor.AQUA + lgp.getCouple().getName());
-                                                        lgp.getCouple().sendMessage(prefix + " " + ChatColor.DARK_GREEN + lgp.getName() + ChatColor.GREEN + " vous a donné " + ChatColor.DARK_GREEN + life + ChatColor.GREEN + "% de vie");
+                                                        lgp.getGameData().getCouple().getPlayer().setHealth(lgp.getGameData().getCouple().getPlayer().getHealth() + damage);
+                                                        lgp.sendMessage(prefix + " " + ChatColor.GREEN + "Tu a donné " + ChatColor.DARK_GREEN + life + ChatColor.GREEN + "% de vie a " + ChatColor.AQUA + lgp.getGameData().getCouple().getName());
+                                                        lgp.getGameData().getCouple().sendMessage(prefix + " " + ChatColor.DARK_GREEN + lgp.getName() + ChatColor.GREEN + " vous a donné " + ChatColor.DARK_GREEN + life + ChatColor.GREEN + "% de vie");
                                                     } else {
-                                                        lgp.sendMessage(prefix + " " + ChatColor.RED + "Impossible de donner 0% de vie a " + ChatColor.AQUA + lgp.getCouple().getName());
+                                                        lgp.sendMessage(prefix + " " + ChatColor.RED + "Impossible de donner 0% de vie a " + ChatColor.AQUA + lgp.getGameData().getCouple().getName());
                                                     }
                                                 } else {
-                                                    lgp.sendMessage(prefix + " " + ChatColor.RED + lgp.getCouple().getName() + " ne peut recevoir tant de vie");
+                                                    lgp.sendMessage(prefix + " " + ChatColor.RED + lgp.getGameData().getCouple().getName() + " ne peut recevoir tant de vie");
                                                 }
                                             } else {
                                                 lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu n'a pas assez de vie");
@@ -576,8 +659,8 @@ public class LGcommands implements CommandExecutor {
                                     break;
                             }
                         } else {
-                            if (lgp.getGame()!=null && lgp.getRole()!=null && lgp.getGame().getGameTimer().getDays()>1) {
-                                lgp.getRole().join(lgp, true);
+                            if (lgp.isInGame() && lgp.getGameData().hasRole() && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                lgp.getGameData().getRole().join(lgp, true);
                             }
                         }
                     }

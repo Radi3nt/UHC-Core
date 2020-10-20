@@ -1,13 +1,9 @@
 package fr.radi3nt.loupgarouuhc.classes.player;
 
 import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
-import fr.radi3nt.loupgarouuhc.classes.config.Config;
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
-import fr.radi3nt.loupgarouuhc.classes.roles.Role;
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.classes.roles.WinType;
 import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
+import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -25,16 +21,8 @@ public class LGPlayer {
 	private Stats stats;
 	private Languages language;
 	private Player player;
-	private boolean dead;
-	private LGGame game;
-	private Role role;
-	private boolean canVote;
 	private Chat chat;
-	private LGPlayer couple;
-	private boolean canBeRespawned = false;
-	private Integer diamondMined = 0;
-	private LGPlayer killer;
-	private Integer kills = 0;
+	private PlayerGameData gameData = new PlayerGameData(null);
 
 	public static LGPlayer thePlayer(Player player) {
 		LGPlayer lgp = cachedPlayers.get(player.getUniqueId());
@@ -55,51 +43,7 @@ public class LGPlayer {
 		return lgp;
 	}
 
-
-	public LGPlayer getCouple() {
-		return couple;
-	}
-
-	public void setCouple(LGPlayer player) {
-		couple = player;
-	}
-
-	public Chat getChat() {
-		return chat;
-	}
-
-	public void setChat(Chat chat) {
-		this.chat = chat;
-	}
-
-	public Integer getDiamondMined() {
-		return diamondMined;
-	}
-
-	public void setDiamondMined(Integer diamondMined) {
-		this.diamondMined = diamondMined;
-	}
-
-
-	public boolean canBeRespawned() {
-		return canBeRespawned;
-	}
-
-	public void setCanBeRespawned(boolean canBeRespawned) {
-		this.canBeRespawned = canBeRespawned;
-	}
-
-
-	public boolean canVote() {
-		return canVote;
-	}
-
-	public void setCanVote(boolean canVote) {
-		this.canVote = canVote;
-	}
-
-
-	public LGPlayer(Player player) {
+	private LGPlayer(Player player) {
 		this.player = player;
 		this.uuid = player.getUniqueId();
 		stats = new Stats();
@@ -111,105 +55,34 @@ public class LGPlayer {
 		}
 	}
 
-	public LGPlayer(UUID uuid) {
-		this.player=null;
+	private LGPlayer(UUID uuid) {
+		this.player = null;
 		this.uuid = uuid;
 		stats = new Stats();
+
+		for (Languages languages : Languages.getLanguages()) {
+			if (languages.getId().equals(Languages.DEFAULTID)) {
+				language = languages;
+			}
+		}
 	}
+
+	public static LGPlayer removePlayer(Player player) {
+		return cachedPlayers.remove(player.getUniqueId());//.remove();
+	}
+
 
 	public void sendMessage(String msg) {
 		if (this.player != null)
 			player.sendMessage(msg);
 	}
 
-	public boolean isDead() {
-		return dead;
-	}
-
-	public LGGame getGame() {
-		return game;
-	}
-
-	public void setGame(LGGame game) {
-		this.game = game;
-	}
-
-	public void setDead(Boolean isdead) {
-		dead = isdead;
-	}
-
-	public void remove() {
-		this.player = null;
-	}
-
-	public String getName() {
-		return player != null ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
-	}
-
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	public Role getRole() {
-		return role;
-	}
-
-	public RoleType getRoleType() {
-		return role.getRoleType();
-	}
-
-	public WinType getRoleWinType() {
-		return role.getWinType();
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + " (" + getName() + ")";
-	}
-
 	public void sendTitle(String s, String s1, int i, int i1, int i2) {
 		this.player.sendTitle(s, s1, i, i1, i2);
 	}
 
-	public Player getPlayer() {
-		return player;
-	}
-
-	public static LGPlayer removePlayer(Player player) {
-		return cachedPlayers.remove(player.getName());//.remove();
-	}
-
-	public LGPlayer getKiller() {
-		return killer;
-	}
-
-	public void setKiller(LGPlayer killer) {
-		this.killer = killer;
-	}
-
-	public Stats getStats() {
-		return stats;
-	}
-
-	public void setStats(Stats stats) {
-		this.stats = stats;
-	}
-
-	public Integer getKills() {
-		return kills;
-	}
-
-	public void setKills(Integer kills) {
-		this.kills = kills;
-	}
-
-	public UUID getUuid() {
-		return uuid;
-	}
-
 	public void saveStats() {
-		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+		Config config = Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
 
 
 		config.getConfiguration().set("Stats" + ".games", this.getStats().getGameNumber());
@@ -218,7 +91,7 @@ public class LGPlayer {
 		config.getConfiguration().set("Stats" + ".points", this.getStats().getPoints());
 		config.saveConfig();
 
-		Config config1 = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "players.yml");
+		Config config1 = Config.createConfig(plugin.getDataFolder() + "", "players.yml");
 
 
 		ArrayList<String> arrayList = new ArrayList<>();
@@ -239,51 +112,72 @@ public class LGPlayer {
 		Config config = Config.createConfig(plugin.getDataFolder() + "/players", player.getName() + ".yml");
 
 		Stats stats = new Stats();
-		stats.setGameNumber(config.getConfiguration().getInt(player.getName() + ".games"));
-		stats.setWinnedGames(config.getConfiguration().getInt(player.getName() + ".wins"));
-		stats.setKills(config.getConfiguration().getInt(player.getName() + ".kills"));
-		stats.setPoints(config.getConfiguration().getInt(player.getName() + ".points"));
-		this.setStats(stats);
+		stats.setGameNumber(config.getConfiguration().getInt("Stats" + ".games"));
+		stats.setWinnedGames(config.getConfiguration().getInt("Stats" + ".wins"));
+		stats.setKills(config.getConfiguration().getInt("Stats" + ".kills"));
+		stats.setPoints(config.getConfiguration().getInt("Stats" + ".points"));
+		setStats(stats);
 	}
 
 	public void saveLang() {
-		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
-
-
+		Config config = Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
 		config.getConfiguration().set("Lang", language.getId());
 		config.saveConfig();
-
-		Config config1 = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "players.yml");
-
-
-		ArrayList<String> arrayList = new ArrayList<>();
-		try {
-			arrayList = (ArrayList<String>) config1.getConfiguration().getStringList("Players");
-		} catch (NullPointerException e) {
-
-		}
-		if (!arrayList.contains(getName())) {
-			arrayList.add(getName());
-		}
-		config1.getConfiguration().set("Players", arrayList);
-
-		config1.saveConfig();
 	}
 
 	public void loadSavedLang() {
-		Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+		Config config = Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
 
 		String id = config.getConfiguration().getString("Lang");
+
+		if (id == null) {
+			config.getConfiguration().set("Lang", "fr");
+			config.saveConfig();
+			id = "fr";
+		}
 
 		for (Languages value : Languages.getLanguages()) {
 			if (id.equals(value.getId()))
 				language = value;
 		}
+		if (language.getId().equals(Languages.DEFAULTID)) {
+			for (Languages value : Languages.getLanguages()) {
+				if (id.equals("fr"))
+					language = value;
+			}
+		}
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		return obj instanceof LGPlayer && ((LGPlayer) obj).getUuid() == this.getUuid();
+	public Chat getChat() {
+		return chat;
+	}
+
+	public void setChat(Chat chat) {
+		this.chat = chat;
+	}
+
+	public void remove() {
+		this.player = null;
+	}
+
+	public String getName() {
+		return player != null ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public Stats getStats() {
+		return stats;
+	}
+
+	public void setStats(Stats stats) {
+		this.stats = stats;
+	}
+
+	public UUID getUuid() {
+		return uuid;
 	}
 
 	public Languages getLanguage() {
@@ -293,4 +187,31 @@ public class LGPlayer {
 	public void setLanguage(Languages language) {
 		this.language = language;
 	}
+
+	public boolean isInGame() {
+		return gameData.getGame() != null;
+	}
+
+	public boolean isLinkedToPlayer() {
+		return player != null;
+	}
+
+	public PlayerGameData getGameData() {
+		return gameData;
+	}
+
+	public void setGameData(PlayerGameData gameData) {
+		this.gameData = gameData;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " (" + getName() + ")";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof LGPlayer && ((LGPlayer) obj).getUuid() == this.getUuid();
+	}
+
 }

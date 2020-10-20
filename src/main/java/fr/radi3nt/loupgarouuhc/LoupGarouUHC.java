@@ -8,24 +8,29 @@ import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
 import fr.radi3nt.loupgarouuhc.classes.chats.DeadChat;
 import fr.radi3nt.loupgarouuhc.classes.chats.GameChat;
 import fr.radi3nt.loupgarouuhc.classes.chats.GeneralChat;
-import fr.radi3nt.loupgarouuhc.classes.config.Config;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.Reader;
 import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.classes.roles.Role;
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.LoupGarou.*;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Solo.Assassin;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Solo.Cupidon;
-import fr.radi3nt.loupgarouuhc.classes.roles.roles.Villagers.*;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
+import fr.radi3nt.loupgarouuhc.commands.LGTabCompleter;
 import fr.radi3nt.loupgarouuhc.commands.LGcommands;
-import fr.radi3nt.loupgarouuhc.customlisteners.*;
-import fr.radi3nt.loupgarouuhc.listeners.*;
-import fr.radi3nt.loupgarouuhc.listeners.gui.ClickEvent;
+import fr.radi3nt.loupgarouuhc.event.customlisteners.*;
+import fr.radi3nt.loupgarouuhc.event.listeners.*;
+import fr.radi3nt.loupgarouuhc.event.listeners.gui.ClickEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.*;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Assassin;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.*;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.ScenarioCommands;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.ScenarioListener;
+import fr.radi3nt.loupgarouuhc.utilis.Config;
 import fr.radi3nt.loupgarouuhc.utilis.Updater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -33,7 +38,11 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -45,7 +54,7 @@ import java.util.Map;
 
 import static org.bukkit.Bukkit.broadcastMessage;
 
-public final class LoupGarouUHC extends JavaPlugin {
+public final class LoupGarouUHC extends JavaPlugin implements Listener {
 
     public static Parameters parameters;
 
@@ -115,6 +124,7 @@ public final class LoupGarouUHC extends JavaPlugin {
         console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered PlaceHolders");
 
         RegisterEvents();
+        RegisterScenarios();
         console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Events");
         RegisterCommands();
         console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Commands");
@@ -138,6 +148,14 @@ public final class LoupGarouUHC extends JavaPlugin {
 
     }
 
+    private void RegisterScenarios() {
+        Scenario.staticRegisterAll();
+        ScenarioListener listen = new ScenarioListener();
+        RegisteredListener registeredListener = new RegisteredListener(listen, (listener, event) -> listen.onEvent(event), EventPriority.NORMAL, this, true);
+        for (HandlerList handler : HandlerList.getHandlerLists())
+            handler.register(registeredListener);
+    }
+
     private void registerConfigs() {
         File locations = new File(getDataFolder(), "roles.yml");
         if (!locations.exists()) {
@@ -158,6 +176,8 @@ public final class LoupGarouUHC extends JavaPlugin {
 
     private void RegisterCommands() {
         getCommand("lg").setExecutor(new LGcommands());
+        getCommand("lg").setTabCompleter(new LGTabCompleter());
+        getCommand("uhc").setExecutor(new ScenarioCommands());
     }
 
     private void RegisterEvents() {
@@ -169,7 +189,6 @@ public final class LoupGarouUHC extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnPlayerMoveEvent(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerDie(), this);
         getServer().getPluginManager().registerEvents(new DamageEvent(), this);
-        getServer().getPluginManager().registerEvents(new OnBreakBlockEvent(), this);
         getServer().getPluginManager().registerEvents(new PlayerPreProcessCommand(), this);
 
         getServer().getPluginManager().registerEvents(new ClickEvent(), this);
@@ -180,14 +199,21 @@ public final class LoupGarouUHC extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OnDiscoverRoleEvent(), this);
         getServer().getPluginManager().registerEvents(new OnKilledEvent(), this);
         getServer().getPluginManager().registerEvents(new OnKillEvent(), this);
+        getServer().getPluginManager().registerEvents(new OnStartGame(), this);
+        getServer().getPluginManager().registerEvents(new OnEndGame(), this);
     }
 
     @Override
     public void onDisable() {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
+            if (lgp.isInGame())
+                lgp.getGameData().getGame().endGame(WinType.NONE, true);
+        }
         try {
             for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet()) {
                 RolesConfig.set("Roles." + role.getKey(), 0);
-                if (roleNumber.containsKey(role.getKey()) && roleNumber.get(role.getKey())!=0) {
+                if (roleNumber.containsKey(role.getKey()) && roleNumber.get(role.getKey()) != 0) {
                     RolesConfig.set("Roles." + role.getKey(), roleNumber.get(role.getKey()));
                 }
             }

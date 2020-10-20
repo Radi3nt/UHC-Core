@@ -2,7 +2,7 @@ package fr.radi3nt.loupgarouuhc.classes.lang.translations.lang;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;

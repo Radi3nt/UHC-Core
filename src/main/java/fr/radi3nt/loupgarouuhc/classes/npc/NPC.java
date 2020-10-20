@@ -3,23 +3,15 @@ package fr.radi3nt.loupgarouuhc.classes.npc;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_12_R1.*;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
-
-import static fr.radi3nt.loupgarouuhc.classes.npc.NMSBase.*;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -28,41 +20,43 @@ import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.util.*;
 
-import static fr.radi3nt.loupgarouuhc.classes.npc.NMSBase.serializeString;
+import static fr.radi3nt.loupgarouuhc.classes.npc.NMSBase.*;
 
 public class NPC {
 
-	private int entityId;
+	//todo do reflection with interface
+
+	private final int entityId;
 	private Location location;
 	private GameProfile gameprofile;
 
 	private Integer specStand;
 
-	private List<Player> recipients;
+	private final List<Player> recipients;
 	private Recipient recipient_type = Recipient.ALL;
 
 	private String display_name;
 	private String tablist_name;
 	private DataWatcher dataWatcher;
-	private DataWatcherObject<Byte> object_entity_state;
-	private DataWatcherObject<String> object_customName;
-	private DataWatcherObject<Boolean> object_isSilent;
-	private DataWatcherObject<Boolean> object_hasGravity;
-	private DataWatcherObject<Boolean> object_isCustomNameVisible;
+	private final DataWatcherObject<Byte> object_entity_state;
+	private final DataWatcherObject<String> object_customName;
+	private final DataWatcherObject<Boolean> object_isSilent;
+	private final DataWatcherObject<Boolean> object_hasGravity;
+	private final DataWatcherObject<Boolean> object_isCustomNameVisible;
 
 	private static final Map<BlockFace, BlockFace[]> nextFaceOrder = new EnumMap<>(BlockFace.class);
 
 	static {
-		nextFaceOrder.put(BlockFace.NORTH, new BlockFace[] { BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH });
-		nextFaceOrder.put(BlockFace.EAST, new BlockFace[] { BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST });
-		nextFaceOrder.put(BlockFace.SOUTH, new BlockFace[] { BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH });
-		nextFaceOrder.put(BlockFace.WEST, new BlockFace[] { BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST });
+		nextFaceOrder.put(BlockFace.NORTH, new BlockFace[]{BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH});
+		nextFaceOrder.put(BlockFace.EAST, new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST});
+		nextFaceOrder.put(BlockFace.SOUTH, new BlockFace[]{BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH});
+		nextFaceOrder.put(BlockFace.WEST, new BlockFace[]{BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST});
 	}
 
 	private boolean isDestroyed;
-	private Plugin plugin;
-	
-	
+	private final Plugin plugin;
+
+
 	/*
 	 *  initialize all the npc default settings
 	 */
@@ -75,11 +69,36 @@ public class NPC {
 		this.entityId = (int) Math.ceil(Math.random() * 1000);
 		this.gameprofile = new GameProfile(UUID.randomUUID(), display_name);
 		this.location = location;
-		this.dataWatcher = new DataWatcher(null);
+		try {
+			this.dataWatcher = (DataWatcher) getNMSClass("DataWatcher").getConstructor(getNMSClass("Entity")).newInstance(new Object[]{null});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		/*
+		Method method = null;
+		try {
+			method = getNMSClass("DataWatcher")
+					.getMethod("register",
+							getNMSClass("DataWatcherObject"),
+							Object.class);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			method.invoke(dataWatcher, getNMSClass("DataWatcherObject").getConstructor(int.class, getNMSClass("DataWatcherSerializer")).newInstance(0, getNMSClass("DataWatcherRegistry").getField("a")), (byte) 0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		 */
+
+
 		this.dataWatcher.register(object_entity_state = new DataWatcherObject<>(0, DataWatcherRegistry.a), (byte) 0);
 		this.dataWatcher.register(new DataWatcherObject<>(1, DataWatcherRegistry.b), 300);
 		this.dataWatcher.register(object_customName = new DataWatcherObject<>(2, DataWatcherRegistry.d), "");
-		this.dataWatcher.register(object_isCustomNameVisible = new DataWatcherObject<>(3, DataWatcherRegistry.h),false);
+		this.dataWatcher.register(object_isCustomNameVisible = new DataWatcherObject<>(3, DataWatcherRegistry.h), false);
 		this.dataWatcher.register(object_isSilent = new DataWatcherObject<>(4, DataWatcherRegistry.h), false);
 		this.dataWatcher.register(object_hasGravity = new DataWatcherObject<>(5, DataWatcherRegistry.h), false);
 		this.dataWatcher.register(new DataWatcherObject<>(6, DataWatcherRegistry.a), (byte) 0);
@@ -202,7 +221,12 @@ public class NPC {
 	 *  spawn the npc, this should be the last function after init.
 	 */
 	public void spawn(boolean tablist, boolean fix_head) {
-		PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
+		Object packet = null;
+		try {
+			packet = NMSBase.getNMSClass("PacketPlayOutNamedEntitySpawn").newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		this.setField(packet, "a", this.entityId);
 		this.setField(packet, "b", this.gameprofile.getId());
 		this.setField(packet, "c", location.getX());
@@ -262,7 +286,7 @@ public class NPC {
 	public void reloadNpc() {
 		this.updateProfile();
 		if(!this.isDestroyed) {
-			PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(new int[] { this.entityId });
+			PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(this.entityId);
 			this.sendPacket(packet);
 			this.spawn(true, true);
 		}	
@@ -489,9 +513,9 @@ public class NPC {
 	 * delete the npc from the server.
 	 */
 	public void destroy() {
-		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(new int[] { this.entityId });
-		if (specStand!=null) {
-			PacketPlayOutEntityDestroy packet1 = new PacketPlayOutEntityDestroy(new int[]{this.specStand});
+		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(this.entityId);
+		if (specStand != null) {
+			PacketPlayOutEntityDestroy packet1 = new PacketPlayOutEntityDestroy(this.specStand);
 			this.sendPacket(packet1);
 		}
 		this.removeFromTabList();
@@ -838,8 +862,8 @@ public class NPC {
 		if (specStand==null) {
 			WorldServer s = ((CraftWorld) location.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
-			specStand= stand.getBukkitEntity().getEntityId();
-			//specStand.setLocation(location1.getX(), location1.getY()+shiftY, location1.getZ(), 0, 0);
+			specStand = stand.getBukkitEntity().getEntityId();
+			stand.setLocation(location1.getX(), location1.getY() + shiftY, location1.getZ(), 0, 0);
 			//specStand.setCustomName("I'm a Armorstand!");
 			stand.setCustomNameVisible(false);
 			stand.setNoGravity(true);
@@ -890,25 +914,24 @@ public class NPC {
 		//player.getLocation().setYaw(location.getYaw());
 		//player.getLocation().setPitch(location.getPitch());
 	}
-	
 
 
 	enum Recipient {
-		ALL, LISTED_RECIPIENTS;
+		ALL, LISTED_RECIPIENTS
 	}
 
 	enum NPCAnimation {
 
-		SWING_MAIN_HAND(0), 
-		TAKE_DAMAGE(1), 
-		LEAVE_BED(2), 
-		SWING_OFFHAND(3), 
-		CRITICAL_EFFECT(4), 
+		SWING_MAIN_HAND(0),
+		TAKE_DAMAGE(1),
+		LEAVE_BED(2),
+		SWING_OFFHAND(3),
+		CRITICAL_EFFECT(4),
 		MAGIC_CRITICAL_EFFECT(5);
 
-		private int id;
+		private final int id;
 
-		private NPCAnimation(int id) {
+		NPCAnimation(int id) {
 			this.id = id;
 		}
 
@@ -922,9 +945,9 @@ public class NPC {
 
 		HURT(2), DIE(3);
 
-		private int id;
+		private final int id;
 
-		private NPCStatus(int id) {
+		NPCStatus(int id) {
 			this.id = id;
 		}
 
@@ -1017,7 +1040,7 @@ public class NPC {
 		}
 
 		private byte add(boolean condition, byte amount) {
-			return (byte) (result += (condition ? amount : 0x00));
+			return result += (condition ? amount : 0x00);
 		}
 	}
 }

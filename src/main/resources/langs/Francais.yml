@@ -5,87 +5,98 @@ Language:
 Roles:
   Villager:
     name: "Villageois"
-    short desc: ""
-    desc: ""
+    short desc: "Tu n’as aucun pouvoir spécial"
+    desc: "Tu n’as aucun pouvoir spécial, seul ton esprit de déduction te permettra de découvrir les loup garous."
 
   LoupGarou:
     name: "Loup garou"
-    short desc: ""
-    desc: ""
+    short desc: "Tu dois tuer les villageois la nuit"
+    desc: "Tu dois éliminer tout les villagois, pour t'aider dans ta quête tu possèdes l'effet Strength 1 la nuit."
 
   PetiteFille:
     name: "Petite fille"
-    short desc: ""
-    desc: ""
+    short desc: "Tu deviens invisible la nuit"
+    desc: "Pendant la nuit, tu disposes de l’effet d’invisibilité pour espionner les loup garous, tu peux voir les particules du loup perfide si celui-ci est invisible."
 
   VPLoup:
     name: "Vilain petit loup"
-    short desc: ""
-    desc: ""
+    short desc: "Tu as un effet de speed la nuit"
+    desc: "Tu dois tuer tous les villageois, tu as l'effet Strength 1 la nuit ainsi que l'effet Speed 2 la nuit, à chaque kill que tu fais tu obtiens 2 coeurs en plus pendant 1 min."
 
   Voyante:
     name: "Voyante"
-    short desc: ""
-    desc: ""
+    short desc: "Tu peux voir le role des joueurs"
+    desc: "Tu peux voir le rôle d’une personne à chaque début d’épisode. Tu as aussi 4 bibliothèques et 4 block d’obsidienne."
 
   LGBlanc:
     name: "Loup garou blanc"
-    short desc: ""
-    desc: ""
+    short desc: "Tu dois trahir les loup garous"
+    desc: "Tu possèdes 15 coeurs, ton but est de gagner seul, tu connais la liste complète des loup garous et les autres loups doivent donc se méfier de toi."
 
   MontreurOurs:
     name: "Montreur d'ours"
-    short desc: ""
-    desc: ""
+    short desc: "Grrrrrrrr"
+    desc: "Tu gagnes avec le village, à chaque début d’épisode, l’ours va grogner. Si l’ours grogne, cela veut dire que l’une des personnes qui se trouvent à moins de 20 blocs de lui est un loup garou. L'ours grognera antant de fois que le nombre de loup garous dans son rayon d'action."
 
   Assassin:
     name: "Assassin"
-    short desc: ""
-    desc: ""
+    short desc: "Tu gagnes seul"
+    desc: "Ton but est de gagner seul, tu as les livres power 3, sharpness 3, protection 3 et aussi un effet de force le jour."
 
   LoupPerfide:
     name: "Loup perfide"
-    short desc: ""
-    desc: ""
+    short desc: "Tu es invisible la nuit"
+    desc: "Tu gagnes avec les loup-garous, tu possède un effet de weakness et invisibility la nuit, tu peux voir les particules de la petite fille si celle-ci est invisible"
 
   Sorciere:
     name: "Sorcière"
-    short desc: ""
-    desc: ""
+    short desc: "Tu peux ressucsiter quelqu'un"
+    desc: "Tu gagnes avec le village, tu peux voir les messages de morts avant tout le monde et tu as une possibilité d’en ressusciter un joueur par partie, tu possèdes aussi 3 splash potion de damage, 3 splash potions de heal et une splash potion regeneration."
 
   Mineur:
     name: "Mineur"
-    short desc: ""
-    desc: ""
+    short desc: "Tu mines bien !!"
+    desc: "Tu gagnes avec le village, tu te souviens d'avoir laissé tomber une pioche en diamant tout près d'ici .... Tiens, la voilà !"
 
   LoupFeutre:
     name: "Loup Feutré"
-    short desc: ""
-    desc: ""
+    short desc: "Tu es discret"
+    desc: "A chaque épisode, tu as un role d'affichage. Si la voyante, le montreur d'ours, ou un role permettant de voir ceux des autres, il ne verra que ton role d'affichage."
 
   Renard:
     name: "Renard"
-    short desc: ""
-    desc: ""
+    short desc: "Sniff sniff .."
+    desc: "A chaque episode, tu peux flairer un joueur et savoir si c'est un loup garou ou pas. Si c'est un role solo, tu le considereras comme non loup garou."
 
   Guard:
     name: "Garde"
-    short desc: ""
-    desc: ""
+    short desc: "Vieux gardien et son épé ..."
+    desc: "Tu gagnes avec le village, tu es un vieux garde qui garde toujours ton épée, un peu rouillée. Quand tu meurs, tu empoisonnes ton tueur avec cette épée (il obtient un effet de poison)"
 
   LGInfect:
     name: "Loup garou infect"
-    short desc: ""
-    desc: ""
+    short desc: "Tu peux infecter une personne"
+    desc: "Tu gagnes avec les loups garous. Quand une personne est tuée par un loup garou, tu peux le ressusciter et il deviendra loup garou tout en gardant les abilités de son role"
 
   Cupidon:
     name: "Cupidon"
-    short desc: ""
-    desc: ""
+    short desc: "Tu peux definir un couple"
+    desc: "Tu gagnes seul ou avec le couple. Tu peux definir un couple qui devras gagner ensemble avec/sans toi. Si l'un des deux meurt, l'autre se suicide par amour."
 
 Messages:
 
-  commandsJoinMessage: "$prefix$ &6Joined current game"
+  gameCannotStartPlayers: "&4&lLa partie ne peut pas commencer, pas assez de joueurs ! (%playerSize%/%roleSize%)"
+
+  gameStartTp: "$prefix$ &7Téléportation de &f%playerName%"
+  gameStartDisconnectMessage: "$prefix$ &4&lMerci de ne pas vous déconnecter avant le debut de la partie"
+  gameStartAuthorMessage: "&8Plugin développé par : &e&l%author%&8."
+  gameStartAuthorTitle: "&6&lLoup Garou UHC"
+  gameStartAuthorSubtitle: "&8&lBy %author%"
+
+
+
+
+  commandsJoinMessage: "$prefix$ &6Vous avez rejoint la partie"
 
   joinRoleMessage: "$prefix$ $prefixP$ &9Tu es %roleName%.\n&9%roleDesc%"
   joinRoleTitleTitle: "&6Tu es %roleName%"
@@ -93,9 +104,20 @@ Messages:
 
   gameTimerNewEpisode: "&b--------- Fin episode %gameTimerDays% ---------"
   gameTimerDega: "$prefix$ &3Les dégats (sauf PVP) sont activés !"
-  gameTimerPvpSoon: "$prefix$ &3PVP activé dans 10 minutes !"
-  gameTimerPvp: "$prefix$ &3PVP activé !"
-  gameTimerVoteDeactivated: "$prefix$ &4Il reste moins de %paramVoteMinPlayer% joueurs en vie, le vote est désomais désactivé."
+  gameTimerPvpSoon: "$prefix$ &3PVP activé dans %pvpMinutes-% minutes !"
+  gameTimerPvpOn: "$prefix$ &3PVP activé !"
+  gameTimerPvpOff: "$prefix$ &3PVP desactivé !"
+  gameTimerVoteDeactivated: "$prefix$ &4Il reste moins de %paramVoteMinPlayer% joueurs en vie, le vote est désormais désactivé."
+  gameTimerVoteResultsHeader: "$prefix$ &6&lRESULTATS DU VOTE :\n"
+  gameTimerVoteResultsPlayer: "$prefix$ &bLe joueur &l%votedName%&b est le joueur ayant le plus de votes : &9&l%numberVotes%&b. Il perd la moitié de sa vie."
+  gameTimerVoteResultsNull: "$prefix$ &bPersonne n'est victime du vote."
+
+
+  gameTimerVoteMessageMinutes: "$prefix$ &6Vous avez %voteMinutes% min pour voter: /lg vote <pseudo>.\n Le joueur recueillant la majorité des votes perdera la moitié de sa vie."
+  gameTimerVoteMessageMinutesSeconds: "$prefix$ &6Vous avez %voteMinutes% min %voteSeconds% sec pour voter: /lg vote <pseudo>.\n Le joueur recueillant la majorité des votes perdera la moitié de sa vie."
+  gameTimerVoteMessageSeconds: "$prefix$ &6Vous avez %voteSeconds% sec pour voter: /lg vote <pseudo>.\n Le joueur recueillant la majorité des votes perdera la moitié de sa vie."
+
+
 
 
   gameTimerActionBar: "&dDistance du centre: &bEntre %1% et %2% blocks du centre"

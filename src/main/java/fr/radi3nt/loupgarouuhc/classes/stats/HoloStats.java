@@ -1,6 +1,6 @@
 package fr.radi3nt.loupgarouuhc.classes.stats;
 
-import fr.radi3nt.loupgarouuhc.classes.config.Config;
+import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -31,12 +31,12 @@ public class HoloStats {
             Location armorLoc = new Location(location.getWorld(), location.getX(), location.getY() - shift, location.getZ());
             String name = " ";
             int value = 0;
-            fr.radi3nt.loupgarouuhc.classes.config.Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "players.yml");
+            Config config = Config.createConfig(plugin.getDataFolder() + "", "players.yml");
             try {
                 for (String playerNames : config.getConfiguration().getStringList("Players")) {
-                    fr.radi3nt.loupgarouuhc.classes.config.Config config1 = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "/players", playerNames + ".yml");
-                    if (config1.getConfiguration().getInt(playerNames + ".points") >= value && !notRanked.contains(playerNames)) {
-                        value = config1.getConfiguration().getInt(playerNames + ".points");
+                    Config config1 = Config.createConfig(plugin.getDataFolder() + "/players", playerNames + ".yml");
+                    if (config1.getConfiguration().getInt("Stats" + ".points") >= value && !notRanked.contains(playerNames)) {
+                        value = config1.getConfiguration().getInt("Stats" + ".points");
                         name = playerNames;
                     }
                 }
@@ -46,12 +46,11 @@ public class HoloStats {
             if (!name.equals(" ")) {
                 notRanked.add(name);
                 Config config1 = Config.createConfig(plugin.getDataFolder() + "/players", name + ".yml");
-                int games = config1.getConfiguration().getInt(name + ".games");
-                int wins = config1.getConfiguration().getInt(name + ".wins");
-                int kills = config1.getConfiguration().getInt(name + ".kills");
-                int points = config1.getConfiguration().getInt(name + ".points");
+                int games = config1.getConfiguration().getInt("Stats" + ".games");
+                int wins = config1.getConfiguration().getInt("Stats" + ".wins");
+                int kills = config1.getConfiguration().getInt("Stats" + ".kills");
+                int points = config1.getConfiguration().getInt("Stats" + ".points");
 
-                //points.toString().for
                 DecimalFormatSymbols symbols = new DecimalFormatSymbols();
                 symbols.setGroupingSeparator(' ');
                 DecimalFormat df = new DecimalFormat("###,###", symbols);
@@ -68,7 +67,7 @@ public class HoloStats {
     }
 
     public static void createHoloStatsScoreboards() {
-        fr.radi3nt.loupgarouuhc.classes.config.Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "stats.yml");
+        Config config = Config.createConfig(plugin.getDataFolder() + "", "stats.yml");
         ArrayList<String> loc = (ArrayList<String>) config.getConfiguration().getStringList("Holograms");
         for (String locations : loc) {
             String [] coords = locations.split(" ");
@@ -81,7 +80,7 @@ public class HoloStats {
         new HoloStats(loc, maxPlayers);
         String location = loc.getWorld().getName() + " " + loc.getX() + " " + loc.getY() + " " + loc.getZ();
         ArrayList<String> locList;
-        fr.radi3nt.loupgarouuhc.classes.config.Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "stats.yml");
+        Config config = Config.createConfig(plugin.getDataFolder() + "", "stats.yml");
         try {
              locList= (ArrayList<String>) config.getConfiguration().getStringList("Holograms");
         } catch (Exception e) {
@@ -97,7 +96,7 @@ public class HoloStats {
     }
 
     public static ArrayList<HoloStats> getHolos() {
-        fr.radi3nt.loupgarouuhc.classes.config.Config config = fr.radi3nt.loupgarouuhc.classes.config.Config.createConfig(plugin.getDataFolder() + "", "stats.yml");
+        Config config = Config.createConfig(plugin.getDataFolder() + "", "stats.yml");
         ArrayList<HoloStats> arrayList = new ArrayList<>();
         ArrayList<String> loc = (ArrayList<String>) config.getConfiguration().getStringList("Holograms");
         for (String locations : loc) {

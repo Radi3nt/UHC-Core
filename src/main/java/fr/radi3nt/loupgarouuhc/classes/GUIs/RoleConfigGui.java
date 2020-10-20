@@ -2,8 +2,8 @@ package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.classes.roles.Role;
-import fr.radi3nt.loupgarouuhc.classes.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

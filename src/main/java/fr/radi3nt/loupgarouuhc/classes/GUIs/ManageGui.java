@@ -29,7 +29,7 @@ public class ManageGui {
     public static ItemStack createPlayerItem() {
         ItemStack itemStack = new ItemStack(Material.BARRIER);
         try {
-            itemStack.setType(Material.getMaterial("PLAYER_HEAD"));
+            itemStack = new ItemStack(Material.getMaterial("PLAYER_HEAD"));
         } catch (NoClassDefFoundError error) {
             try {
                 itemStack = new ItemStack(Material.getMaterial("SKULL_ITEM"), 1, (short) 0, (byte) 3);
