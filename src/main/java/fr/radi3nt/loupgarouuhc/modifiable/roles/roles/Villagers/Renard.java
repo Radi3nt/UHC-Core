@@ -12,7 +12,7 @@ import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefixPrivé;
 
 public class Renard extends Role {
 
-    private final int time = 0;
+    private int time = 0;
     private boolean canSee;
     private int radius = 20;
 
@@ -27,8 +27,7 @@ public class Renard extends Role {
 
     @Override
     public void OnNight(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
-        if (time == 3) {
+        if (time < 3) {
             lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.GOLD + " Tu peut voir si un joueur est loup garou ou pas en faisant /lg role see <player>, tu pourras flairer un joueur encore " + ChatColor.YELLOW + (3 - time) + ChatColor.GOLD + " fois");
             this.canSee = true;
         }
@@ -36,6 +35,7 @@ public class Renard extends Role {
 
     @Override
     public void OnDay(LGGame game, LGPlayer lgp) {
+        lgp.getPlayer().setMaxHealth(20F);
         canSee = false;
     }
 
@@ -73,5 +73,13 @@ public class Renard extends Role {
 
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
     }
 }

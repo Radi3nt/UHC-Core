@@ -20,14 +20,14 @@ public class Command {
     }
 
     public boolean executeCommand(String name, String permission, int argsNumber, Command.Checks... checks) {
-        if (sender.hasPermission(permission)) {
-            String commandS = command.getName();
-            for (int i = 0; i < args.length; i++) {
-                String arg = args[i];
-                commandS += "." + arg;
-            }
-            if (commandS.equalsIgnoreCase(name)) {
-                if (args.length - name.split("\\.").length >= argsNumber) {
+        String commandS = command.getName();
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            commandS += "." + arg;
+        }
+        if (commandS.equalsIgnoreCase(name)) {
+            if (sender.hasPermission(permission)) {
+                if (args.length + 1 - name.split("\\.").length >= argsNumber) {
                     boolean valid = true;
                     for (Checks check : checks) {
                         if (!valid)
@@ -46,11 +46,11 @@ public class Command {
                     //todo invalid args
                 }
             } else {
-                //todo non-existant command
+                new NoPermission().sendMessage((Player) sender, "", true);
             }
         } else {
-            new NoPermission().sendMessage((Player) sender, "", true);
-        }
+                //todo non-existant command
+            }
         return false;
     }
 

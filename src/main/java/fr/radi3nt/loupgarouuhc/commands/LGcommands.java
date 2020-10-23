@@ -19,6 +19,7 @@ import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Renard;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Sorciere;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Voyante;
+import fr.radi3nt.loupgarouuhc.utilis.Maths;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -460,20 +461,20 @@ public class LGcommands implements CommandExecutor {
                                             lgp.sendMessage(prefix + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
                                         }
                                     } else if (lgp.isInGame() && lgp.getGameData().getRole().getRoleSort() == RoleSort.RENARD && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
-                                        Renard voyante = (Renard) lgp.getGameData().getRole();
-                                        if (voyante.canSee()) {
+                                        Renard renard = (Renard) lgp.getGameData().getRole();
+                                        if (renard.canSee()) {
                                             if (args.length > 2) {
                                                 Player target = Bukkit.getServer().getPlayerExact(args[2]);
                                                 if (target != null) {
                                                     LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                                    if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && !tlgp.getGameData().isDead() && generateSphere(lgp.getPlayer().getLocation(), voyante.getRadius()).contains(tlgp.getPlayer().getLocation())) {
+                                                    if (tlgp.isInGame() && tlgp.getGameData().hasRole() && !tlgp.getGameData().isDead() && Maths.getDistanceBetween2Points(lgp.getPlayer().getLocation(), tlgp.getPlayer().getLocation()) <= renard.getRadius()) {
                                                         if (tlgp.getGameData().getRole().getRoleSort() == RoleSort.LG_FEUTRE) {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (((LGFeutre) tlgp.getGameData().getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup Garou"));
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (((LGFeutre) tlgp.getGameData().getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "loup garou" : ChatColor.DARK_BLUE + "non loup Garou"));
                                                         } else {
-                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (tlgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "Loup garou" : ChatColor.YELLOW + "Non loup garou"));
-
+                                                            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " " + tlgp.getName() + " est " + (tlgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "loup garou" : ChatColor.DARK_BLUE + "non loup garou"));
                                                         }
-                                                        voyante.setCanSee(false);
+                                                        renard.setTime(renard.getTime() + 1);
+                                                        renard.setCanSee(false);
                                                     } else {
                                                         lgp.sendMessage(prefix + " " + ChatColor.RED + "Ce joueur est invalide");
                                                     }

@@ -14,12 +14,11 @@ import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.*;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.PvP;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -83,6 +82,7 @@ public class LGGame {
         //scenarios.add(new Timber(this,true, 3L));
         //scenarios.add(new NoFall(this));
         //scenarios.add(new CutClean(this));
+        /*
         scenarios.add(new VanillaPlus(this, 10, 20));
         scenarios.add(new FinalHeal(this, 20 * 60 * 20));
         HashMap<Material, Integer> xp = new HashMap<>();
@@ -102,6 +102,8 @@ public class LGGame {
         scenarios.add(new OreLimiter(this, ores));
         //scenarios.add(new FireLess(this, 50));
         //scenarios.add(new NoClean(this, 5*20));
+
+         */
     }
 
     public void join(LGPlayer player) {
@@ -425,7 +427,7 @@ public class LGGame {
             scenario.unregister();
         }
 
-        ArrayList<LGPlayer> winners = new ArrayList<LGPlayer>();
+        ArrayList<LGPlayer> winners = new ArrayList<>();
         gameTimer.cancel();
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

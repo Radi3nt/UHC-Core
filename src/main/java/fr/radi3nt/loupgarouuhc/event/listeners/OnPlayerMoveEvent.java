@@ -20,6 +20,13 @@ public class OnPlayerMoveEvent implements Listener {
             Location location = holoStats.getLocation();
             int viewDistance = 64;
             if (getDistanceBetween2Points(location, e.getTo()) != null) {
+                if (getDistanceBetween2Points(location, e.getTo()) == null) {
+                    for (Hologram hologram : holoStats.getHologramsStand()) {
+                        if (!hologram.getViewers().contains(e.getPlayer())) {
+                            hologram.display(e.getPlayer());
+                        }
+                    }
+                }
                 if (getDistanceBetween2Points(location, e.getTo()) < (float) viewDistance) {
                     for (Hologram hologram : holoStats.getHologramsStand()) {
                         if (!hologram.getViewers().contains(e.getPlayer())) {

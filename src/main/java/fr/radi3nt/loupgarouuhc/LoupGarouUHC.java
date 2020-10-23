@@ -87,11 +87,13 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
 
-            new Logger(Config.createConfig(getDataFolder() + "/logs", "latest.yml"));
-            plugin = LoupGarouUHC.getPlugin(LoupGarouUHC.class);
+        new File(getDataFolder() + "/logs", "latest.yml").delete();
 
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Starting up !");
-            console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "LG UHC Plugin by " + ChatColor.AQUA + ChatColor.BOLD + "Radi3nt");
+        new Logger(Config.createConfig(getDataFolder() + "/logs", "latest.yml"));
+        plugin = LoupGarouUHC.getPlugin(LoupGarouUHC.class);
+
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Starting up !");
+        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Loup Garou UHC plugin (version " + plugin.getDescription().getVersion() + ") by " + ChatColor.AQUA + ChatColor.BOLD + "Radi3nt");
         console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "If you have any issues, please report it");
 
         parameters = new Parameters();
@@ -201,10 +203,14 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new OnKillEvent(), this);
         getServer().getPluginManager().registerEvents(new OnStartGame(), this);
         getServer().getPluginManager().registerEvents(new OnEndGame(), this);
+
+
+        getServer().getPluginManager().registerEvents(new SmallFeaturesListener(), this);
     }
 
     @Override
     public void onDisable() {
+        Logger.getLogger().archive();
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
             if (lgp.isInGame())

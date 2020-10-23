@@ -14,6 +14,7 @@ import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
+import fr.radi3nt.loupgarouuhc.utilis.Maths;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_12_R1.ChatComponentText;
@@ -123,7 +124,7 @@ public class GameTimer extends BukkitRunnable {
                     }
                 }
 
-                int distance = (int) getDistanceBetween2Points(lgp.getPlayer().getLocation(), game.getGameSpawn());
+                int distance = (int) Maths.getDistanceBetween2Points(lgp.getPlayer().getLocation(), game.getGameSpawn());
 
                 String disM = lgp.getLanguage().getMessage("gameTimerActionBar", lgp);
                 String disS = "NaN";
@@ -399,41 +400,6 @@ public class GameTimer extends BukkitRunnable {
     private void setScore(String text, int i, Objective objective) {
         Score score = objective.getScore(text);
         score.setScore(i);
-    }
-
-    /**
-     * This method use the pythagoras theorem
-     *
-     * @param point1 first point
-     * @param point2 2nd point
-     * @return distance between two point
-     */
-    private double getDistanceBetween2Points(Location point1, Location point2) {
-        double distance;
-
-        double x1 = point1.getX();
-        double z1 = point1.getZ();
-
-        double x2 = point2.getX();
-        double z2 = point2.getZ();
-
-        x1 = x1 - x2;
-        z1 = z1 - z2;
-
-        if (x1 < 0) {
-            x1 = -x1;
-        }
-        if (z1 < 0) {
-            z1 = -z1;
-        }
-
-        double x = (int) x1 * x1;
-        double z = (int) z1 * z1;
-
-        distance = x + z;
-        distance = Math.sqrt(distance);
-
-        return distance;
     }
 
     private Scoreboard createScoreBoard(LGPlayer lgp) {
