@@ -5,18 +5,21 @@ import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.event.events.OnStartGame;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StarterItems extends Scenario {
 
-    private final List<ItemStack> items;
+    protected List<ItemStack> items = new ArrayList<>();
 
-    public StarterItems(LGGame game, List<ItemStack> items) {
+    public StarterItems(LGGame game) {
         super(game);
-        this.items = items;
+        items.add(new ItemStack(Material.COOKED_BEEF, 32));
     }
 
     public static String getName() {
@@ -25,11 +28,6 @@ public class StarterItems extends Scenario {
 
     public static ItemStack getItem() {
         return new ItemStack(Material.COOKED_BEEF);
-    }
-
-    @Override
-    public void register() {
-        super.register();
     }
 
     @ScenarioEvent
@@ -45,4 +43,13 @@ public class StarterItems extends Scenario {
         }
     }
 
+    @ScenarioGetter(name = "Item list")
+    public List<ItemStack> getItems() {
+        return items;
+    }
+
+    @ScenarioSetter(name = "Item list")
+    public void setItems(List<ItemStack> items) {
+        this.items = items;
+    }
 }

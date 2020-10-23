@@ -4,6 +4,8 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -12,13 +14,11 @@ import java.security.SecureRandom;
 
 public class VanillaPlus extends Scenario {
 
-    private final int appleDropChance;
-    private final int flintDropChance;
+    protected float appleDropChance = 0.1f;
+    protected float flintDropChance = 10;
 
-    public VanillaPlus(LGGame game, int appleDropChance, int flintDropChance) {
+    public VanillaPlus(LGGame game) {
         super(game);
-        this.appleDropChance = appleDropChance;
-        this.flintDropChance = flintDropChance;
     }
 
     public static String getName() {
@@ -27,11 +27,6 @@ public class VanillaPlus extends Scenario {
 
     public static ItemStack getItem() {
         return new ItemStack(Material.APPLE);
-    }
-
-    @Override
-    public void register() {
-        super.register();
     }
 
     @ScenarioEvent
@@ -65,4 +60,24 @@ public class VanillaPlus extends Scenario {
         }
     }
 
+    @ScenarioGetter(name = "Apple drop")
+    public float getAppleDropChance() {
+        return appleDropChance;
+    }
+
+    @ScenarioSetter(name = "Apple drop")
+    public void setAppleDropChance(float appleDropChance) {
+        this.appleDropChance = appleDropChance;
+    }
+
+
+    @ScenarioGetter(name = "Flint drop")
+    public float getFlintDropChance() {
+        return flintDropChance;
+    }
+
+    @ScenarioSetter(name = "Flint drop")
+    public void setFlintDropChance(float flintDropChance) {
+        this.flintDropChance = flintDropChance;
+    }
 }

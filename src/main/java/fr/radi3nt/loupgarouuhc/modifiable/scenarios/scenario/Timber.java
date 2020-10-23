@@ -5,6 +5,8 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -19,13 +21,12 @@ public class Timber extends Scenario {
             Material.WOOD_AXE};
     static Material[] logs = {Material.LOG, Material.LOG_2};
     static Material[] leaves = {Material.LEAVES, Material.LEAVES_2};
-    private final boolean axeOnly;
-    private final long time;
 
-    public Timber(LGGame game, boolean axeOnly, long time) {
+    private boolean axeOnly = false;
+    private int time = 3;
+
+    public Timber(LGGame game) {
         super(game);
-        this.axeOnly = axeOnly;
-        this.time = time;
     }
 
     public static String getName() {
@@ -34,11 +35,6 @@ public class Timber extends Scenario {
 
     public static ItemStack getItem() {
         return new ItemStack(Material.LOG);
-    }
-
-    @Override
-    public void register() {
-        super.register();
     }
 
     @ScenarioEvent
@@ -99,7 +95,7 @@ public class Timber extends Scenario {
                 if (axe != null)
                     fell(w, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), time, axe);
                 else
-                    fell(w, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), time); //todo time in param
+                    fell(w, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), time);
 
             }
         }
@@ -107,9 +103,13 @@ public class Timber extends Scenario {
 
     private void fell(World w, int x, int y, int z, long time) {
         Bukkit.getScheduler().runTaskLater(LoupGarouUHC.getPlugin(), () -> {
-            if (!w.getBlockAt(x, y, z).breakNaturally()) {
+            boolean air = false;
+            if (w.getBlockAt(x, y, z).getType() == Material.AIR) {
+                air = true;
+            }
+            if (!w.getBlockAt(x, y, z).breakNaturally() && !air) {
                 return;
-            } else {
+            } else if (!air) {
                 w.playSound(new Location(w, x, y, z), Sound.ENTITY_ARROW_HIT_PLAYER, SoundCategory.BLOCKS, 1, 1.5f);
             }
             // Checks blocks on current y plane
@@ -174,4 +174,23 @@ public class Timber extends Scenario {
         }, time);
     }
 
+    @ScenarioGetter(name = "Axe only")
+    public boolean isAxeOnly() {
+        return axeOnly;
+    }
+
+    @ScenarioSetter(name = "Axe only")
+    public void setAxeOnly(boolean axeOnly) {
+        this.axeOnly = axeOnly;
+    }
+
+    @ScenarioGetter(name = "Time")
+    public int getTime() {
+        return time;
+    }
+
+    @ScenarioSetter(name = "Time")
+    public void setTime(int time) {
+        this.time = time;
+    }
 }

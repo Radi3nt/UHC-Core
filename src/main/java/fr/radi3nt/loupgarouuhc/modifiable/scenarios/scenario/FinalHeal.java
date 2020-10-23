@@ -4,6 +4,8 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioCommand;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,11 +19,10 @@ import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
 
 public class FinalHeal extends Scenario {
 
-    private final int time;
+    private int time = 20;
 
-    public FinalHeal(LGGame game, int time) {
+    public FinalHeal(LGGame game) {
         super(game);
-        this.time = time;
     }
 
     public static String getName() {
@@ -33,20 +34,10 @@ public class FinalHeal extends Scenario {
     }
 
     @Override
-    public void register() {
-        super.register();
-    }
-
-    @Override
-    public void unregister() {
-        super.unregister();
-    }
-
-    @Override
     public void tick(GameTimer gameTimer, int tick) {
         if (gameTimer.getGame() == game) {
             if (isActive()) {
-                if (tick == time) {
+                if (tick == time * 20 * 60) {
                     doFinalHeal();
                 }
             }
@@ -55,7 +46,7 @@ public class FinalHeal extends Scenario {
 
     private void doFinalHeal() {
         for (LGPlayer lgPlayer : game.getGamePlayers()) {
-            if (lgPlayer != null) {
+            if (lgPlayer.getPlayer() != null) {
                 lgPlayer.getPlayer().setHealth(lgPlayer.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             }
         }
@@ -70,5 +61,15 @@ public class FinalHeal extends Scenario {
                 doFinalHeal();
             }
         }
+    }
+
+    @ScenarioGetter(name = "Time")
+    public int getTime() {
+        return time;
+    }
+
+    @ScenarioSetter(name = "Time")
+    public void setTime(int time) {
+        this.time = time;
     }
 }

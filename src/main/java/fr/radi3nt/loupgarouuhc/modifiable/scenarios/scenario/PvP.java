@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PvP extends Scenario {
 
-    private final List<Integer> timeAlert;
+    protected final List<Integer> timeAlert;
     private int time;
     private boolean timerActivated = true;
     private boolean pvp = false;

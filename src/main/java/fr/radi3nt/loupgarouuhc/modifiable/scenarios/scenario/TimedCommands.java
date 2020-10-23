@@ -10,19 +10,17 @@ import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimedCommands extends Scenario {
 
-    private final List<String> startCommands;
-    private final List<String> deadCommands;
-    private final List<String> endCommands;
+    protected List<String> startCommands = new ArrayList<>();
+    protected List<String> deadCommands = new ArrayList<>();
+    protected List<String> endCommands = new ArrayList<>();
 
-    public TimedCommands(LGGame game, List<String> startCommands, List<String> deadCommands, List<String> endCommands) {
+    public TimedCommands(LGGame game) {
         super(game);
-        this.startCommands = startCommands;
-        this.endCommands = endCommands;
-        this.deadCommands = deadCommands;
     }
 
     public static String getName() {
@@ -73,4 +71,28 @@ public class TimedCommands extends Scenario {
         }
     }
 
+    //todo annotations
+    public List<String> getStartCommands() {
+        return startCommands;
+    }
+
+    public void setStartCommands(List<String> startCommands) {
+        this.startCommands = startCommands;
+    }
+
+    public List<String> getDeadCommands() {
+        return deadCommands;
+    }
+
+    public void setDeadCommands(List<String> deadCommands) {
+        this.deadCommands = deadCommands;
+    }
+
+    public List<String> getEndCommands() {
+        return endCommands;
+    }
+
+    public void setEndCommands(List<String> endCommands) {
+        this.endCommands = endCommands;
+    }
 }

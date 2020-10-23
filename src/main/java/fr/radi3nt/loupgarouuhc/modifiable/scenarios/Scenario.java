@@ -4,6 +4,8 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.*;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioCommand;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -23,7 +25,9 @@ public abstract class Scenario {
     private static final ArrayList<Scenario> scenarios = new ArrayList<>();
     private static final Set<Class<? extends Scenario>> registred = new HashSet<>();
 
-    private static final String defaultName = "NaN";
+
+    private static final String DEFAULT_NAME = "NaN";
+    private static final int MAX_RETURN_METHODS = 64;
     protected boolean active = false;
     protected LGGame game;
 
@@ -32,7 +36,7 @@ public abstract class Scenario {
     }
 
     public static String getName() {
-        return defaultName;
+        return DEFAULT_NAME;
     }
 
     public static ItemStack getItem() {
@@ -64,13 +68,14 @@ public abstract class Scenario {
 
     public static void callEvent(Event e) {
         for (Scenario scenario : scenarios) {
-            Method method = null;
+            ArrayList<Method> method = new ArrayList<>();
             Method[] methods = scenario.getClass().getMethods();
             for (Method method1 : methods) {
                 boolean hasAnnontation = false;
-                for (Annotation declaredAnnotation : method1.getDeclaredAnnotations()) {
+                for (Annotation declaredAnnotation : method1.getAnnotations()) {
                     if (declaredAnnotation.annotationType().equals(ScenarioEvent.class)) {
                         hasAnnontation = true;
+                        break;
                     }
                 }
                 if (!hasAnnontation) {
@@ -79,18 +84,21 @@ public abstract class Scenario {
                 if (method1.getParameterTypes().length == 1) {
                     for (Class<?> parameterType : method1.getParameterTypes()) {
                         if (parameterType.equals(e.getClass())) {
-                            method = method1;
-                            break;
+                            method.add(method1);
                         }
                     }
                 }
             }
-            if (method != null) {
-                try {
-                    method.invoke(scenario, e);
-                } catch (IllegalAccessException | InvocationTargetException illegalAccessException) {
-                    illegalAccessException.printStackTrace();
-                }
+            if (!method.isEmpty()) {
+                method.forEach(method1 -> {
+                    try {
+                        method1.invoke(scenario, e);
+                    } catch (IllegalAccessException illegalAccessException) {
+                        illegalAccessException.printStackTrace();
+                    } catch (InvocationTargetException invocationTargetException) {
+                        invocationTargetException.printStackTrace();
+                    }
+                });
             }
         }
     }
@@ -115,6 +123,12 @@ public abstract class Scenario {
         registred.add(FinalHeal.class);
         registred.add(CutClean.class);
         registred.add(AutoBreak.class);
+        registred.add(DeadlyWater.class);
+        registred.add(FastFurnace.class);
+        registred.add(HastyBoys.class);
+        registred.add(LimitedEnchants.class);
+        registred.add(NoPoison.class);
+        registred.add(RodLess.class);
     }
 
     public static ArrayList<Scenario> getScenarios() {
@@ -126,19 +140,108 @@ public abstract class Scenario {
     }
 
     public void register() {
-        scenarios.add(this);
+        if (!scenarios.contains(this))
+            scenarios.add(this);
     }
 
     public void unregister() {
-        scenarios.remove(this);
+        if (isActive())
+            scenarios.remove(this);
     }
 
     public void tick(GameTimer gameTimer, int tick) {
     }
 
     public void activate() {
-        active = true;
-        register();
+        if (!isActive()) {
+            active = true;
+            register();
+        }
+    }
+
+    public Method[] getScenarioSetMethods() {
+        ArrayList<Method> methodFinal = new ArrayList<>();
+        Method[] methods = this.getClass().getMethods();
+        for (Method method1 : methods) {
+            for (Annotation declaredAnnotation : method1.getDeclaredAnnotations()) {
+                if (declaredAnnotation.annotationType().equals(ScenarioSetter.class)) {
+                    methodFinal.add(method1);
+                }
+            }
+        }
+        return methodFinal.toArray(new Method[methodFinal.size()]);
+    }
+
+    public ScenarioSetter[] getScenarioSetAnnotations() {
+        ArrayList<ScenarioSetter> methodFinal = new ArrayList<>();
+        Method[] methods = this.getClass().getMethods();
+        for (Method method1 : methods) {
+            for (Annotation declaredAnnotation : method1.getDeclaredAnnotations()) {
+                if (declaredAnnotation.annotationType().equals(ScenarioSetter.class)) {
+                    methodFinal.add((ScenarioSetter) declaredAnnotation);
+                }
+            }
+        }
+        return methodFinal.toArray(new ScenarioSetter[methodFinal.size()]);
+    }
+
+    public ScenarioGetter[] getScenarioGetAnnotations() {
+        ArrayList<ScenarioGetter> methodFinal = new ArrayList<>();
+        Method[] methods = this.getClass().getMethods();
+        for (Method method1 : methods) {
+            for (Annotation declaredAnnotation : method1.getDeclaredAnnotations()) {
+                if (declaredAnnotation.annotationType().equals(ScenarioGetter.class)) {
+                    methodFinal.add((ScenarioGetter) declaredAnnotation);
+                }
+            }
+        }
+        return methodFinal.toArray(new ScenarioGetter[methodFinal.size()]);
+    }
+
+    public Method[] getScenarioGetMethods() {
+        ArrayList<Method> methodFinal = new ArrayList<>();
+        Method[] methods = this.getClass().getMethods();
+        for (Method method1 : methods) {
+            boolean hasAnnontation = false;
+            for (Annotation declaredAnnotation : method1.getDeclaredAnnotations()) {
+                if (declaredAnnotation.annotationType().equals(ScenarioGetter.class)) {
+                    hasAnnontation = true;
+                }
+            }
+            if (!hasAnnontation) {
+                continue;
+            }
+            methodFinal.add(method1);
+        }
+        return methodFinal.toArray(new Method[methodFinal.size()]);
+    }
+
+    public Method getScenarioGetMethod(String name) throws NoSuchMethodException {
+        for (Method scenarioGetMethod : getScenarioGetMethods()) {
+            for (Annotation declaredAnnotation : scenarioGetMethod.getDeclaredAnnotations()) {
+                if (declaredAnnotation.annotationType().equals(ScenarioGetter.class)) {
+                    ScenarioGetter scenarioGetter = (ScenarioGetter) declaredAnnotation;
+                    if (scenarioGetter.name().equals(name)) {
+                        return scenarioGetMethod;
+                    }
+                }
+            }
+        }
+        throw new NoSuchMethodException("Cannot get method with name: " + name);
+    }
+
+    public Method getScenarioSetMethod(String name) throws NoSuchMethodException {
+        for (Method scenarioSetMethod : getScenarioSetMethods()) {
+            for (Annotation declaredAnnotation : scenarioSetMethod.getDeclaredAnnotations()) {
+                if (declaredAnnotation.annotationType().equals(ScenarioSetter.class)) {
+                    ScenarioSetter scenarioGetter = (ScenarioSetter) declaredAnnotation;
+                    if (scenarioGetter.name().equals(name)) {
+                        return scenarioSetMethod;
+                    }
+                }
+            }
+        }
+        throw new NoSuchMethodException("Cannot get method with name: " + name);
     }
 
     public void deactivate() {

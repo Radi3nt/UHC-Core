@@ -5,6 +5,8 @@ import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.event.events.OnKilled;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,9 +23,8 @@ public class NoClean extends Scenario {
     private final HashMap<LGPlayer, Integer> players = new HashMap<>();
     private Integer time;
 
-    public NoClean(LGGame game, Integer time) {
+    public NoClean(LGGame game) {
         super(game);
-        this.time = time;
     }
 
     public static String getName() {
@@ -32,11 +33,6 @@ public class NoClean extends Scenario {
 
     public static ItemStack getItem() {
         return new ItemStack(Material.BED);
-    }
-
-    @Override
-    public void register() {
-        super.register();
     }
 
     @Override
@@ -96,10 +92,12 @@ public class NoClean extends Scenario {
         }
     }
 
+    @ScenarioGetter(name = "Time")
     public Integer getTime() {
         return time;
     }
 
+    @ScenarioSetter(name = "Time")
     public void setTime(Integer time) {
         this.time = time;
     }

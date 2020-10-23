@@ -5,6 +5,8 @@ import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioCommand;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioEvent;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,12 +21,12 @@ import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
 
 public class OreLimiter extends Scenario {
 
-    private final Map<Material, Integer> oreLimit;
+    protected Map<Material, Integer> oreLimit = new HashMap<>();
     private final Map<LGPlayer, Map<Material, Integer>> playersOre = new HashMap<>();
 
-    public OreLimiter(LGGame game, Map<Material, Integer> oreLimit) {
+    public OreLimiter(LGGame game) {
         super(game);
-        this.oreLimit = oreLimit;
+        oreLimit.put(Material.DIAMOND_ORE, 17);
     }
 
     public static String getName() {
@@ -77,10 +79,19 @@ public class OreLimiter extends Scenario {
                     map.put(material, integer);
                     playersOre.put(tlgp, map);
                 } else {
-                    System.out.println("naaa");
+                    //todo error message
                 }
             }
         }
     }
 
+    @ScenarioGetter(name = "Ore Limit")
+    public Map<Material, Integer> getOreLimit() {
+        return oreLimit;
+    }
+
+    @ScenarioSetter(name = "Ore Limit")
+    public void setOreLimit(Map<Material, Integer> oreLimit) {
+        this.oreLimit = oreLimit;
+    }
 }

@@ -1,5 +1,6 @@
 package fr.radi3nt.loupgarouuhc.modifiable.scenarios;
 
+import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,42 +19,22 @@ import java.util.ArrayList;
 
 public class ScenarioCommands implements CommandExecutor {
 
-    static int i = 0;
 
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        Scenario.callCommand(commandSender, command, s, strings);
-        if (strings[0].equalsIgnoreCase("scenario")) {
-            if (commandSender instanceof Player) {
-                if (LGPlayer.thePlayer((Player) commandSender).isInGame()) {
-                    ((Player) commandSender).openInventory(createInventory((InventoryHolder) commandSender)[0]);
-                }
-            }
-        }
-        if (strings[0].equalsIgnoreCase("+")) {
-            i++;
-        }
-        if (strings[0].equalsIgnoreCase("-")) {
-            i--;
-        }
-        System.out.println(i);
-        return true;
-    }
-
-    public Inventory[] createInventory(InventoryHolder owner) {
+    public static Inventory[] createInventory(InventoryHolder owner, ArrayList<Scenario> activatedScenarios) {
         int inventoryListSize = 4096;
         Inventory[] inventories = new Inventory[inventoryListSize];
         String name = ChatColor.GOLD + "Scenarios %page%";
         int size = 9 * 6;
         int number = 9 * 2;
-        int currentPage = i; //0
+        int currentPage = 0;
         while (inventoryListSize > currentPage) {
-            if (getScenariosItems(size - number, currentPage * (size - number)).isEmpty())
+            int offset = currentPage * (size - number);
+            if (getScenariosItems(size - number, offset, activatedScenarios).isEmpty())
                 break;
 
             inventories[currentPage] = Bukkit.createInventory(owner, size, name.replace("%page%", String.valueOf(currentPage + 1)));
-            for (int i = 0; i < getScenariosItems(size - number, currentPage * (size - number)).size(); i++) {
-                inventories[currentPage].setItem(i, getScenariosItems(size - number, currentPage * (size - number)).get(i));
+            for (int i = 0; i < getScenariosItems(size - number, offset, activatedScenarios).size(); i++) {
+                inventories[currentPage].setItem(i, getScenariosItems(size - number, offset, activatedScenarios).get(i));
             }
             addScroll(inventories[currentPage], currentPage);
             currentPage++;
@@ -61,7 +42,7 @@ public class ScenarioCommands implements CommandExecutor {
         return inventories;
     }
 
-    private Inventory addScroll(Inventory inventory, int page) {
+    private static Inventory addScroll(Inventory inventory, int page) {
         int maxSize = inventory.getSize();
         ItemStack plus = new ItemStack(Material.PAPER);
         ItemStack sign = new ItemStack(Material.SIGN);
@@ -82,7 +63,7 @@ public class ScenarioCommands implements CommandExecutor {
         return inventory;
     }
 
-    private ArrayList<ItemStack> getScenariosItems(int number, int offset) {
+    private static ArrayList<ItemStack> getScenariosItems(int number, int offset, ArrayList<Scenario> activatedScenarios) {
         int i = 0;
         int iOffset = 0;
         ArrayList<ItemStack> itemStacks = new ArrayList<>();
@@ -114,11 +95,32 @@ public class ScenarioCommands implements CommandExecutor {
             } catch (NoSuchMethodException noSuchMethodException) {
                 noSuchMethodException.printStackTrace();
             }
+            meta.setDisplayName(ChatColor.RED + meta.getDisplayName());
+            for (Scenario activatedScenario : activatedScenarios) {
+                if (activatedScenario.getClass() == aClass) {
+                    meta.setDisplayName(ChatColor.GREEN + ChatColor.stripColor(meta.getDisplayName()));
+                }
+            }
             itemStack.setItemMeta(meta);
             itemStacks.add(itemStack);
             i++;
         }
         return itemStacks;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+        Scenario.callCommand(commandSender, command, s, strings);
+        if (strings[0].equalsIgnoreCase("scenario")) {
+            if (commandSender instanceof Player) {
+                if (LGPlayer.thePlayer((Player) commandSender).isInGame()) {
+                    ((Player) commandSender).openInventory(createInventory((InventoryHolder) commandSender, LGPlayer.thePlayer((Player) commandSender).getGameData().getGame().getScenarios())[0]);
+                } else {
+                    ((Player) commandSender).openInventory(createInventory((InventoryHolder) commandSender, LoupGarouUHC.GameInstance.getScenarios())[0]);
+                }
+            }
+        }
+        return true;
     }
 
 }

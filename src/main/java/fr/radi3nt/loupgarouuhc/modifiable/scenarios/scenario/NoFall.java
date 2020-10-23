@@ -36,6 +36,7 @@ public class NoFall extends Scenario {
                 if (isActive()) {
                     if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) {
                         e.setCancelled(true);
+                        e.setDamage(0.0);
                     }
                 }
             }
