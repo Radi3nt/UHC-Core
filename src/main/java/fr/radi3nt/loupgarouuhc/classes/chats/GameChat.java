@@ -8,7 +8,7 @@ public class GameChat extends Chat{
 
     public void sendMessage(LGPlayer user, String message) {
         String finalMessage = ChatColor.GOLD + "[" + ChatColor.YELLOW + "GAME" + ChatColor.GOLD + "] " + ChatColor.RESET + user.getPlayer().getDisplayName() + ChatColor.GOLD + " » " + ChatColor.RESET + message;
-        LoupGarouUHC.console.sendMessage(finalMessage);
+        LoupGarouUHC.getConsole().sendMessage(finalMessage);
         for (LGPlayer lgp : user.getGameData().getGame().getGamePlayersWithDeads()) {
             lgp.sendMessage(finalMessage);
         }

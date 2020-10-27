@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.classes.game;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.SystemPlaceHolder;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.SystemPlaceHolder;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.player.PlayerGameData;
@@ -10,7 +10,7 @@ import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
 import fr.radi3nt.loupgarouuhc.event.events.OnEndGame;
 import fr.radi3nt.loupgarouuhc.event.events.OnStartGame;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
@@ -115,7 +115,7 @@ public class LGGame {
     public void updateStart() {
         if (!isStarted) {
             final int[] i = {0};
-            roleNumber.forEach((s, integer) -> i[0] = i[0] +integer);
+            getRoleNumber().forEach((s, integer) -> i[0] = i[0] + integer);
             int playerSize = gamePlayers.size();
             if (playerSize == i[0]) {
                 start();
@@ -164,7 +164,7 @@ public class LGGame {
 
         // Canceler
         if (roles.isEmpty()) {
-            Bukkit.broadcastMessage(prefix + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 1 role pour commencer !"); //TODO 2 roles + message
+            Bukkit.broadcastMessage(getPrefix() + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 1 role pour commencer !"); //TODO 2 roles + message
             gamePlayers.clear();
             gamePlayersWithDeads.clear();
             roles.clear();
@@ -181,7 +181,7 @@ public class LGGame {
         }
         same=true; //todo a enlever en game
         if (!same) {
-            Bukkit.broadcastMessage(prefix + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 2 sortes de role pour commencer !");
+            Bukkit.broadcastMessage(getPrefix() + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 2 sortes de role pour commencer !");
             gamePlayers.clear();
             gamePlayersWithDeads.clear();
             roles.clear();
@@ -212,7 +212,7 @@ public class LGGame {
                     canStart[0] = true;
                     cancel();
                 }
-            }.runTaskLater(plugin, 1);
+            }.runTaskLater(getPlugin(), 1);
         }
 
         new BukkitRunnable() {
@@ -516,7 +516,7 @@ public class LGGame {
                         wc.type(WorldType.NORMAL);
                         gameSpawn.setWorld(wc.createWorld());
                     } else {
-                        console.sendMessage(ChatColor.DARK_RED + "Something went horribly wrong ! Please restart your server and change manually the game map");
+                        getConsole().sendMessage(ChatColor.DARK_RED + "Something went horribly wrong ! Please restart your server and change manually the game map");
                     }
                 }
             }
@@ -565,10 +565,10 @@ public class LGGame {
                         cancel();
                     }
                 }
-            }.runTaskTimer(plugin, 1, 1);
+            }.runTaskTimer(getPlugin(), 1, 1);
         }
 
-        Bukkit.broadcastMessage(prefix + " " + ChatColor.BLUE + winType.getMessage());
+        Bukkit.broadcastMessage(getPrefix() + " " + ChatColor.BLUE + winType.getMessage());
         for (Role role : rolesWithDeads) {
             if (roles.contains(role)) {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -584,7 +584,7 @@ public class LGGame {
         }
 
         HoloStats.updateAll();
-        GameInstance = new LGGame(parameters);
+        reloadGameInstance();
     }
 
     private void resetPlayer(LGPlayer lgp) {

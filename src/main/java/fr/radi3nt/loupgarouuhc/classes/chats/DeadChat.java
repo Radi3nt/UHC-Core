@@ -4,7 +4,7 @@ import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import org.bukkit.ChatColor;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.players;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPlayers;
 
 public class DeadChat extends Chat{
 
@@ -15,8 +15,8 @@ public class DeadChat extends Chat{
         } else {
             finalMessage = ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "DEAD" + ChatColor.DARK_GRAY + "]" + ChatColor.GRAY + user.getName() + ChatColor.DARK_GRAY + " » " + ChatColor.GRAY + message;
         }
-        LoupGarouUHC.console.sendMessage(finalMessage);
-        for (LGPlayer lgp : players) {
+        LoupGarouUHC.getConsole().sendMessage(finalMessage);
+        for (LGPlayer lgp : getPlayers()) {
             if (lgp.getChat() == this) {
                 lgp.sendMessage(finalMessage);
             }
