@@ -3,7 +3,9 @@ package fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -14,9 +16,13 @@ public class Mineur extends Role {
         super(game);
     }
 
+    public static RoleIdentity getStaticRoleIdentity() {
+        return new RoleIdentity("Mineur", WinType.VILLAGE, RoleType.VILLAGER);
+    }
+
     @Override
-    public RoleSort getRoleSort() {
-        return RoleSort.MINEUR;
+    public RoleIdentity getRoleIdentity() {
+        return getStaticRoleIdentity();
     }
 
     @Override

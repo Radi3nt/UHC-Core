@@ -3,7 +3,9 @@ package fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import org.bukkit.Location;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -14,16 +16,20 @@ public class LoupGarou extends Role {
         super(game);
     }
 
+    public static RoleIdentity getStaticRoleIdentity() {
+        return new RoleIdentity("LoupGarou", WinType.LOUP_GAROU, RoleType.LOUP_GAROU);
+    }
 
-    public RoleSort getRoleSort() {
-        return RoleSort.LOUP_GAROU;
+    @Override
+    public RoleIdentity getRoleIdentity() {
+        return getStaticRoleIdentity();
     }
 
     public void OnNight(LGGame game, LGPlayer lgp) {
         lgp.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 0, true, false), true);
     }
 
-    
+
     public void OnDay(LGGame game, LGPlayer lgp) {
         lgp.getPlayer().removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
     }

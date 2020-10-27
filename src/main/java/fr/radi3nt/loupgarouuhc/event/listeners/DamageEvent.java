@@ -9,7 +9,7 @@ import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.event.events.OnKill;
 import fr.radi3nt.loupgarouuhc.event.events.OnKilled;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGInfect;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Sorciere;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -21,6 +21,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -34,9 +35,9 @@ import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 
 public class DamageEvent implements Listener {
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void OnDamageEvent(EntityDamageEvent e) {
-        if (!e.isCancelled()) {
+        if (!e.isCancelled() && e.getDamage() != 0) {
             if (e.getEntity() instanceof Player) {
                 LGGame game = LGPlayer.thePlayer((Player) e.getEntity()).getGameData().getGame();
                 if (LGPlayer.thePlayer((Player) e.getEntity()).isInGame()) {
@@ -79,11 +80,32 @@ public class DamageEvent implements Listener {
                         lgp.sendTitle(ChatColor.RED + "You died", ChatColor.GRAY + "You can only spectate the game", 5, 5 * 20, 5);
 
                         lgp.getGameData().setCanBeRespawned(true);
+                        LGPlayer lgDamager = null;
+
+                        if (e instanceof EntityDamageByEntityEvent || e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
+                            EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
+                            if (e1.getDamager() instanceof Player) {
+                                if (!game.getPvP().isPvp()) {
+                                    lgDamager = LGPlayer.thePlayer((Player) e1.getDamager());
+
+                                }
+                            }
+                            if (e1.getDamager() instanceof Projectile) {
+                                Projectile projectile = (Projectile) e1.getDamager();
+                                if (projectile.getShooter() instanceof Player) {
+                                    if (!game.getPvP().isPvp()) {
+                                        lgDamager = LGPlayer.thePlayer((Player) projectile.getShooter());
+
+                                    }
+                                }
+                            }
+                        }
+
                         for (LGPlayer lgp2 : lgp.getGameData().getGame().getGamePlayers()) {
-                            if (lgp2.getGameData().getRole().getRoleSort() == RoleSort.SORCIERE && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                            if (lgp2.getGameData().getRole().getRoleIdentity().equals(Sorciere.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
                                 Sorciere role = (Sorciere) lgp2.getGameData().getRole();
                                 if (!role.hasrespwaned) {
-                                    lgp2.sendMessage(prefix + " " + prefixPrivé + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
+                                    lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
                                     TextComponent tc = new TextComponent();
                                     tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
                                     tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
@@ -93,31 +115,23 @@ public class DamageEvent implements Listener {
                                 }
                             }
                             if (lgp.getGameData().getGame().getGameTimer() != null && e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
-                                if (lgp2.getGameData().getRole().getRoleSort() == RoleSort.LG_INFECTE && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                if (lgp2.getGameData().getRole().getRoleIdentity().equals(LGInfect.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
                                     LGInfect role = (LGInfect) lgp2.getGameData().getRole();
                                     if (!role.hasrespwaned) {
-                                        lgp2.sendMessage(prefix + " " + prefixPrivé + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
-                                        TextComponent tc = new TextComponent();
-                                        tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
-                                        tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
-                                        //tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.DARK_GREEN + "Réssusciter cette personne").create()));
+                                        if (lgDamager != null && lgDamager.isInGame() && lgDamager.getGameData().getRole().getRoleIdentity().getRoleType() == RoleType.LOUP_GAROU) {
+                                            lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
+                                            TextComponent tc = new TextComponent();
+                                            tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
+                                            tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
+                                            //tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.DARK_GREEN + "Réssusciter cette personne").create()));
 
-                                        lgp2.getPlayer().spigot().sendMessage(tc);
+                                            lgp2.getPlayer().spigot().sendMessage(tc);
+                                        }
                                     }
                                 }
                             }
                         }
-                    /*
-                    ReflectCorpse rp = null;
-                    try {
-                        rp = new ReflectCorpse(lgp.getName(), lgp.getPlayer().getLocation());
-                        rp.spawn();
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    }
-                    //rp.destroy(); for delete the corpse;
 
-                     */
                         Location npcLoc = lgp.getPlayer().getLocation().clone();
                         while (npcLoc.getBlock().getType() == Material.AIR) {
                             npcLoc.setY(npcLoc.getBlockY() - 1);
@@ -126,7 +140,7 @@ public class DamageEvent implements Listener {
                                 break;
                             }
                         }
-                        NPC npc = new NPC(lgp.getName(), npcLoc, plugin);
+                        NPC npc = new NPC(lgp.getName(), npcLoc.add(0, 1, 0), getPlugin());
                         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                             npc.addRecipient(onlinePlayer);
                         }
@@ -160,27 +174,6 @@ public class DamageEvent implements Listener {
                         }
                         lgp.setChat(DeadChatI);
 
-                        LGPlayer lgDamager = null;
-
-                        if (e instanceof EntityDamageByEntityEvent || e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
-                            EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
-                            if (e1.getDamager() instanceof Player) {
-                                if (!game.getPvP().isPvp()) {
-                                    lgDamager = LGPlayer.thePlayer((Player) e1.getDamager());
-
-                                }
-                            }
-                            if (e1.getDamager() instanceof Projectile) {
-                                Projectile projectile = (Projectile) e1.getDamager();
-                                if (projectile.getShooter() instanceof Player) {
-                                    if (!game.getPvP().isPvp()) {
-                                        lgDamager = LGPlayer.thePlayer((Player) projectile.getShooter());
-
-                                    }
-                                }
-                            }
-                        }
-
                         LGPlayer finalLgDamager = lgDamager;
                         new BukkitRunnable() {
                             int i = 0;
@@ -203,7 +196,7 @@ public class DamageEvent implements Listener {
                                     game.updateKill(false);
                                     if (lgp.getGameData().getGame() != null) {
                                         if (game.getGameTimer().getDays() < game.getParameters().getDayRoleDivulged()) {
-                                            Bukkit.broadcastMessage(prefix + " " + ChatColor.DARK_RED + lgp.getPlayer().getName() + ChatColor.RED + " has been respawned");
+                                            Bukkit.broadcastMessage(getPrefix() + " " + ChatColor.DARK_RED + lgp.getPlayer().getName() + ChatColor.RED + " has been respawned");
                                             int items = game.getParameters().getNumberOfBlockRemovedWhenRespawn();
                                             for (ItemStack itemStack : lgp.getPlayer().getInventory().getContents()) {
                                                 if (itemStack != null && (itemStack.getType().isBlock() || !lgp.getGameData().getGame().getParameters().isOnlyBlockCanBeRemoved())) {

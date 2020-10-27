@@ -1,9 +1,8 @@
 package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,7 +17,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getRoleNumber;
 import static org.bukkit.Bukkit.broadcastMessage;
 
 public class RoleConfigGui {
@@ -28,33 +27,29 @@ public class RoleConfigGui {
     public static Inventory createGUI(Player player, Integer page) {
         LGPlayer lgp = LGPlayer.thePlayer(player);
 
-        ArrayList<Role> roles = new ArrayList<>();
-        ArrayList<RoleSort> rolesSorts = new ArrayList<>();
+        ArrayList<RoleIdentity> rolesSorts = new ArrayList<>();
         ArrayList<ItemStack> items = new ArrayList<>();
 
 
         try {
-            for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet())
-                for (int i = 0; i < roleNumber.getOrDefault(role.getKey(), 0); i++) {
-                    roles.add(role.getValue().newInstance(new LGGame(parameters)));
+            for (Map.Entry<RoleIdentity, Constructor<? extends Role>> role : Role.getRoleLinkByStringKey().entrySet())
+                for (int i = 0; i < getRoleNumber().getOrDefault(role.getKey().getId(), 0); i++) {
+                    rolesSorts.add(role.getKey());
                 }
         } catch (Exception err) {
             broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
             err.printStackTrace();
         }
 
-        for (Role role : roles) {
-            rolesSorts.add(role.getRoleSort());
-        }
 
-        for (RoleSort roleSort : RoleSort.values()) {
+        for (RoleIdentity roleSort : Role.getRoleLinkByStringKey().keySet()) {
             ItemStack rolesItem = new ItemStack(Material.REDSTONE_BLOCK);
             ItemMeta rolesMeta = rolesItem.getItemMeta();
             if (rolesSorts.contains(roleSort)) {
                 rolesItem.setType(Material.EMERALD_BLOCK);
                 rolesMeta.setDisplayName(ChatColor.DARK_GREEN + roleSort.getName(lgp.getLanguage()));
                 int i = 0;
-                for (RoleSort rolesSort : rolesSorts) {
+                for (RoleIdentity rolesSort : rolesSorts) {
                     if (rolesSort == roleSort) {
                         i++;
                     }
@@ -91,33 +86,28 @@ public class RoleConfigGui {
         LGPlayer lgp = LGPlayer.thePlayer(player);
 
 
-        ArrayList<Role> roles = new ArrayList<>();
-        ArrayList<RoleSort> rolesSorts = new ArrayList<>();
+        ArrayList<RoleIdentity> rolesSorts = new ArrayList<>();
         ArrayList<ItemStack> items = new ArrayList<>();
 
 
         try {
-            for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet())
-                for (int i = 0; i < roleNumber.getOrDefault(role.getKey(), 0); i++) {
-                    roles.add(role.getValue().newInstance(new LGGame(parameters)));
+            for (Map.Entry<RoleIdentity, Constructor<? extends Role>> role : Role.getRoleLinkByStringKey().entrySet())
+                for (int i = 0; i < getRoleNumber().getOrDefault(role.getKey().getId(), 0); i++) {
+                    rolesSorts.add(role.getKey());
                 }
         } catch (Exception err) {
             broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
             err.printStackTrace();
         }
 
-        for (Role role : roles) {
-            rolesSorts.add(role.getRoleSort());
-        }
-
-        for (RoleSort roleSort : RoleSort.values()) {
+        for (RoleIdentity roleSort : Role.getRoleLinkByStringKey().keySet()) {
             ItemStack rolesItem = new ItemStack(Material.REDSTONE_BLOCK);
             ItemMeta rolesMeta = rolesItem.getItemMeta();
             if (rolesSorts.contains(roleSort)) {
                 rolesItem.setType(Material.EMERALD_BLOCK);
                 rolesMeta.setDisplayName(ChatColor.DARK_GREEN + roleSort.getName(lgp.getLanguage()));
                 int i = 0;
-                for (RoleSort rolesSort : rolesSorts) {
+                for (RoleIdentity rolesSort : rolesSorts) {
                     if (rolesSort == roleSort) {
                         i++;
                     }
@@ -179,7 +169,7 @@ public class RoleConfigGui {
     public static Integer getPage(InventoryView inventory) {
         if (checkInventoryView(inventory)) {
             char[] chars = new char[10];
-            inventory.getTitle().getChars(MainGuiName.length(), inventory.getTitle().length()-String.valueOf(RoleSort.values().length/(4*9)+1).length()-1, chars, 0);
+            inventory.getTitle().getChars(MainGuiName.length(), inventory.getTitle().length() - String.valueOf(Role.getRoleLinkByStringKey().size() / (4 * 9) + 1).length() - 1, chars, 0);
             String page = "";
             for (char charactere : chars) {
                 page = page + charactere;

@@ -45,6 +45,7 @@ public class LGTabCompleter implements TabCompleter {
             list.add("name");
             list.add("host");
             list.add("regen");
+            list.add("revive");
             list.add("stop");
             list.removeIf(s1 -> !s1.startsWith(strings[1]));
         } else if (strings.length == 2 && strings[0].equalsIgnoreCase("role")) {
@@ -66,6 +67,7 @@ public class LGTabCompleter implements TabCompleter {
             }
             list.removeIf(s1 -> !s1.startsWith(strings[strings.length - 1]));
         }
+        java.util.Collections.sort(list);
         return list;
     }
 }

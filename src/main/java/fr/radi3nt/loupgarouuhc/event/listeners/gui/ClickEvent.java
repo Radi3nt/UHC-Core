@@ -5,7 +5,7 @@ import fr.radi3nt.loupgarouuhc.classes.GUIs.*;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.ScenarioCommands;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
@@ -21,13 +21,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 import static org.bukkit.Bukkit.broadcastMessage;
@@ -41,7 +38,7 @@ public class ClickEvent implements Listener {
             if (MainGUI.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
                 if (e.getCurrentItem().isSimilar(MainGUI.createStartItem())) {
-                    GameInstance.updateStart();
+                    getGameInstance().updateStart();
                 }
                 if (e.getCurrentItem().isSimilar(MainGUI.createOptionItem())) {
                     player.openInventory(OptionsItems.createGUI(player));
@@ -75,7 +72,7 @@ public class ClickEvent implements Listener {
             if (ManageGameGui.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
                 if (e.getCurrentItem().isSimilar(ManageGameGui.createSkipItem())) {
-                    if (LGPlayer.thePlayer(player).getGameData().getGame() != null) {
+                    if (LGPlayer.thePlayer(player).isInGame()) {
                         LGPlayer.thePlayer(player).getGameData().getGame().getGameTimer().setDay(LGPlayer.thePlayer(player).getGameData().getGame().getGameTimer().getDays() + 1);
                     }
                 }
@@ -109,54 +106,41 @@ public class ClickEvent implements Listener {
                     }
                     return;
                 }
-                for (RoleSort sort : RoleSort.values()) {
+                for (RoleIdentity sort : Role.getRoleLinkByStringKey().keySet()) {
                     if (e.getCurrentItem().getItemMeta() != null && sort.getName(LGPlayer.thePlayer(player).getLanguage()).equals(ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()))) {
-                        String key = "";
-                        try {
-                            for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet()) {
-                                if (role.getValue().newInstance(new LGGame(parameters)).getRoleSort() == sort) {
-                                    key = role.getKey();
+                        String key = sort.getId();
+                        if (e.getClick().isLeftClick()) {
+                            if (e.getClick().isShiftClick()) {
+                                if (LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) + 5 <= 32) {
+                                    LoupGarouUHC.getRoleNumber().put(key, LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) + 5);
+                                } else {
+                                    LoupGarouUHC.getRoleNumber().put(key, 32);
+                                }
+                            } else {
+                                if (LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) + 5 <= 32) {
+                                    LoupGarouUHC.getRoleNumber().put(key, LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) + 1);
                                 }
                             }
-
-                        } catch (Exception err) {
-                            broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
-                            err.printStackTrace();
                         }
-                        if (rolesLink.containsKey(key)) {
-                            if (e.getClick().isLeftClick()) {
-                                if (e.getClick().isShiftClick()) {
-                                    if (LoupGarouUHC.roleNumber.getOrDefault(key, 0) + 5 <= 32) {
-                                        LoupGarouUHC.roleNumber.put(key, LoupGarouUHC.roleNumber.getOrDefault(key, 0) + 5);
-                                    } else {
-                                        LoupGarouUHC.roleNumber.put(key, 32);
-                                    }
+                        if (e.getClick().isRightClick()) {
+                            if (e.getClick().isShiftClick()) {
+                                if (LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) - 5 >= 0) {
+                                    LoupGarouUHC.getRoleNumber().put(key, LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) - 5);
                                 } else {
-                                    if (LoupGarouUHC.roleNumber.getOrDefault(key, 0) + 5 <= 32) {
-                                        LoupGarouUHC.roleNumber.put(key, LoupGarouUHC.roleNumber.getOrDefault(key, 0) + 1);
-                                    }
+                                    LoupGarouUHC.getRoleNumber().put(key, 0);
                                 }
-                            }
-                            if (e.getClick().isRightClick()) {
-                                if (e.getClick().isShiftClick()) {
-                                    if (LoupGarouUHC.roleNumber.getOrDefault(key, 0) - 5 >= 0) {
-                                        LoupGarouUHC.roleNumber.put(key, LoupGarouUHC.roleNumber.getOrDefault(key, 0) - 5);
-                                    } else {
-                                        LoupGarouUHC.roleNumber.put(key, 0);
-                                    }
-                                } else {
-                                    if (LoupGarouUHC.roleNumber.getOrDefault(key, 0) - 1 >= 0) {
-                                        LoupGarouUHC.roleNumber.put(key, LoupGarouUHC.roleNumber.getOrDefault(key, 0) - 1);
-                                    }
+                            } else {
+                                if (LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) - 1 >= 0) {
+                                    LoupGarouUHC.getRoleNumber().put(key, LoupGarouUHC.getRoleNumber().getOrDefault(key, 0) - 1);
                                 }
                             }
                         }
                     }
                 }
                 try {
-                    for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet()) {
-                        if (roleNumber.containsKey(role.getKey())) {
-                            RolesConfig.set("Roles." + role.getKey(), roleNumber.getOrDefault(role.getKey(), 0));
+                    for (RoleIdentity role : Role.getRoleLinkByStringKey().keySet()) {
+                        if (getRoleNumber().containsKey(role.getId())) {
+                            getRolesConfig().set("Roles." + role.getId(), getRoleNumber().getOrDefault(role.getId(), 0));
                         }
                     }
 
@@ -164,17 +148,13 @@ public class ClickEvent implements Listener {
                     broadcastMessage("§4§lUne erreur est survenue lors de la sauvegarde des roles... Regardez la console !");
                     err.printStackTrace();
                 }
-                try {
-                    RolesConfig.save(RoleConfigFile);
-                } catch (IOException error) {
-                    error.printStackTrace();
-                }
+                LoupGarouUHC.saveRoleFile();
                 RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, e.getInventory());
             }
             if (e.getView().getTopInventory().getTitle().contains(ChatColor.GOLD + "Scenarios ")) {
                 LGGame game = LGPlayer.thePlayer(player).getGameData().getGame();
-                if (game == null) {
-                    game = GameInstance;
+                if (game == null || !game.getStarted()) {
+                    game = getGameInstance();
                 }
                 String itemName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
                 int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle()).replace("Scenarios ", "").trim()) - 1;
@@ -244,7 +224,6 @@ public class ClickEvent implements Listener {
                         for (Scenario gameScenario : game.getScenarios()) {
                             if (gameScenario.getClass().equals(scenario.getClass())) {
                                 scenario = gameScenario;
-                                break;
                             }
                         }
                         for (ScenarioGetter annotation : scenario.getScenarioGetAnnotations()) {
@@ -291,10 +270,10 @@ public class ClickEvent implements Listener {
                     }
                 }
                 e.setCancelled(true);
-            } else if (e.getView().getTopInventory().getTitle().contains(ChatColor.GOLD + "Options for ")) {
+            } else if (e.getView().getTopInventory().getTitle().contains(ChatColor.GOLD + "Options for ") && e.getCurrentItem() != null) {
                 LGGame game = LGPlayer.thePlayer(player).getGameData().getGame();
-                if (game == null) {
-                    game = GameInstance;
+                if (game == null || !game.getStarted()) {
+                    game = getGameInstance();
                 }
                 String scenarioName = ChatColor.stripColor(e.getView().getTopInventory().getTitle()).replace("Options for ", "").trim();
                 String itemStackName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());

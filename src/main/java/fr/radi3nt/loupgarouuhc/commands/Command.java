@@ -1,7 +1,8 @@
 package fr.radi3nt.loupgarouuhc.commands;
 
-import fr.radi3nt.loupgarouuhc.classes.message.m.NoPermission;
+import fr.radi3nt.loupgarouuhc.classes.message.messages.NoPermission;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.loupgarouuhc.exeptions.common.NoPermissionException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,7 +20,7 @@ public class Command {
         this.args = args;
     }
 
-    public boolean executeCommand(String name, String permission, int argsNumber, Command.Checks... checks) {
+    public boolean executeCommand(String name, String permission, int argsNumber, Command.Checks... checks) throws NoPermissionException {
         String commandS = command.getName();
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -46,7 +47,7 @@ public class Command {
                     //todo invalid args
                 }
             } else {
-                new NoPermission().sendMessage((Player) sender, "", true);
+                throw new NoPermissionException("No permission for command: " + command.getName(), sender instanceof Player ? ((Player) sender).getUniqueId() : null, true);
             }
         } else {
                 //todo non-existant command
@@ -84,7 +85,7 @@ public class Command {
 
                     }
                 } else {
-                    new NoPermission().sendMessage((Player) sender, "", true);
+                    new NoPermission().sendMessage(sender instanceof Player ? ((Player) sender).getUniqueId() : null, "", true);
                 }
             }
         }

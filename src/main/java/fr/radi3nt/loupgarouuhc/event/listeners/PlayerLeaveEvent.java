@@ -40,7 +40,7 @@ public class PlayerLeaveEvent implements Listener {
 
                 @Override
                 public void run() {
-                    if (i >= lgp.getGameData().getGame().getParameters().getDisconnectTimeout() || lgp.getGameData().getGame().getPvP().isPvp()) {
+                    if (i >= lgp.getGameData().getGame().getParameters().getDisconnectTimeout() || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().isCanReconnectInPvp())) {
                         Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
                         Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
                         Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getGameData().getRole().getName(lgp.getLanguage()));
@@ -97,7 +97,7 @@ public class PlayerLeaveEvent implements Listener {
                         lgp.getGameData().setCanVote(false);
                         lgp.getGameData().setCouple(null);
 
-                        players.remove(lgp);
+                        getPlayers().remove(lgp);
                         lgp.remove();
                         this.cancel();
                     }
@@ -106,11 +106,11 @@ public class PlayerLeaveEvent implements Listener {
                     }
                     i++;
                 }
-            }.runTaskTimer(plugin, 1L, 1L);
+            }.runTaskTimer(getPlugin(), 1L, 1L);
         }
         if (!lgp.isInGame() || lgp.getGameData().isDead()) {
-            GameInstance.getGamePlayers().remove(lgp);
-            players.remove(lgp);
+            getGameInstance().getGamePlayers().remove(lgp);
+            getPlayers().remove(lgp);
             lgp.remove();
         }
     }

@@ -2,6 +2,7 @@ package fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario;
 
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.loupgarouuhc.exeptions.common.NoPermissionException;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioCommand;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
@@ -15,7 +16,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
 
 public class FinalHeal extends Scenario {
 
@@ -50,15 +51,19 @@ public class FinalHeal extends Scenario {
                 lgPlayer.getPlayer().setHealth(lgPlayer.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             }
         }
-        Bukkit.broadcastMessage(prefix + " " + ChatColor.GOLD + "Final heal >" + ChatColor.AQUA + " All players have been healed");
+        Bukkit.broadcastMessage(getPrefix() + " " + ChatColor.GOLD + "Final heal >" + ChatColor.AQUA + " All players have been healed");
     }
 
     @ScenarioCommand
     public void onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (isActive()) {
             fr.radi3nt.loupgarouuhc.commands.Command command1 = new fr.radi3nt.loupgarouuhc.commands.Command(commandSender, command, s, strings);
-            if (command1.executeCommand("uhc.fh.activate", "uhc.finalheal.activate", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
-                doFinalHeal();
+            try {
+                if (command1.executeCommand("uhc.fh.activate", "uhc.finalheal.activate", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
+                    doFinalHeal();
+                }
+            } catch (NoPermissionException e) {
+
             }
         }
     }

@@ -4,7 +4,9 @@ import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,8 +17,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefixPrivé;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefixPrivé;
 
 public class Cupidon extends Role {
 
@@ -26,9 +28,13 @@ public class Cupidon extends Role {
         super(game);
     }
 
+    public static RoleIdentity getStaticRoleIdentity() {
+        return new RoleIdentity("Cupidon", WinType.SOLO, RoleType.NEUTRAL);
+    }
+
     @Override
-    public RoleSort getRoleSort() {
-        return RoleSort.CUPIDON;
+    public RoleIdentity getRoleIdentity() {
+        return getStaticRoleIdentity();
     }
 
     @Override
@@ -68,13 +74,14 @@ public class Cupidon extends Role {
         lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), bow);
         lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), arrows);
         lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), string);
-        canCouple=true;
-        lgp.sendMessage(prefix + ChatColor.GOLD + " Tu peut choisir un couple en faisant /lg role couple <pseudo> <pseudo>");
+        canCouple = true;
+        lgp.sendMessage(getPrefix() + ChatColor.GOLD + " Tu peut choisir un couple en faisant /lg role couple <pseudo> <pseudo>");
         new BukkitRunnable() {
             int i = 0;
+
             @Override
             public void run() {
-                if (i==60*5*20) {
+                if (i == 60 * 5 * 20) {
                     canCouple = false;
                     if (game.getGamePlayers().size() >= 2) {
                         ArrayList<LGPlayer> players1 = (ArrayList<LGPlayer>) game.getGamePlayers().clone();
@@ -104,9 +111,9 @@ public class Cupidon extends Role {
                         lgp2.getGameData().setCouple(lgp1);
 
 
-                        lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu n'a pas su te decider, ton instinct l'a fait pour toi: tu a uni " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + " et " + ChatColor.DARK_AQUA + lgp2.getName());
-                        lgp1.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp2.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
-                        lgp2.sendMessage(prefix + " " + prefixPrivé + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
+                        lgp.sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.BLUE + " Tu n'a pas su te decider, ton instinct l'a fait pour toi: tu a uni " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + " et " + ChatColor.DARK_AQUA + lgp2.getName());
+                        lgp1.sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp2.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
+                        lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + lgp1.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
 
 
                     } else {

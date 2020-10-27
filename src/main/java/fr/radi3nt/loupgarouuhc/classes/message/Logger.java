@@ -53,14 +53,14 @@ public class Logger {
         boolean found = false;
         int i = 1;
         while (!found) {
-            File file = new File(config.getFile().getPath() + name + i + ".yml");
+            File file = new File(config.getFile().getParent() + name + i + ".yml");
             if (file.exists()) {
                 i++;
             } else {
                 found = true;
             }
         }
-        Config config1 = Config.createConfig(config.getFile().getPath(), name + i + ".yml");
+        Config config1 = Config.createConfig(config.getFile().getParent(), name + i + ".yml");
         config1.getConfiguration().set("Logs", logs);
         config1.saveConfig();
     }

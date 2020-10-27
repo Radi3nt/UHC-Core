@@ -2,6 +2,7 @@ package fr.radi3nt.loupgarouuhc.modifiable.scenarios;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioUtilis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -110,13 +111,13 @@ public class ScenarioCommands implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        Scenario.callCommand(commandSender, command, s, strings);
+        ScenarioUtilis.callCommand(commandSender, command, s, strings);
         if (strings[0].equalsIgnoreCase("scenario")) {
             if (commandSender instanceof Player) {
                 if (LGPlayer.thePlayer((Player) commandSender).isInGame()) {
                     ((Player) commandSender).openInventory(createInventory((InventoryHolder) commandSender, LGPlayer.thePlayer((Player) commandSender).getGameData().getGame().getScenarios())[0]);
                 } else {
-                    ((Player) commandSender).openInventory(createInventory((InventoryHolder) commandSender, LoupGarouUHC.GameInstance.getScenarios())[0]);
+                    ((Player) commandSender).openInventory(createInventory((InventoryHolder) commandSender, LoupGarouUHC.getGameInstance().getScenarios())[0]);
                 }
             }
         }

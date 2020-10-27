@@ -92,6 +92,8 @@ Messages:
   gameStartAuthorMessage: "&8Plugin développé par : &e&l%author%&8."
   gameStartAuthorTitle: "&6&lLoup Garou UHC"
   gameStartAuthorSubtitle: "&8&lBy %author%"
+  gameStartTile: "&6GO"
+  gameStartSubTile: "&7The UHC begin"
 
 
 
@@ -122,6 +124,8 @@ Messages:
 
   gameTimerActionBar: "&dDistance du centre: &bEntre %1% et %2% blocks du centre"
   gameTimerActionBarMax: "&dDistance du centre: &bPlus de %1% blocks du centre"
+
+  roleFeutreAffichage: "$prefix$ &6Ton role d'affichage est &c%affichageName%"
 
 PlaceHolders:
   #To use placeholders, just add them here,

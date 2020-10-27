@@ -1,5 +1,6 @@
 package fr.radi3nt.loupgarouuhc.event.listeners;
 
+import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
 import fr.radi3nt.loupgarouuhc.classes.stats.Hologram;
@@ -20,8 +21,8 @@ public class PlayerJoinEvent implements Listener {
         Player p = e.getPlayer();
         p.setWalkSpeed(0.2f);
         LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer());
-        if (!players.contains(lgp)) {
-            players.add(lgp);
+        if (!LoupGarouUHC.getPlayers().contains(lgp)) {
+            LoupGarouUHC.getPlayers().add(lgp);
         }
 
         lgp.loadSavedLang();
@@ -35,13 +36,13 @@ public class PlayerJoinEvent implements Listener {
         }
 
 
-        e.setJoinMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getDisplayName() + " (" + ChatColor.YELLOW + players.size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
+        e.setJoinMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getDisplayName() + " (" + ChatColor.YELLOW + LoupGarouUHC.getPlayers().size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
         HoloStats.updateAll();
-        if (!lgp.isInGame() || (lgp.isInGame() && lgp.getGameData().isDead()) || ((lgp.isInGame() && lgp.getGameData().getGame().getPvP().isPvp()))) {
+        lgp.getPlayer().setWalkSpeed(0.2F);
+        if (!lgp.isInGame() || (lgp.isInGame() && lgp.getGameData().isDead()) || ((lgp.isInGame() && lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().isCanReconnectInPvp()))) {
             p.resetMaxHealth();
             p.setFoodLevel(20);
             p.setHealth(20);
-            p.setWalkSpeed(0);
             p.setExp(0);
             p.setLevel(0);
             for (PotionEffectType ption : PotionEffectType.values()) {
@@ -51,13 +52,12 @@ public class PlayerJoinEvent implements Listener {
 
                 }
             }
-            lgp.getPlayer().setWalkSpeed(0.2F);
             lgp.getPlayer().getInventory().clear();
 
             e.getPlayer().teleport(parameters.getSpawn(), PlayerTeleportEvent.TeleportCause.PLUGIN);
             e.getPlayer().setGameMode(Bukkit.getServer().getDefaultGameMode());
             lgp.setChat(GeneralChatI);
-            for (LGPlayer player : players) {
+            for (LGPlayer player : LoupGarouUHC.getPlayers()) {
                 if (player.isInGame()) {
                     lgp.setChat(DeadChatI);
                 }

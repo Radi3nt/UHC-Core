@@ -17,19 +17,17 @@ public class Parameters {
     private int dayRoleDivulged = 2;
     private int minDayForVote = 3;
     private int getTimeForVote = 60 * 20;
-    private int percentageOfAppleDrop = 10;
-    private int percentageOfGravelDrop = 20;
     private int timeMultiplication = 1;
-    private int diamondLimit = 17;
 
     private boolean hiddenCompo = false;
+    private boolean canReconnectInPvp = true;
     private boolean respawnBeforeRoleDivulged = true;
     private boolean onlyBlockCanBeRemoved = false;
     private boolean preserveRareItem = true;
     private int numberOfBlockRemovedWhenRespawn = 30;
     private int percentageOfChanceToRemove = 40;
 
-    private int disconnectTimeout = 20 * 60 * 20;
+    private int disconnectTimeout = 10 * 60 * 20;
     private int minPlayerForVotes = 3;
 
     private Location spawn = new Location(Bukkit.getWorlds().get(0), 0.5, 133, 0.5, 160, 0);
@@ -85,35 +83,12 @@ public class Parameters {
         this.getTimeForVote = getTimeForVote;
     }
 
-    public int getPercentageOfAppleDrop() {
-        return percentageOfAppleDrop;
-    }
-
-    public void setPercentageOfAppleDrop(int percentageOfAppleDrop) {
-        this.percentageOfAppleDrop = percentageOfAppleDrop;
-    }
     public int getTimeMultiplication() {
         return timeMultiplication;
     }
 
     public void setTimeMultiplication(int timeMultiplication) {
         this.timeMultiplication = timeMultiplication;
-    }
-
-    public int getDiamondLimit() {
-        return diamondLimit;
-    }
-
-    public void setDiamondLimit(int diamondLimit) {
-        this.diamondLimit = diamondLimit;
-    }
-
-    public int getPercentageOfGravelDrop() {
-        return percentageOfGravelDrop;
-    }
-
-    public void setPercentageOfGravelDrop(int percentageOfGravelDrop) {
-        this.percentageOfGravelDrop = percentageOfGravelDrop;
     }
 
     public int getDisconnectTimeout() {
@@ -202,5 +177,13 @@ public class Parameters {
 
     public void setHiddenCompo(boolean hiddenCompo) {
         this.hiddenCompo = hiddenCompo;
+    }
+
+    public boolean isCanReconnectInPvp() {
+        return canReconnectInPvp;
+    }
+
+    public void setCanReconnectInPvp(boolean canReconnectInPvp) {
+        this.canReconnectInPvp = canReconnectInPvp;
     }
 }

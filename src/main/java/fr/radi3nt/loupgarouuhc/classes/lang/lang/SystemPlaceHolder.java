@@ -1,4 +1,4 @@
-package fr.radi3nt.loupgarouuhc.classes.lang.translations.lang;
+package fr.radi3nt.loupgarouuhc.classes.lang.lang;
 
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 

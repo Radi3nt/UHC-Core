@@ -1,8 +1,7 @@
-package fr.radi3nt.loupgarouuhc.classes.lang.translations.lang;
+package fr.radi3nt.loupgarouuhc.classes.lang.lang;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
@@ -14,14 +13,14 @@ public class Languages {
     private static final String defaultMessage = ChatColor.DARK_RED + "Cannot find message !" + ChatColor.RESET;
     private static final String defaultRole = ChatColor.DARK_RED + "Cannot find message !" + ChatColor.RESET;
     private static final String defaultPlaceHolder = ChatColor.DARK_RED + "Cannot find message !" + ChatColor.RESET;
-    private final ArrayList<RoleAspect> roleAspects;
+    private final ArrayList<RoleLang> roleLangs;
     private final ArrayList<Message> messages;
     private final ArrayList<PlaceHolder> placeHolders;
     private final String name;
     private final String id;
 
-    public Languages(String name, String id, ArrayList<RoleAspect> roleAspects, ArrayList<Message> messages, ArrayList<PlaceHolder> placeHolders) {
-        this.roleAspects = roleAspects;
+    public Languages(String name, String id, ArrayList<RoleLang> roleLangs, ArrayList<Message> messages, ArrayList<PlaceHolder> placeHolders) {
+        this.roleLangs = roleLangs;
         this.messages = messages;
         this.placeHolders = placeHolders;
         this.name = name;
@@ -71,19 +70,10 @@ public class Languages {
         return defaultMessage;
     }
 
-    public RoleAspect getRoleAspect(RoleSort roleSort) {
-        for (RoleAspect roleAspect : getRoleAspects()) {
-            if (roleAspect.getRoleSort().equals(roleSort)) {
-                return roleAspect;
-            }
-        }
-        return null;
-    }
-
-    public RoleAspect getRoleAspect(String name) {
-        for (RoleAspect roleAspect : getRoleAspects()) {
-            if (roleAspect.getName().equals(name)) {
-                return roleAspect;
+    public RoleLang getRoleAspect(String name) {
+        for (RoleLang roleLang : getRoleAspects()) {
+            if (roleLang.getName().equals(name)) {
+                return roleLang;
             }
         }
         return null;
@@ -92,7 +82,7 @@ public class Languages {
     public void setupLanguage() {
         for (Languages language : languages) {
             if (language.getId().equals(this.getId())) {
-                LoupGarouUHC.console.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.DARK_RED + "Invalid language: " + ChatColor.RED + getId());
+                LoupGarouUHC.getConsole().sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.DARK_RED + "Invalid language: " + ChatColor.RED + getId());
                 return;
             }
         }
@@ -106,8 +96,8 @@ public class Languages {
         return false;
     }
 
-    public ArrayList<RoleAspect> getRoleAspects() {
-        return roleAspects;
+    public ArrayList<RoleLang> getRoleAspects() {
+        return roleLangs;
     }
 
     public ArrayList<Message> getMessages() {

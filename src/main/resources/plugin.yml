@@ -5,6 +5,7 @@ api-version: 1.13
 prefix: LG UHC
 authors: [Radi3nt]
 description: Play to the Loup Garou UHC in minecraft
+load-before: [ LoupGarouUHC-Server ]
 commands:
   lg:
     description: "Main command of the lg plugin"

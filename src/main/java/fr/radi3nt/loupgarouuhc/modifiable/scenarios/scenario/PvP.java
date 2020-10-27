@@ -2,6 +2,7 @@ package fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario;
 
 import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
+import fr.radi3nt.loupgarouuhc.exeptions.common.NoPermissionException;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioCommand;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
@@ -78,14 +79,18 @@ public class PvP extends Scenario {
             String[] deactivate = new String[2];
             deactivate[0] = base + "deactivate";
             deactivate[1] = base + "off";
-            if (command1.executeCommand(activate, "uhc.pvp.activate", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
-                activatePvp();
-            } else if (command1.executeCommand(deactivate, "uhc.pvp.deactivate", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
-                deactivatePvp();
-            } else if (command1.executeCommand(base + "timer.off", "uhc.pvp.timer", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
-                timerActivated = false;
-            } else if (command1.executeCommand(base + "timer.on", "uhc.pvp.timer", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
-                timerActivated = true;
+            try {
+                if (command1.executeCommand(activate, "uhc.pvp.activate", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
+                    activatePvp();
+                } else if (command1.executeCommand(deactivate, "uhc.pvp.deactivate", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
+                    deactivatePvp();
+                } else if (command1.executeCommand(base + "timer.off", "uhc.pvp.timer", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
+                    timerActivated = false;
+                } else if (command1.executeCommand(base + "timer.on", "uhc.pvp.timer", 0, fr.radi3nt.loupgarouuhc.commands.Command.Checks.GAME)) {
+                    timerActivated = true;
+                }
+            } catch (NoPermissionException e) {
+
             }
         }
     }

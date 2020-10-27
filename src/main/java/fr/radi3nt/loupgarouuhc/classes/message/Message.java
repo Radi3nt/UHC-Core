@@ -1,7 +1,8 @@
 package fr.radi3nt.loupgarouuhc.classes.message;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public abstract class Message {
 
@@ -14,7 +15,7 @@ public abstract class Message {
     public static final String PREFIX_FATAL = ChatColor.DARK_RED + "[FATAL ERROR] ";
 
 
-    public abstract void sendMessage(Player player, String comments, boolean broadcastConsole);
+    public abstract void sendMessage(UUID uuid, String comments, boolean broadcastConsole);
 
 
 

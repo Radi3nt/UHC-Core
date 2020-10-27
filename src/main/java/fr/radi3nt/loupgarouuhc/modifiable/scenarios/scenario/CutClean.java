@@ -62,6 +62,7 @@ public class CutClean extends Scenario {
                 if (materials.containsKey(drop.getType())) {
                     e.getDrops().clear();
                     e.getEntity().getWorld().dropItem(e.getEntity().getLocation().clone().add(0.5, 0.5, 0.5), new ItemStack(materials.get(drop.getType())));
+                    break;
                 }
             }
         }

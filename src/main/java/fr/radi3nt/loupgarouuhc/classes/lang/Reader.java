@@ -1,10 +1,10 @@
-package fr.radi3nt.loupgarouuhc.classes.lang.translations;
+package fr.radi3nt.loupgarouuhc.classes.lang;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
-import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Message;
-import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.PlaceHolder;
-import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.RoleAspect;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.Languages;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.Message;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.PlaceHolder;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.RoleLang;
 import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.ChatColor;
@@ -27,7 +27,7 @@ public class Reader {
         String name;
         String id;
         ArrayList<Message> messages = new ArrayList<>();
-        ArrayList<RoleAspect> roleAspects = new ArrayList<>();
+        ArrayList<RoleLang> roleLangs = new ArrayList<>();
         ArrayList<PlaceHolder> placeHolders = new ArrayList<>();
 
         name = config.getConfiguration().getString("Language.name");
@@ -39,8 +39,8 @@ public class Reader {
                 String roleShortDesc = config.getConfiguration().getString("Roles." + roleid + ".short desc");
                 String roleDesc = config.getConfiguration().getString("Roles." + roleid + ".desc");
 
-                RoleAspect roleAspect = new RoleAspect(roleid, roleName, roleShortDesc, roleDesc);
-                roleAspects.add(roleAspect);
+                RoleLang roleLang = new RoleLang(roleid, roleName, roleShortDesc, roleDesc);
+                roleLangs.add(roleLang);
             }
 
             for (String messageId : config.getConfiguration().getConfigurationSection("Messages").getKeys(false)) {
@@ -53,8 +53,8 @@ public class Reader {
                 placeHolders.add(placeHolder);
             }
 
-            new Languages(name, id, roleAspects, messages, placeHolders);
-            Logger.getLogger().logWhenDebug(ChatColor.DARK_RED + "[Language] Loading new language: " + file.getName(), LoupGarouUHC.console);
+            new Languages(name, id, roleLangs, messages, placeHolders);
+            Logger.getLogger().logWhenDebug(ChatColor.DARK_RED + "[Language] Loading new language: " + file.getName(), LoupGarouUHC.getConsole());
         }
     }
 
@@ -126,7 +126,7 @@ public class Reader {
                 if (!file.isHidden() && file.getName().contains(".yml")) {
                     loadLanguage(file);
                 } else {
-                    Logger.getLogger().logWhenDebug(ChatColor.DARK_RED + "[Language] Skipping loading of: " + file.getName(), LoupGarouUHC.console);
+                    Logger.getLogger().logWhenDebug(ChatColor.DARK_RED + "[Language] Skipping loading of: " + file.getName(), LoupGarouUHC.getConsole());
                 }
             }
         }

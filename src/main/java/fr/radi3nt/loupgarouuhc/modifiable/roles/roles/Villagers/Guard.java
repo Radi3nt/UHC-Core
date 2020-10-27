@@ -3,7 +3,9 @@ package fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,8 +16,8 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefixPrivé;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefixPrivé;
 
 public class Guard extends Role {
 
@@ -23,9 +25,13 @@ public class Guard extends Role {
         super(game);
     }
 
+    public static RoleIdentity getStaticRoleIdentity() {
+        return new RoleIdentity("Guard", WinType.VILLAGE, RoleType.VILLAGER);
+    }
+
     @Override
-    public RoleSort getRoleSort() {
-        return RoleSort.GUARD;
+    public RoleIdentity getRoleIdentity() {
+        return getStaticRoleIdentity();
     }
 
     @Override
@@ -58,7 +64,7 @@ public class Guard extends Role {
             killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 20 * 30, 1, true), true);
             killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60 * 30, 0, true), true);
             killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 30, 1, true), true);
-            killed.getGameData().getKiller().sendMessage(prefix + " " + prefixPrivé + ChatColor.GOLD + " Tu as été infecté par le garde");
+            killed.getGameData().getKiller().sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.GOLD + " Tu as été infecté par le garde");
         }
     }
 

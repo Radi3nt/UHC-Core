@@ -1,7 +1,8 @@
 package fr.radi3nt.loupgarouuhc.classes.player;
 
+import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
-import fr.radi3nt.loupgarouuhc.classes.lang.translations.lang.Languages;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.stats.Stats;
 import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.Bukkit;
@@ -10,8 +11,6 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.plugin;
 
 
 public class LGPlayer {
@@ -82,7 +81,7 @@ public class LGPlayer {
 	}
 
 	public void saveStats() {
-		Config config = Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+		Config config = Config.createConfig(LoupGarouUHC.getPlugin().getDataFolder() + "/players", getName() + ".yml");
 
 
 		config.getConfiguration().set("Stats" + ".games", this.getStats().getGameNumber());
@@ -91,7 +90,7 @@ public class LGPlayer {
 		config.getConfiguration().set("Stats" + ".points", this.getStats().getPoints());
 		config.saveConfig();
 
-		Config config1 = Config.createConfig(plugin.getDataFolder() + "", "players.yml");
+		Config config1 = Config.createConfig(LoupGarouUHC.getPlugin().getDataFolder() + "", "players.yml");
 
 
 		ArrayList<String> arrayList = new ArrayList<>();
@@ -109,7 +108,7 @@ public class LGPlayer {
 	}
 
 	public void loadStats() {
-		Config config = Config.createConfig(plugin.getDataFolder() + "/players", player.getName() + ".yml");
+		Config config = Config.createConfig(LoupGarouUHC.getPlugin().getDataFolder() + "/players", player.getName() + ".yml");
 
 		Stats stats = new Stats();
 		stats.setGameNumber(config.getConfiguration().getInt("Stats" + ".games"));
@@ -120,13 +119,13 @@ public class LGPlayer {
 	}
 
 	public void saveLang() {
-		Config config = Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+		Config config = Config.createConfig(LoupGarouUHC.getPlugin().getDataFolder() + "/players", getName() + ".yml");
 		config.getConfiguration().set("Lang", language.getId());
 		config.saveConfig();
 	}
 
 	public void loadSavedLang() {
-		Config config = Config.createConfig(plugin.getDataFolder() + "/players", getName() + ".yml");
+		Config config = Config.createConfig(LoupGarouUHC.getPlugin().getDataFolder() + "/players", getName() + ".yml");
 
 		String id = config.getConfiguration().getString("Lang");
 

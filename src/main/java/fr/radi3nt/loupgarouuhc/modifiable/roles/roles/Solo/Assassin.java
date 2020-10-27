@@ -3,11 +3,14 @@ package fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -17,9 +20,13 @@ public class Assassin extends Role {
         super(game);
     }
 
+    public static RoleIdentity getStaticRoleIdentity() {
+        return new RoleIdentity("Assassin", WinType.SOLO, RoleType.NEUTRAL);
+    }
+
     @Override
-    public RoleSort getRoleSort() {
-        return RoleSort.ASSASSIN;
+    public RoleIdentity getRoleIdentity() {
+        return getStaticRoleIdentity();
     }
 
     @Override
@@ -50,12 +57,19 @@ public class Assassin extends Role {
     @Override
     public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
         ItemStack power3 = new ItemStack(Material.ENCHANTED_BOOK);
-        power3.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 3);
-        ItemStack sharpness3 = new ItemStack(Material.ENCHANTED_BOOK);
-        sharpness3.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
-        ItemStack prot3 = new ItemStack(Material.ENCHANTED_BOOK);
-        prot3.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
+        EnchantmentStorageMeta power3M = (EnchantmentStorageMeta) power3.getItemMeta();
+        power3M.addStoredEnchant(Enchantment.ARROW_DAMAGE, 3, true);
+        power3.setItemMeta(power3M);
 
+        ItemStack sharpness3 = new ItemStack(Material.ENCHANTED_BOOK);
+        EnchantmentStorageMeta sharpness3M = (EnchantmentStorageMeta) sharpness3.getItemMeta();
+        sharpness3M.addStoredEnchant(Enchantment.DAMAGE_ALL, 3, true);
+        sharpness3.setItemMeta(sharpness3M);
+
+        ItemStack prot3 = new ItemStack(Material.ENCHANTED_BOOK);
+        EnchantmentStorageMeta prot3M = (EnchantmentStorageMeta) prot3.getItemMeta();
+        prot3M.addStoredEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 3, true);
+        prot3.setItemMeta(prot3M);
 
         lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), power3);
         lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), sharpness3);

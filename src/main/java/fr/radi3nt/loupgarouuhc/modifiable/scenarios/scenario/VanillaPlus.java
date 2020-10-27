@@ -8,14 +8,15 @@ import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.security.SecureRandom;
 
 public class VanillaPlus extends Scenario {
 
-    protected float appleDropChance = 0.1f;
-    protected float flintDropChance = 10;
+    private float appleDropChance = 10f;
+    private float flintDropChance = 20f;
 
     public VanillaPlus(LGGame game) {
         super(game);
@@ -55,6 +56,23 @@ public class VanillaPlus extends Scenario {
                             player.getPlayer().getWorld().dropItem(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5), new ItemStack(Material.FLINT));
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @ScenarioEvent
+    public void event(LeavesDecayEvent e) {
+        if (isActive()) {
+            if (e.getBlock().getType() == Material.LEAVES || e.getBlock().getType() == Material.LEAVES_2) {
+                SecureRandom random = new SecureRandom();
+                if (random.nextInt(100) < appleDropChance) {
+                    for (ItemStack item : e.getBlock().getDrops()) {
+                        if (item.getType() == Material.APPLE) {
+                            item.setType(Material.AIR);
+                        }
+                    }
+                    e.getBlock().getWorld().dropItem(e.getBlock().getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.APPLE));
                 }
             }
         }

@@ -11,14 +11,17 @@ import fr.radi3nt.loupgarouuhc.event.events.OnDiscoverRole;
 import fr.radi3nt.loupgarouuhc.event.events.OnNewEpisode;
 import fr.radi3nt.loupgarouuhc.event.events.OnNight;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LoupPerfide;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.PetiteFille;
+import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioUtilis;
 import fr.radi3nt.loupgarouuhc.utilis.Maths;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_12_R1.ChatComponentText;
 import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -47,6 +50,12 @@ public class GameTimer extends BukkitRunnable {
         this.game = game;
     }
 
+    private static void addGhost(Player player, Team team) {
+        team.setAllowFriendlyFire(true);
+        team.setCanSeeFriendlyInvisibles(true);
+        team.addPlayer(player);
+    }
+
     @Override
     @SuppressWarnings("deprecated")
     public void run() {
@@ -69,7 +78,7 @@ public class GameTimer extends BukkitRunnable {
                     gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_NOTE_HARP, SoundCategory.AMBIENT, 1f, 1f);
                 }
                 if (ticks == 3 * 20) {
-                    gamePlayer.sendTitle(ChatColor.GOLD + "GO", ChatColor.GRAY + "The UHC begin", 20, 20 * 3, 20);
+                    gamePlayer.sendTitle(ChatColor.GOLD + gamePlayer.getLanguage().getMessage("gameStartTile", gamePlayer), gamePlayer.getLanguage().getMessage("gameStartSubTile", gamePlayer), 20, 20 * 3, 20);
                     gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_END_PORTAL_SPAWN, SoundCategory.AMBIENT, 1f, 1f);
                 }
             }
@@ -80,7 +89,9 @@ public class GameTimer extends BukkitRunnable {
         for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
             if (ticksday >= 24000 - shift) {
                 lgp.sendMessage(lgp.getLanguage().getMessage("gameTimerNewEpisode", lgp));
-                lgp.getPlayer().playSound(lgp.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, SoundCategory.AMBIENT, 1f, 2f);
+                if (lgp.getPlayer() != null) {
+                    lgp.getPlayer().playSound(lgp.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, SoundCategory.AMBIENT, 1f, 2f);
+                }
                 Bukkit.getPluginManager().callEvent(new OnNewEpisode(game, checkDay(ticks - 1)));
                 game.getGameSpawn().getWorld().setTime(24000 - shift);
                 ticksday = -shift;
@@ -102,7 +113,7 @@ public class GameTimer extends BukkitRunnable {
                 if (lgp.getGameData().isInCouple()) {
                     LGPlayer cupi = null;
                     for (LGPlayer lgp1 : game.getGamePlayers()) {
-                        if (lgp1.getGameData().getRole().getRoleSort() == RoleSort.CUPIDON) {
+                        if (lgp1.getGameData().getRole().getRoleIdentity() == Cupidon.getStaticRoleIdentity()) {
                             cupi = lgp1;
                             break;
                         }
@@ -183,10 +194,14 @@ public class GameTimer extends BukkitRunnable {
                         e.printStackTrace();
                     }
                 }
-                if (lgp.getGameData().getRole().getRoleSort() == RoleSort.LOUP_PERFIDE) {
+
+                if (lgp.getGameData().getRole().getRoleIdentity().equals(LoupPerfide.getStaticRoleIdentity())) {
                     for (LGPlayer tlgp : game.getGamePlayers()) {
-                        if (tlgp.getGameData().getRole().getRoleSort() == RoleSort.PETITE_FILLE) {
+                        if (tlgp.getGameData().getRole().getRoleIdentity() == PetiteFille.getStaticRoleIdentity()) {
                             if (ticksday > 12500 && checkDay(ticks) > 1) {
+                                addGhost(tlgp.getPlayer(), createScoreBoard(tlgp).registerNewTeam("ghostsPlayers"));
+                                addGhost(lgp.getPlayer(), createScoreBoard(lgp).registerNewTeam("ghostsPlayers"));
+
                                 lgp.getPlayer().spawnParticle(Particle.FIREWORKS_SPARK, tlgp.getPlayer().getLocation().add(0, 1.5, 0), 1, 0, 0, 0, 0);
                                 tlgp.getPlayer().spawnParticle(Particle.FIREWORKS_SPARK, lgp.getPlayer().getLocation().add(0, 1.5, 0), 1, 0, 0, 0, 0);
                             }
@@ -346,7 +361,7 @@ public class GameTimer extends BukkitRunnable {
                                 }
                             }
                         } else {
-                            Logger.getLogger().logWhenDebug("Wrong vote time : time is more than 1 hour", LoupGarouUHC.console);
+                            Logger.getLogger().logWhenDebug("Wrong vote time : time is more than 1 hour", LoupGarouUHC.getConsole());
                             minutes = 59;
                             seconds = 59;
                             lgp.sendMessage(lgp.getLanguage().getMessage("gameTimerVoteMessageMinutesSeconds").replace("%voteMinutes%", String.valueOf(minutes)).replace("%voteSeconds%", String.valueOf(seconds)));
@@ -394,7 +409,7 @@ public class GameTimer extends BukkitRunnable {
             game.getVoted().clear();
         }
 
-        Scenario.tickAll(this, ticks);
+        ScenarioUtilis.tickAll(this, ticks);
     }
 
     private void setScore(String text, int i, Objective objective) {
@@ -414,7 +429,7 @@ public class GameTimer extends BukkitRunnable {
         i--;
         setScore(ChatColor.AQUA + "Episode " + checkDay(ticks), i, objective);
         i--;
-        setScore(ChatColor.GOLD + "" + ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                            ", i, objective);
+        setScore(ChatColor.GOLD + "" + ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective);
         i--;
 
         setScore(ChatColor.RED + "" + game.getGamePlayers().size() + ChatColor.DARK_RED + " joueurs", i, objective);
@@ -433,7 +448,7 @@ public class GameTimer extends BukkitRunnable {
         setScore(ChatColor.DARK_RED + "Groupes de " + ChatColor.RED + nbGroupe, i, objective);
         i--;
 
-        setScore(ChatColor.BLACK + "" + ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                            ", i, objective);
+        setScore(ChatColor.BLACK + "" + ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective);
         i--;
 
         int heures = (ticks / 20 / 3600);
@@ -467,7 +482,7 @@ public class GameTimer extends BukkitRunnable {
         }
         i--;
 
-        setScore(ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                            ", i, objective);
+        setScore(ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective); //todo tro longue barres
         i--;
 
         if (checkDay(ticks) >= game.getParameters().getDayRoleDivulged())
@@ -480,7 +495,7 @@ public class GameTimer extends BukkitRunnable {
         setScore(ChatColor.DARK_BLUE + "Kills: " + ChatColor.BLUE + lgp.getGameData().getKills(), i, objective);
         i--;
 
-        setScore(ChatColor.AQUA + "" + ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                            ", i, objective);
+        setScore(ChatColor.AQUA + "" + ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective);
         i--;
 
         String text;
@@ -490,13 +505,11 @@ public class GameTimer extends BukkitRunnable {
             text = ChatColor.DARK_GREEN + "Border: " + ChatColor.GREEN + game.getRadius();
 
         setScore(text, i, objective);
-        //i--;
-                    /*
-                    setScore("   ", i, objective);
-                    i--;
-                    setScore(ChatColor.DARK_GREEN + "by Radi3nt", i, objective);
+        i--;
 
-                     */
+        setScore("   ", i, objective);
+        i--;
+        setScore(ChatColor.DARK_GREEN + "@Radi3nt", i, objective);
         return board;
     }
 

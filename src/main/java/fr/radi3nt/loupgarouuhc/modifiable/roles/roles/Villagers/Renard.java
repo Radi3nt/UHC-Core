@@ -3,12 +3,14 @@ package fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefix;
-import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.prefixPrivé;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefixPrivé;
 
 public class Renard extends Role {
 
@@ -20,15 +22,19 @@ public class Renard extends Role {
         super(game);
     }
 
+    public static RoleIdentity getStaticRoleIdentity() {
+        return new RoleIdentity("Renard", WinType.VILLAGE, RoleType.VILLAGER);
+    }
+
     @Override
-    public RoleSort getRoleSort() {
-        return RoleSort.RENARD;
+    public RoleIdentity getRoleIdentity() {
+        return getStaticRoleIdentity();
     }
 
     @Override
     public void OnNight(LGGame game, LGPlayer lgp) {
         if (time < 3) {
-            lgp.sendMessage(prefix + " " + prefixPrivé + ChatColor.GOLD + " Tu peut voir si un joueur est loup garou ou pas en faisant /lg role see <player>, tu pourras flairer un joueur encore " + ChatColor.YELLOW + (3 - time) + ChatColor.GOLD + " fois");
+            lgp.sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.GOLD + " Tu peut voir si un joueur est loup garou ou pas en faisant /lg role see <player>, tu pourras flairer un joueur encore " + ChatColor.YELLOW + (3 - time) + ChatColor.GOLD + " fois");
             this.canSee = true;
         }
     }

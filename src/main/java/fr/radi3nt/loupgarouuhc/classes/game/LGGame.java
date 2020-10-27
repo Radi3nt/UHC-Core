@@ -151,11 +151,11 @@ public class LGGame {
 
         gamePlayersWithDeads= (ArrayList<LGPlayer>) gamePlayers.clone();
         try {
-            for (Map.Entry<String, Constructor<? extends Role>> role : rolesLink.entrySet()) {
-                for (int i = 0; i < roleNumber.getOrDefault(role.getKey(), 0); i++) {
+            for (Map.Entry<RoleIdentity, Constructor<? extends Role>> role : Role.getRoleLinkByStringKey().entrySet()) {
+                for (int i = 0; i < getRoleNumber().getOrDefault(role.getKey().getId(), 0); i++) {
                     roles.add(role.getValue().newInstance(this));
                 }
-                RolesConfig.set("Roles." + role.getKey(), 0);
+                getRolesConfig().set("Roles." + role.getKey(), 0);
             }
         } catch (Exception err) {
             broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
@@ -218,7 +218,7 @@ public class LGGame {
         new BukkitRunnable() {
             int timeOut = 20 * 20;
             int timeLeft = 5 * 2;
-            int actualRole = RoleSort.values().length;
+            int actualRole = Role.getRoleLinkByStringKey().size();
 
             @Override
             public void run() {
@@ -246,7 +246,7 @@ public class LGGame {
                     }
 
                     if (--actualRole < 0)
-                        actualRole = RoleSort.values().length - 1;
+                        actualRole = Role.getRoleLinkByStringKey().size() - 1;
                 } else {
                     timeOut--;
                 }
@@ -412,7 +412,7 @@ public class LGGame {
                     if (player.getGameData().getRole().getWinType() == WinType.SOLO)
                         return;
                 }
-                endGame(roles.get(0).getWinType(), false);
+                endGame(winrole, false);
                 isStarted = false;
             }
         }
@@ -440,7 +440,6 @@ public class LGGame {
         }
 
         for (LGPlayer lgp : gamePlayersWithDeads) {
-            lgp.setGameData(new PlayerGameData(null));
             if (lgp.getPlayer() != null) {
                 lgp.getPlayer().closeInventory();
                 if (lgp.getGameData().getRole() != null && lgp.getGameData().getRoleWinType() == winType && winType != WinType.SOLO) {
@@ -474,6 +473,7 @@ public class LGGame {
                     lgp.sendTitle("§c§lDéfaite...", "§4Vous avez perdu la partie.", 5, 200, 5);
                 }
 
+                lgp.setGameData(new PlayerGameData(null));
                 lgp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                 stats.setKills(stats.getKills() + lgp.getGameData().getKills());
                 stats.setPoints(stats.getPoints() + lgp.getGameData().getKills() * KILLS_POINTS);

@@ -2,7 +2,7 @@ package fr.radi3nt.loupgarouuhc.classes.player;
 
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleSort;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 
@@ -47,8 +47,8 @@ public class PlayerGameData {
         return role.getRoleType();
     }
 
-    public RoleSort getRoleSort() {
-        return role.getRoleSort();
+    public RoleIdentity getRoleIdentity() {
+        return role.getRoleIdentity();
     }
 
     public WinType getRoleWinType() {
