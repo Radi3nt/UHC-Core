@@ -1,6 +1,7 @@
 package fr.radi3nt.loupgarouuhc.classes.lang.lang;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import org.bukkit.ChatColor;
 
@@ -82,7 +83,7 @@ public class Languages {
     public void setupLanguage() {
         for (Languages language : languages) {
             if (language.getId().equals(this.getId())) {
-                LoupGarouUHC.getConsole().sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.DARK_RED + "Invalid language: " + ChatColor.RED + getId());
+                Logger.getGeneralLogger().logInConsole(LoupGarouUHC.getPrefix() + " " + ChatColor.DARK_RED + "Invalid language: " + ChatColor.RED + getId());
                 return;
             }
         }

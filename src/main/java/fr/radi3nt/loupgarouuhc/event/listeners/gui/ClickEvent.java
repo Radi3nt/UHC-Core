@@ -3,6 +3,7 @@ package fr.radi3nt.loupgarouuhc.event.listeners.gui;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.GUIs.*;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
-import static org.bukkit.Bukkit.broadcastMessage;
 
 public class ClickEvent implements Listener {
 
@@ -145,8 +145,8 @@ public class ClickEvent implements Listener {
                     }
 
                 } catch (Exception err) {
-                    broadcastMessage("§4§lUne erreur est survenue lors de la sauvegarde des roles... Regardez la console !");
-                    err.printStackTrace();
+                    Logger.getGeneralLogger().logInConsole("§4§lUne erreur est survenue lors de la sauvegarde des roles");
+                    Logger.getGeneralLogger().log(err);
                 }
                 LoupGarouUHC.saveRoleFile();
                 RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, e.getInventory());
@@ -259,8 +259,7 @@ public class ClickEvent implements Listener {
                                 itemStack.setItemMeta(meta);
                                 inventory.addItem(itemStack);
                             } catch (Exception err) {
-                                //todo logger of exeption !
-                                err.printStackTrace();
+                                Logger.getGeneralLogger().log(err);
                             }
                         }
                         player.openInventory(inventory);
@@ -393,8 +392,7 @@ public class ClickEvent implements Listener {
                             e.getCurrentItem().setItemMeta(meta);
                         }
                     } catch (Exception err) {
-                        //todo logger of exeption !
-                        err.printStackTrace();
+                        Logger.getGeneralLogger().log(err);
                     }
                 }
                 e.setCancelled(true);

@@ -36,7 +36,6 @@ import fr.radi3nt.loupgarouuhc.utilis.Config;
 import fr.radi3nt.loupgarouuhc.utilis.Updater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -53,8 +52,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static org.bukkit.Bukkit.broadcastMessage;
-
 public final class LoupGarouUHC extends JavaPlugin implements Listener {
 
     public static Parameters parameters;
@@ -65,12 +62,12 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
 
     private static final HashMap<String, Integer> roleNumber = new HashMap<>();
     private static final ArrayList<LGPlayer> players = new ArrayList<>();
-    private static final ConsoleCommandSender console = Bukkit.getConsoleSender();
     private static final String prefix = ChatColor.AQUA + "[" + ChatColor.GOLD + ChatColor.BOLD + "LG UHC" + ChatColor.AQUA + "]" + ChatColor.RESET;
     private static final String prefixPrivé = ChatColor.BLUE + "[Privé]" + ChatColor.RESET;
     private static Plugin plugin;
     private static FileConfiguration RolesConfig;
     private static Updater updater;
+    public static final String DEFAULT_LANG_ID = "fr";
     private static File RoleConfigFile;
     private static LGGame GameInstance;
     private final HashMap<RoleIdentity, Boolean> MaxRoles = new HashMap<>();
@@ -83,7 +80,8 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         try {
             registerRole((RoleIdentity) role.getMethod("getStaticRoleIdentity").invoke(null), role);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            e.printStackTrace();
+            Logger.getGeneralLogger().log("Cannot register role: " + role.getSimpleName());
+            Logger.getGeneralLogger().log(e);
         }
     }
 
@@ -142,10 +140,6 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         }
     }
 
-    public static ConsoleCommandSender getConsole() {
-        return console;
-    }
-
     public static FileConfiguration getRolesConfig() {
         return RolesConfig;
     }
@@ -199,66 +193,94 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         return plugin.getDescription().getVersion();
     }
 
+    public static void broadcastMessage(String message) {
+        Bukkit.broadcastMessage(message);
+        Logger.getChat().log(message);
+    }
+
     @Override
     public void onEnable() {
 
-        new File(getDataFolder() + "/logs", "latest.yml").delete();
+        try {
 
-        new Logger(Config.createConfig(getDataFolder() + "/logs", "latest.yml"));
-        plugin = LoupGarouUHC.getPlugin(LoupGarouUHC.class);
+            new File(getDataFolder() + "/logs/general", "latest.yml").delete();
 
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Starting up !");
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Loup Garou UHC plugin (version " + plugin.getDescription().getVersion() + ") by " + ChatColor.AQUA + ChatColor.BOLD + "Radi3nt");
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "If you have any issues, please report it");
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.AQUA + "--------------------------------------");
+            Logger.setGeneralLogger(new Logger(Config.createConfig(getDataFolder() + "/logs/general", "latest.yml"), Bukkit.getConsoleSender()));
+            Logger.setChat(new Logger(Config.createConfig(getDataFolder() + "/logs/chat", "latest.yml"), Bukkit.getConsoleSender()));
+            plugin = LoupGarouUHC.getPlugin(LoupGarouUHC.class);
 
-        parameters = new Parameters();
-        GameInstance = new LGGame(parameters);
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Starting up !");
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "Loup Garou UHC plugin (version " + plugin.getDescription().getVersion() + ") by " + ChatColor.AQUA + ChatColor.BOLD + "Radi3nt");
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.YELLOW + "If you have any issues, please report it");
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.AQUA + "--------------------------------------");
 
-        new Languages("Default", Languages.DEFAULTID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-        Reader reader = new Reader();
-        if (!reader.loadAllLanguage())
-            console.sendMessage(ChatColor.DARK_RED + "Error while loading languages configs");
+            Logger.getGeneralLogger().log("Loading default game");
+            parameters = new Parameters();
+            GameInstance = new LGGame(parameters);
 
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Languages");
-        loadDefaultRole();
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Loading Default Roles");
-        registerConfigs();
+            Logger.getGeneralLogger().log("Loading default language");
+            new Languages("Default", Languages.DEFAULTID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            Reader reader = new Reader();
+            if (!reader.loadAllLanguage())
+                Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Error while loading languages configs");
 
-        HoloStats.createHoloStatsScoreboards();
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Languages");
+            loadDefaultRole();
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Loading Default Roles");
+            registerConfigs();
 
-        GeneralChatI = new GeneralChat();
-        GameChatI = new GameChat();
-        DeadChatI = new DeadChat();
+            GeneralChatI = new GeneralChat();
+            GameChatI = new GameChat();
+            DeadChatI = new DeadChat();
 
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered PlaceHolders");
-        RegisterEvents();
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Events");
-        RegisterScenarios();
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Loading Default Scenarios");
-        RegisterCommands();
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Commands");
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered PlaceHolders");
+            RegisterEvents();
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Events");
+            registerScenariosListeners();
+            registerDefaultScenarios();
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Loading Default Scenarios");
+            RegisterCommands();
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Commands");
 
-        for (String rolesKeys : RolesConfig.getConfigurationSection("Roles").getKeys(false)) {
-            roleNumber.put(rolesKeys, RolesConfig.getInt("Roles." + rolesKeys));
+            for (String rolesKeys : RolesConfig.getConfigurationSection("Roles").getKeys(false)) {
+                roleNumber.put(rolesKeys, RolesConfig.getInt("Roles." + rolesKeys));
+            }
+
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                LGPlayer lgp = LGPlayer.thePlayer(player);
+                lgp.loadStats();
+                lgp.loadSavedLang();
+                players.add(lgp);
+                lgp.setChat(GeneralChatI);
+                broadcastMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + player.getDisplayName() + " (" + ChatColor.YELLOW + players.size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
+            }
+
+            HoloStats.createHoloStatsScoreboards();
+
+
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.GREEN + "Finished initialisation");
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.AQUA + "--------------------------------------");
+        } catch (Exception e) {
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.DARK_RED + "Something went wrong, please restart your server");
+            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.AQUA + "--------------------------------------");
+            Logger.getGeneralLogger().log(e);
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
         }
+    }
 
+    private void registerScenariosListeners() {
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            LGPlayer lgp = LGPlayer.thePlayer(player);
-            lgp.loadStats();
-            lgp.loadSavedLang();
-            players.add(lgp);
-            lgp.setChat(GeneralChatI);
-            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + player.getDisplayName() + " (" + ChatColor.YELLOW + players.size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
+        ScenarioListener listen = new ScenarioListener();
+        RegisteredListener registeredListener = new RegisteredListener(listen, (listener, event) -> listen.onEvent(event), EventPriority.NORMAL, this, true);
+        for (HandlerList handler : HandlerList.getHandlerLists()) {
+            handler.register(registeredListener);
         }
-
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.GREEN + "Finished initialisation");
-        console.sendMessage(ChatColor.GOLD + "[LG UHC] " + ChatColor.AQUA + "--------------------------------------");
+        Logger.getGeneralLogger().log("Registered listeners for all registered events");
 
     }
 
-    private void RegisterScenarios() {
+    private void registerDefaultScenarios() {
 
         ScenarioUtilis.addScenario(XPBoost.class);
         ScenarioUtilis.addScenario(VanillaPlus.class);
@@ -281,12 +303,8 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         ScenarioUtilis.addScenario(DoubleJump.class);
         ScenarioUtilis.addScenario(HungerLess.class);
         ScenarioUtilis.addScenario(NoDrown.class);
+        ScenarioUtilis.addScenario(FastPlace.class);
 
-
-        ScenarioListener listen = new ScenarioListener();
-        RegisteredListener registeredListener = new RegisteredListener(listen, (listener, event) -> listen.onEvent(event), EventPriority.NORMAL, this, true);
-        for (HandlerList handler : HandlerList.getHandlerLists())
-            handler.register(registeredListener);
     }
 
     private void loadDefaultRole() {
@@ -310,13 +328,15 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
             registerRole(Renard.getStaticRoleIdentity(), Renard.class);
 
         } catch (SecurityException e) {
-            System.out.println("Error while enabling roles");
+            Logger.getGeneralLogger().log("Error while enabling roles");
+            Logger.getGeneralLogger().log(e);
         }
     }
 
     @Override
     public void onDisable() {
-        Logger.getLogger().archive();
+        Logger.getGeneralLogger().archive();
+        Logger.getChat().archive();
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
             if (lgp.isInGame())
@@ -331,8 +351,8 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
             }
 
         } catch (Exception err) {
-            broadcastMessage("§4§lUne erreur est survenue lors de la sauvegarde des roles... Regardez la console !");
-            err.printStackTrace();
+            Logger.getGeneralLogger().logInConsole("§4§lUne erreur est survenue lors de la sauvegarde des roles");
+            Logger.getGeneralLogger().log(err);
         }
         try {
             RolesConfig.save(RoleConfigFile);

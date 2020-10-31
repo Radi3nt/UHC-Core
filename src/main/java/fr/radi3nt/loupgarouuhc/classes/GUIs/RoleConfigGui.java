@@ -1,5 +1,6 @@
 package fr.radi3nt.loupgarouuhc.classes.GUIs;
 
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getRoleNumber;
-import static org.bukkit.Bukkit.broadcastMessage;
 
 public class RoleConfigGui {
 
@@ -37,8 +37,8 @@ public class RoleConfigGui {
                     rolesSorts.add(role.getKey());
                 }
         } catch (Exception err) {
-            broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
-            err.printStackTrace();
+            Logger.getGeneralLogger().logInConsole("§4§lUne erreur est survenue lors de la sauvegarde des roles");
+            Logger.getGeneralLogger().log(err);
         }
 
 
@@ -96,8 +96,8 @@ public class RoleConfigGui {
                     rolesSorts.add(role.getKey());
                 }
         } catch (Exception err) {
-            broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
-            err.printStackTrace();
+            Logger.getGeneralLogger().logInConsole("§4§lUne erreur est survenue lors de la sauvegarde des roles");
+            Logger.getGeneralLogger().log(err);
         }
 
         for (RoleIdentity roleSort : Role.getRoleLinkByStringKey().keySet()) {

@@ -54,7 +54,7 @@ public class Reader {
             }
 
             new Languages(name, id, roleLangs, messages, placeHolders);
-            Logger.getLogger().logWhenDebug(ChatColor.DARK_RED + "[Language] Loading new language: " + file.getName(), LoupGarouUHC.getConsole());
+            Logger.getGeneralLogger().log(ChatColor.DARK_RED + "[Language] Loading new language: " + file.getName());
         }
     }
 
@@ -126,7 +126,7 @@ public class Reader {
                 if (!file.isHidden() && file.getName().contains(".yml")) {
                     loadLanguage(file);
                 } else {
-                    Logger.getLogger().logWhenDebug(ChatColor.DARK_RED + "[Language] Skipping loading of: " + file.getName(), LoupGarouUHC.getConsole());
+                    Logger.getGeneralLogger().log(ChatColor.DARK_RED + "[Language] Skipping loading of: " + file.getName());
                 }
             }
         }
