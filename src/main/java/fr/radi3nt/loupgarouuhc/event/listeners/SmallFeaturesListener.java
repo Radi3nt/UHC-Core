@@ -4,9 +4,7 @@
 
 package fr.radi3nt.loupgarouuhc.event.listeners;
 
-import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,12 +30,20 @@ public class SmallFeaturesListener implements Listener {
     }
 
     @EventHandler
-    public void onDrinkMilk(final PlayerInteractEvent event) {
+    public void onDrinkMilkAndNapple(final PlayerInteractEvent event) {
         final Action a = event.getAction();
-        if (LGPlayer.thePlayer(event.getPlayer()).isInGame())
+        if (LGPlayer.thePlayer(event.getPlayer()).isInGame()) {
             if ((a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) && event.getPlayer().getInventory().getItemInMainHand().getType() == Material.MILK_BUCKET) {
                 event.setCancelled(true);
             }
+
+            if ((a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)) {
+                if (new ItemStack(Material.GOLDEN_APPLE, 1, (byte) 1).isSimilar(event.getPlayer().getInventory().getItemInMainHand())) {
+                    event.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.GOLDEN_APPLE, event.getItem().getAmount()));
+
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -57,7 +63,8 @@ public class SmallFeaturesListener implements Listener {
         if (LGPlayer.thePlayer(event.getPlayer()).isInGame())
             if (new ItemStack(Material.GOLDEN_APPLE, 1, (byte) 1).isSimilar(event.getItem())) {
                 event.setCancelled(true);
-                Bukkit.getScheduler().scheduleSyncDelayedTask(LoupGarouUHC.getPlugin(), () -> event.getPlayer().getInventory().remove(event.getItem()));
+                event.setItem(new ItemStack(Material.GOLDEN_APPLE, event.getItem().getAmount()));
+                //Bukkit.getScheduler().scheduleSyncDelayedTask(LoupGarouUHC.getPlugin(), () -> );
             }
     }
 

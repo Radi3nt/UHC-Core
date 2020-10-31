@@ -20,6 +20,9 @@ public class Parameters {
     private int timeMultiplication = 1;
 
     private boolean hiddenCompo = false;
+    private boolean isTroll = false;
+    private boolean isRandomTroll = true;
+    private int trollEndTime = 3 * 60 * 20 + 20 * 60 * 20;
     private boolean canReconnectInPvp = true;
     private boolean respawnBeforeRoleDivulged = true;
     private boolean onlyBlockCanBeRemoved = false;
@@ -27,7 +30,7 @@ public class Parameters {
     private int numberOfBlockRemovedWhenRespawn = 30;
     private int percentageOfChanceToRemove = 40;
 
-    private int disconnectTimeout = 10 * 60 * 20;
+    private int disconnectTimeout = 5 * 60 * 20;
     private int minPlayerForVotes = 3;
 
     private Location spawn = new Location(Bukkit.getWorlds().get(0), 0.5, 133, 0.5, 160, 0);
@@ -185,5 +188,29 @@ public class Parameters {
 
     public void setCanReconnectInPvp(boolean canReconnectInPvp) {
         this.canReconnectInPvp = canReconnectInPvp;
+    }
+
+    public boolean isTroll() {
+        return isTroll;
+    }
+
+    public void setTroll(boolean troll) {
+        isTroll = troll;
+    }
+
+    public int getTrollEndTime() {
+        return trollEndTime;
+    }
+
+    public void setTrollEndTime(int trollEndTime) {
+        this.trollEndTime = trollEndTime;
+    }
+
+    public boolean isRandomTroll() {
+        return isRandomTroll;
+    }
+
+    public void setRandomTroll(boolean randomTroll) {
+        isRandomTroll = randomTroll;
     }
 }

@@ -34,6 +34,7 @@ public class SystemPlaceHolder extends PlaceHolder {
                 if (player.getGameData().getGame().getGameTimer() != null) {
                     message = message.replace(getFormatedPlaceHolder("paramVoteMinPlayer"), String.valueOf(player.getGameData().getGame().getParameters().getMinPlayerForVotes()));
                     message = message.replace(getFormatedPlaceHolder("gameTimerDays"), String.valueOf(player.getGameData().getGame().getGameTimer().getDays()));
+                    message = message.replace(getFormatedPlaceHolder("gameTimerDays-"), String.valueOf(player.getGameData().getGame().getGameTimer().getDays() - 1));
                     int ticksPvp = player.getGameData().getGame().getPvP().getTime() - player.getGameData().getGame().getGameTimer().getTicks();
                     int heures1 = (ticksPvp / 20 / 3600);
                     int minutes1 = ((ticksPvp / 20 - (ticksPvp / 20 / 3600) * 3600) / 60);
