@@ -5,6 +5,7 @@ import com.mojang.authlib.properties.Property;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.game.Reason;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.event.events.OnKill;
@@ -18,6 +19,7 @@ import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -77,6 +79,7 @@ public class DamageEvent implements Listener {
                         e.setCancelled(true);
                         player.setMaxHealth(20.0D);
                         player.setHealth(20.0D);
+                        lgp.getPlayerStats().refresh();
                         lgp.sendTitle(ChatColor.RED + "You died", ChatColor.GRAY + "You can only spectate the game", 5, 5 * 20, 5);
 
                         lgp.getGameData().setCanBeRespawned(true);
@@ -133,7 +136,7 @@ public class DamageEvent implements Listener {
                         }
 
                         Location npcLoc = lgp.getPlayer().getLocation().clone();
-                        while (npcLoc.getBlock().getType() == Material.AIR) {
+                        while (npcLoc.getBlock().getType() == Material.AIR && !npcLoc.getBlock().getType().isSolid()) {
                             npcLoc.setY(npcLoc.getBlockY() - 1);
                             if (npcLoc.getBlockY() <= -1) {
                                 npcLoc = lgp.getPlayer().getLocation().clone();
@@ -153,7 +156,8 @@ public class DamageEvent implements Listener {
                                 String signature = property.getSignature();
                                 npc.setSkin(texture, signature);
                             } catch (Exception e1) {
-
+                                Logger.getGeneralLogger().logInConsole("§4§lCannot get skin for player: " + player.getUniqueId());
+                                Logger.getGeneralLogger().log(e1);
                             }
                         }
                         npc.spawn(false, true);
@@ -196,7 +200,7 @@ public class DamageEvent implements Listener {
                                     game.updateKill(false);
                                     if (lgp.getGameData().getGame() != null) {
                                         if (game.getGameTimer().getDays() < game.getParameters().getDayRoleDivulged()) {
-                                            Bukkit.broadcastMessage(getPrefix() + " " + ChatColor.DARK_RED + lgp.getPlayer().getName() + ChatColor.RED + " has been respawned");
+                                            LoupGarouUHC.broadcastMessage(getPrefix() + " " + ChatColor.DARK_RED + lgp.getPlayer().getName() + ChatColor.RED + " has been respawned");
                                             int items = game.getParameters().getNumberOfBlockRemovedWhenRespawn();
                                             for (ItemStack itemStack : lgp.getPlayer().getInventory().getContents()) {
                                                 if (itemStack != null && (itemStack.getType().isBlock() || !lgp.getGameData().getGame().getParameters().isOnlyBlockCanBeRemoved())) {
@@ -240,20 +244,14 @@ public class DamageEvent implements Listener {
                                 }
 
                                 if (i == 5 * 20) {
-                                    if (!lgp.getGameData().isInCouple()) {
-                                        Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
-                                        Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
-                                        Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getGameData().getRole().getName(lgp.getLanguage()));
-                                        Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
-                                    } else {
-                                        Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
-                                        Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
-                                        Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " qui c'est suicidé, il était " + ChatColor.ITALIC + lgp.getGameData().getRole().getName(lgp.getLanguage()));
-                                        Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
+                                    if (game.isRoleTrolled() && game.getGameTimer().getTicks() < game.getParameters().getTrollEndTime()) {
+                                        SecureRandom random = new SecureRandom();
+                                        lgp.getGameData().setRole(game.getRoles().get(random.nextInt(game.getRoles().size())));
                                     }
                                     lgp.getGameData().setCanVote(false);
                                     if (player != null) {
                                         npc.spectate(lgp.getPlayer(), false);
+                                        (player.getLocation().getWorld().spawn(playerloc.clone().add(0.5, 0.5, 0.5), ExperienceOrb.class)).setExperience(player.getTotalExperience() / 17);
                                         for (ItemStack item : player.getInventory().getContents()) {
                                             if (item != null) {
                                                 player.getWorld().dropItem(playerloc, item.clone());
@@ -279,7 +277,11 @@ public class DamageEvent implements Listener {
                                             }
                                         }
                                     }
-
+                                    if (lgp.getGameData().isInCouple() && lgp.getGameData().getCouple().getGameData().isDead()) {
+                                        game.kill(lgp, Reason.LOVE, false, playerloc);
+                                    } else {
+                                        game.kill(lgp, Reason.TUÉ, false, playerloc);
+                                    }
                                     if (game.getGameTimer() != null) {
                                         if (finalLgDamager != null) {
                                             Bukkit.getPluginManager().callEvent(new OnKilled(game, lgp, finalLgDamager, playerloc));
@@ -287,7 +289,7 @@ public class DamageEvent implements Listener {
                                         }
                                     }
 
-                                    lgp.getGameData().getGame().kill(lgp, Reason.TUÉ, false, playerloc);
+
                                     lgp.getGameData().setCanBeRespawned(false);
                                     if (lgp.getGameData().isInCouple() && lgp.getGameData().isDead() && !lgp.getGameData().getCouple().getGameData().isDead()) {
                                         lgp.getGameData().getCouple().getPlayer().damage(20);

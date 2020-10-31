@@ -1,9 +1,9 @@
 package fr.radi3nt.loupgarouuhc.event.listeners;
 
+import fr.radi3nt.loupgarouuhc.classes.game.Reason;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
 import fr.radi3nt.loupgarouuhc.classes.stats.Hologram;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -37,15 +37,16 @@ public class PlayerLeaveEvent implements Listener {
         e.setQuitMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_RED + "-" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getName());
         if (lgp.isInGame() && lgp.getGameData().hasRole() && !lgp.getGameData().isDead()) {
             new BukkitRunnable() {
+                final LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer().getUniqueId());
                 int i = 0;
 
                 @Override
                 public void run() {
-                    if (i >= lgp.getGameData().getGame().getParameters().getDisconnectTimeout() || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().isCanReconnectInPvp())) {
-                        Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
-                        Bukkit.broadcastMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
-                        Bukkit.broadcastMessage(ChatColor.GREEN + "" + ChatColor.BOLD + lgp.getName() + ChatColor.GREEN + " est mort, il était " + ChatColor.ITALIC + lgp.getGameData().getRole().getName(lgp.getLanguage()));
-                        Bukkit.broadcastMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
+                    if (!lgp.isInGame()) {
+                        cancel();
+                    }
+                    if (lgp.isInGame() && (i >= lgp.getGameData().getGame().getParameters().getDisconnectTimeout() || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().isCanReconnectInPvp()))) {
+                        lgp.getGameData().getGame().kill(lgp, Reason.DISCONNECTED, false, playerloc);
                         for (ItemStack item : inventory.getContents()) {
                             if (item != null) {
                                 playerloc.getWorld().dropItem(playerloc, item.clone());
@@ -71,23 +72,6 @@ public class PlayerLeaveEvent implements Listener {
                             }
                         }
 
-
-                        lgp.getGameData().getGame().getRoles().remove(lgp.getGameData().getRole());
-                        lgp.getGameData().getGame().getGamePlayers().remove(lgp);
-                        lgp.setChat(DeadChatI);
-                        //Lightning effect
-                        playerloc.getWorld().strikeLightningEffect(playerloc);
-                        lgp.getGameData().setDead(true);
-                        if (lgp.getGameData().getCouple() != null) {
-                            lgp.getGameData().getCouple().getPlayer().damage(20);
-                            //lgp.getCouple().setCouple(null);
-                            lgp.getGameData().setCouple(null);
-                        }
-                        lgp.getGameData().getGame().getGamePlayers().remove(lgp);
-                        lgp.getGameData().getGame().updateKill(false);
-
-                        lgp.getGameData().setGame(null);
-
                         lgp.getStats().setKills(lgp.getStats().getKills() + lgp.getGameData().getKills());
                         lgp.getGameData().setKills(0);
 
@@ -102,7 +86,7 @@ public class PlayerLeaveEvent implements Listener {
                         lgp.remove();
                         this.cancel();
                     }
-                    if (lgp.getPlayer() != null) {
+                    if (i > 20 && lgp.getPlayer() != null && lgp.getPlayer().isOnline()) {
                         this.cancel();
                     }
                     i++;

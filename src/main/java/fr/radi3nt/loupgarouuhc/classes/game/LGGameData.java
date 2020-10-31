@@ -1,19 +1,20 @@
 package fr.radi3nt.loupgarouuhc.classes.game;
 
-import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
 import fr.radi3nt.loupgarouuhc.classes.chats.DeadChat;
 import fr.radi3nt.loupgarouuhc.classes.chats.GameChat;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 
 public class LGGameData {
 
     private LGPlayer host;
 
-    private Chat logChat;
+    private Logger logChat;
     private DeadChat deathChat;
     private GameChat gameChat;
 
     private String name;
+    private boolean practice = false;
     private String displayName = "&4Loup Garou UHC";
 
     public LGPlayer getHost() {
@@ -24,11 +25,11 @@ public class LGGameData {
         this.host = host;
     }
 
-    public Chat getLogChat() {
+    public Logger getLogChat() {
         return logChat;
     }
 
-    public void setLogChat(Chat logChat) {
+    public void setLogChat(Logger logChat) {
         this.logChat = logChat;
     }
 
@@ -63,5 +64,13 @@ public class LGGameData {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public boolean isPractice() {
+        return practice;
+    }
+
+    public void setPractice(boolean practice) {
+        this.practice = practice;
     }
 }

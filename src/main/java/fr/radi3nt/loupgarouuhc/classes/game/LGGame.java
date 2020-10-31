@@ -178,7 +178,7 @@ public class LGGame {
             gamePlayers.clear();
             gamePlayersWithDeads.clear();
             roles.clear();
-            isStarted=false;
+            isStarted = false;
             return;
         }
 
@@ -196,7 +196,7 @@ public class LGGame {
             gamePlayers.clear();
             gamePlayersWithDeads.clear();
             roles.clear();
-            isStarted=false;
+            isStarted = false;
             return;
         }
 
@@ -401,15 +401,15 @@ public class LGGame {
         if (killed.isLinkedToPlayer() && killed.getPlayer().isOnline()) {
             killed.getPlayer().setGameMode(GameMode.SPECTATOR);
             //Lightning effect
-            killed.getPlayer().getWorld().strikeLightningEffect(playerloc);
-            killed.getGameData().setDead(true);
-            if (killed.getGameData().getCouple() != null) {
-                killed.getGameData().getCouple().getPlayer().damage(20);
-                killed.getGameData().setCouple(null);
-            }
-            killed.getGameData().setGame(null);
-            updateKill(endGame);
         }
+        if (killed.getGameData().getCouple() != null) {
+            killed.getGameData().getCouple().getPlayerStats().setHealth(0);
+            killed.getGameData().setCouple(null);
+        }
+        sendDeathMessageToAll(killed.getName(), killed.getGameData().getRole(), reason);
+        killed.getGameData().setGame(null);
+        updateKill(endGame);
+        data.getLogChat().log("Killed " + killed.getPlayer());
     }
 
     public void updateKill(Boolean endGame) {
@@ -673,6 +673,19 @@ public class LGGame {
         lgp.getGameData().setCouple(null);
         lgp.getGameData().setKiller(null);
         lgp.getGameData().setGame(null);
+    }
+
+    public void sendDeathMessageToAll(String playerName, Role role, Reason reason) {
+        for (LGPlayer gamePlayersWithDead : this.getGamePlayersWithDeads()) {
+            gamePlayersWithDead.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "========== ♦ =========");
+            gamePlayersWithDead.sendMessage(ChatColor.GREEN + "Le village a perdu un de ses membres:");
+            gamePlayersWithDead.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD +
+                    playerName + ChatColor.GREEN + " " +
+                    reason.getMessage() + ", il était " + ChatColor.ITALIC +
+                    role.getName(gamePlayersWithDead.getLanguage()));
+            gamePlayersWithDead.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "=====================");
+        }
+        Logger.getGeneralLogger().logInConsole(ChatColor.GREEN + "" + ChatColor.BOLD + playerName + ChatColor.GREEN + " " + reason.getMessage() + ", il était " + ChatColor.ITALIC + role.getRoleIdentity().getId());
     }
 
     public void setRadius(Integer radius) {
