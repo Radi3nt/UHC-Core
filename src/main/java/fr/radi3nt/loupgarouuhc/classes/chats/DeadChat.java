@@ -1,6 +1,6 @@
 package fr.radi3nt.loupgarouuhc.classes.chats;
 
-import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import org.bukkit.ChatColor;
 
@@ -15,7 +15,7 @@ public class DeadChat extends Chat{
         } else {
             finalMessage = ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "DEAD" + ChatColor.DARK_GRAY + "]" + ChatColor.GRAY + user.getName() + ChatColor.DARK_GRAY + " » " + ChatColor.GRAY + message;
         }
-        LoupGarouUHC.getConsole().sendMessage(finalMessage);
+        Logger.getChat().logInConsole(finalMessage);
         for (LGPlayer lgp : getPlayers()) {
             if (lgp.getChat() == this) {
                 lgp.sendMessage(finalMessage);

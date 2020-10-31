@@ -1,7 +1,9 @@
 package fr.radi3nt.loupgarouuhc.classes.game;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
+import fr.radi3nt.loupgarouuhc.classes.lang.lang.Languages;
 import fr.radi3nt.loupgarouuhc.classes.lang.lang.SystemPlaceHolder;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.classes.player.PlayerGameData;
@@ -16,6 +18,7 @@ import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.PvP;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
+import fr.radi3nt.loupgarouuhc.utilis.Config;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
@@ -23,6 +26,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -30,13 +34,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
-import static org.bukkit.Bukkit.broadcastMessage;
 
 public class LGGame {
 
 
     public static final int GAME_POINTS = 5;
     public static final int KILLS_POINTS = 5;
+    public static final int WINNED_BONUS = 5;
     public static final int ALIVE_POINTS = 10;
     public static final int DEAD_POINTS = 5;
     private final ArrayList<Scenario> scenarios = new ArrayList<>();
@@ -44,6 +48,7 @@ public class LGGame {
 
     private Parameters parameters;
     private GameTimer gameTimer;
+    private boolean roleTrolled = false;
 
     private LGGameData data;
     private boolean isStarted = false;
@@ -72,6 +77,8 @@ public class LGGame {
     public LGGame(Parameters parameters) {
         this.parameters = parameters;
         this.data = new LGGameData();
+        new File(LoupGarouUHC.getPlugin().getDataFolder() + "/logs/game", "latest.yml").delete();
+        this.data.setLogChat(new Logger(Config.createConfig(LoupGarouUHC.getPlugin().getDataFolder() + "/logs/game", "latest.yml"), Bukkit.getConsoleSender()));
         ArrayList<Integer> timerAlerts = new ArrayList<>();
         timerAlerts.add(25 * 60 * 20);
         timerAlerts.add(20 * 60 * 20);
@@ -109,6 +116,7 @@ public class LGGame {
     public void join(LGPlayer player) {
         if (!isStarted) {
             gamePlayers.add(player);
+            data.getLogChat().log(player.getName() + " a rejoint la game");
         }
     }
 
@@ -121,6 +129,7 @@ public class LGGame {
                 start();
             } else {
                 isStarted = false;
+                data.getLogChat().log("Tentative de demarrage de la game: pas assez de joueurs");
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
                     lgp.sendMessage(lgp.getLanguage().getMessage("gameCannotStartPlayers").replace("%playerSize%", String.valueOf(playerSize)).replace("%roleSize%", String.valueOf(i[0])));
@@ -158,13 +167,14 @@ public class LGGame {
                 getRolesConfig().set("Roles." + role.getKey(), 0);
             }
         } catch (Exception err) {
-            broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
-            err.printStackTrace();
+            Logger.getGeneralLogger().logInConsole("§4§lUne erreur est survenue lors de la sauvegarde des roles");
+            Logger.getGeneralLogger().log(err);
         }
 
         // Canceler
         if (roles.isEmpty()) {
-            Bukkit.broadcastMessage(getPrefix() + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 1 role pour commencer !"); //TODO 2 roles + message
+            data.getLogChat().log("Cannot start game: 1 role");
+            LoupGarouUHC.broadcastMessage(getPrefix() + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 1 role pour commencer !"); //TODO 2 roles + message
             gamePlayers.clear();
             gamePlayersWithDeads.clear();
             roles.clear();
@@ -181,7 +191,8 @@ public class LGGame {
         }
         same=true; //todo a enlever en game
         if (!same) {
-            Bukkit.broadcastMessage(getPrefix() + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 2 sortes de role pour commencer !");
+            data.getLogChat().log("Cannot start game: 2 wintype");
+            LoupGarouUHC.broadcastMessage(getPrefix() + ChatColor.DARK_RED + " " + ChatColor.BOLD + "Il faut au moins 2 sortes de role pour commencer !");
             gamePlayers.clear();
             gamePlayersWithDeads.clear();
             roles.clear();
@@ -254,22 +265,29 @@ public class LGGame {
         }.runTaskTimer(LoupGarouUHC.getPlugin(LoupGarouUHC.class), 0, 4);
     }
 
-    private void startGameForReal(ArrayList<Role> roles) {
-        isStarted = false;
-        //Give roles...
+    public void giveRoles(boolean sendMessage) {
         ArrayList<LGPlayer> toGive = (ArrayList<LGPlayer>) gamePlayers.clone();
-        rolesWithDeads = (ArrayList<Role>) roles.clone();
-
         for (Role role : roles) {
             int randomized = random.nextInt(toGive.size());
             LGPlayer player = toGive.remove(randomized);
+            role.join(player, sendMessage);
+        }
+        data.getLogChat().log("Distributing role...");
+    }
+
+    private void startGameForReal(ArrayList<Role> roles) {
+        isStarted = false;
+        //Give roles...
+        rolesWithDeads = (ArrayList<Role>) roles.clone();
+
+        giveRoles(false);
+
+        for (LGPlayer player : gamePlayersWithDeads) {
             player.getGameData().setDead(false);
             player.getGameData().setKiller(null);
             player.getGameData().setCanBeRespawned(false);
             player.getGameData().setCanVote(false);
             player.setChat(GameChatI);
-
-            role.join(player, false);
 
 
             Player p = player.getPlayer();
@@ -289,6 +307,7 @@ public class LGGame {
 
                 }
             }
+            player.getPlayerStats().refresh();
             p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 99999, 180, true, false));
             p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 99999, 8, true, false));
             p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 99999, 0, true, false));
@@ -347,6 +366,7 @@ public class LGGame {
         }
         player.getPlayer().teleport(new Location(location.getWorld(), location.getBlockX() + 0.5, gameSpawn.getWorld().getHighestBlockYAt(location), location.getBlockZ() + 0.5));
         player.getPlayer().setGravity(true);
+        data.getLogChat().log("Scattered " + player.getName());
     }
 
     public Location findRoofedForest(Location baseLoc1, int timeout, int distance) {
@@ -360,21 +380,25 @@ public class LGGame {
             while (baseLoc.getBlock().getBiome() != Biome.ROOFED_FOREST) {
                 baseLoc.add(16, 0, 16);
                 if (i >= timeout) {
-                    System.out.println("Cannot find roofed forest");
+                    Logger.getGeneralLogger().log("Cannot find roofed forest");
                     return baseLoc1;
                 }
                 i++;
             }
+            data.getLogChat().log("Found roofed forest at " + baseLoc.toString());
             return baseLoc;
         }
+        data.getLogChat().log("Found roofed forest at " + baseLoc1.toString());
         return baseLoc1;
     }
 
     public void kill(LGPlayer killed, Reason reason, boolean endGame, Location playerloc) {
-        if (killed.getPlayer() != null) {
-            roles.remove(killed.getGameData().getRole());
-            gamePlayers.remove(killed);
-            killed.setChat(DeadChatI);
+        roles.remove(killed.getGameData().getRole());
+        gamePlayers.remove(killed);
+        killed.setChat(DeadChatI);
+        playerloc.getWorld().strikeLightningEffect(playerloc);
+        killed.getGameData().setDead(true);
+        if (killed.isLinkedToPlayer() && killed.getPlayer().isOnline()) {
             killed.getPlayer().setGameMode(GameMode.SPECTATOR);
             //Lightning effect
             killed.getPlayer().getWorld().strikeLightningEffect(playerloc);
@@ -389,6 +413,7 @@ public class LGGame {
     }
 
     public void updateKill(Boolean endGame) {
+        data.getLogChat().log("Update kill / endgame: " + endGame);
         if (endGame) {
             endGame(null, false);
             isStarted = false;
@@ -419,12 +444,13 @@ public class LGGame {
     }
 
     public void endGame(WinType winType, boolean fast) {
-
+        data.getLogChat().log("-- Endgame --");
         Bukkit.getPluginManager().callEvent(new OnEndGame(this));
 
         for (Scenario scenario : scenarios) {
             scenario.deactivate();
             scenario.unregister();
+            data.getLogChat().log("Scenario: " + Scenario.getName() + " deactivated");
         }
 
         ArrayList<LGPlayer> winners = new ArrayList<>();
@@ -439,6 +465,10 @@ public class LGGame {
             winType = WinType.NONE;
         }
 
+        data.getLogChat().log("Endgame: " + winType.getMessage());
+
+        LoupGarouUHC.broadcastMessage(getPrefix() + " " + ChatColor.BLUE + winType.getMessage()); //todo trad
+
         for (LGPlayer lgp : gamePlayersWithDeads) {
             if (lgp.getPlayer() != null) {
                 lgp.getPlayer().closeInventory();
@@ -452,21 +482,31 @@ public class LGGame {
                 }
             }
             Stats stats = lgp.getStats();
+            data.getLogChat().log("-- Initial Stats for " + lgp.getName() + " --");
+            data.getLogChat().log("points: " + stats.getPoints());
+            data.getLogChat().log("games: " + stats.getGameNumber());
+            data.getLogChat().log("won: " + stats.getWinnedGames());
+            data.getLogChat().log("kill: " + stats.getKills());
             stats.setGameNumber(stats.getGameNumber() + 1);
             stats.setPoints(stats.getPoints() + GAME_POINTS);
+            lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.AQUA + " +" + GAME_POINTS + ChatColor.GOLD + " ⛁ " + ChatColor.AQUA + "(played game)");
 
             if (lgp.getPlayer() != null) {
                 lgp.sendTitle("§7§lÉgalité", "§8Personne n'a gagné...", 5, 200, 5);
 
                 if (lgp.getGameData().isDead()) {
                     stats.setPoints(stats.getPoints() + DEAD_POINTS);
+                    lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.AQUA + " +" + DEAD_POINTS + ChatColor.GOLD + " ⛁ " + ChatColor.AQUA + "(dead)");
                 } else {
                     stats.setPoints(stats.getPoints() + ALIVE_POINTS);
+                    lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.AQUA + " +" + ALIVE_POINTS + ChatColor.GOLD + " ⛁ " + ChatColor.AQUA + "(alive)");
                 }
 
                 if (winners.contains(lgp)) {
                     lgp.sendTitle("§a§lVictoire !", "§6Vous avez gagné la partie.", 5, 200, 5);
                     stats.setWinnedGames(stats.getWinnedGames() + 1);
+                    stats.setPoints(stats.getPoints() + WINNED_BONUS);
+                    lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.AQUA + " +" + WINNED_BONUS + ChatColor.GOLD + " ⛁ " + ChatColor.AQUA + "(winned)");
                 } else if (winType == WinType.EQUAL || winType == WinType.NONE) {
                     lgp.sendTitle("§7§lÉgalité", "§8Personne n'a gagné...", 5, 200, 5);
                 } else {
@@ -478,8 +518,17 @@ public class LGGame {
                 stats.setKills(stats.getKills() + lgp.getGameData().getKills());
                 stats.setPoints(stats.getPoints() + lgp.getGameData().getKills() * KILLS_POINTS);
 
-                lgp.setStats(stats);
+                if (!data.isPractice()) {
+                    lgp.setStats(stats);
+                }
             }
+
+            data.getLogChat().log("-- Modified Stats for " + lgp.getName() + " --");
+            data.getLogChat().log("points: " + stats.getPoints());
+            data.getLogChat().log("games: " + stats.getGameNumber());
+            data.getLogChat().log("won: " + stats.getWinnedGames());
+            data.getLogChat().log("kill: " + stats.getKills());
+
         }
 
 
@@ -516,7 +565,7 @@ public class LGGame {
                         wc.type(WorldType.NORMAL);
                         gameSpawn.setWorld(wc.createWorld());
                     } else {
-                        getConsole().sendMessage(ChatColor.DARK_RED + "Something went horribly wrong ! Please restart your server and change manually the game map");
+                        Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Something went horribly wrong ! Please restart your server and change manually the game map");
                     }
                 }
             }
@@ -561,29 +610,40 @@ public class LGGame {
                         }
                     }
                     if (i == deleteTimeout) {
-                        System.out.println("Cannot delete map");
+                        Logger.getGeneralLogger().log("Cannot delete map");
                         cancel();
                     }
                 }
             }.runTaskTimer(getPlugin(), 1, 1);
         }
 
-        Bukkit.broadcastMessage(getPrefix() + " " + ChatColor.BLUE + winType.getMessage());
+        Languages languages = null;
+        for (Languages language : Languages.getLanguages()) {
+            if (language.getId().equals(LoupGarouUHC.DEFAULT_LANG_ID)) {
+                languages = language;
+            }
+        }
         for (Role role : rolesWithDeads) {
             if (roles.contains(role)) {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
                     lgp.sendMessage(role.getName(lgp.getLanguage()));
                 }
+                if (languages != null)
+                    data.getLogChat().log(role.getName(languages));
             } else {
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
                     lgp.sendMessage(ChatColor.STRIKETHROUGH + role.getName(lgp.getLanguage()));
                 }
+                if (languages != null)
+                    data.getLogChat().log(ChatColor.STRIKETHROUGH + role.getName(languages));
             }
         }
 
+
         HoloStats.updateAll();
+        data.getLogChat().archive();
         reloadGameInstance();
     }
 
@@ -717,5 +777,13 @@ public class LGGame {
 
     public void setPvP(fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.PvP pvP) {
         PvP = pvP;
+    }
+
+    public boolean isRoleTrolled() {
+        return roleTrolled;
+    }
+
+    public void setRoleTrolled(boolean roleTrolled) {
+        this.roleTrolled = roleTrolled;
     }
 }
