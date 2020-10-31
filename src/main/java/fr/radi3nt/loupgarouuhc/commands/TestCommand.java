@@ -1,8 +1,5 @@
 package fr.radi3nt.loupgarouuhc.commands;
 
-import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.FinalHeal;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.boss.BarColor;
@@ -659,9 +656,12 @@ public class TestCommand {
         String[] strings = new String[3];
         strings[0] = "fh";
         strings[1] = "activate";
-        FinalHeal finalHeal = new FinalHeal(new LGGame(LoupGarouUHC.parameters));
-        finalHeal.activate();
-        finalHeal.onCommand(commandSender, command, "uhc", strings);
+        //FinalHeal finalHeal = new FinalHeal(new LGGame(LoupGarouUHC.parameters));
+        //finalHeal.activate();
+        //finalHeal.onCommand(commandSender, command, "uhc", strings);
+
+        System.out.println(System.currentTimeMillis());
+        System.out.println((60 * 20 - ((System.currentTimeMillis() - 1603998723333L) / 1000) * 20));
     }
 
 }

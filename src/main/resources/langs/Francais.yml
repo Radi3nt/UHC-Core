@@ -58,7 +58,7 @@ Roles:
     short desc: "Tu mines bien !!"
     desc: "Tu gagnes avec le village, tu te souviens d'avoir laissé tomber une pioche en diamant tout près d'ici .... Tiens, la voilà !"
 
-  LoupFeutre:
+  LGFeutre:
     name: "Loup Feutré"
     short desc: "Tu es discret"
     desc: "A chaque épisode, tu as un role d'affichage. Si la voyante, le montreur d'ours, ou un role permettant de voir ceux des autres, il ne verra que ton role d'affichage."
@@ -104,7 +104,7 @@ Messages:
   joinRoleTitleTitle: "&6Tu es %roleName%"
   joinRoleTitleSubtitle: "&e%roleShortDesc%"
 
-  gameTimerNewEpisode: "&b--------- Fin episode %gameTimerDays% ---------"
+  gameTimerNewEpisode: "&b--------- Fin episode %gameTimerDays-% ---------"
   gameTimerDega: "$prefix$ &3Les dégats (sauf PVP) sont activés !"
   gameTimerPvpSoon: "$prefix$ &3PVP activé dans %pvpMinutes-% minutes !"
   gameTimerPvpOn: "$prefix$ &3PVP activé !"
@@ -126,6 +126,7 @@ Messages:
   gameTimerActionBarMax: "&dDistance du centre: &bPlus de %1% blocks du centre"
 
   roleFeutreAffichage: "$prefix$ &6Ton role d'affichage est &c%affichageName%"
+  roleTrollEnd: "$prefix$ &6Bon, la blague a assez duré: voici ton vrai role"
 
 PlaceHolders:
   #To use placeholders, just add them here,

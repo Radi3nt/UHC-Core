@@ -11,8 +11,8 @@ public class OnKillEvent implements Listener {
     public void OnKillEvent(OnKill e) {
         LGPlayer lgp = e.getKiller();
         if (lgp.isLinkedToPlayer() && lgp.getGameData().hasRole()) {
-            lgp.getGameData().getRole().OnKillSomeone(e.getGame(), lgp, e.getKilled());
-            lgp.getGameData().setKills(lgp.getGameData().getKills()+1);
+            lgp.getGameData().getRole().OnkillSomeone(e.getGame(), lgp, e.getKilled());
+            lgp.getGameData().setKills(lgp.getGameData().getKills() + 1);
         }
     }
 
