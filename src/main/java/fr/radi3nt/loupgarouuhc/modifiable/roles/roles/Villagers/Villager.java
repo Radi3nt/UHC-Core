@@ -25,32 +25,32 @@ public class Villager extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
         lgp.getPlayer().setMaxHealth(20F);
     }
 
     @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
+    public void discoverRole(LGGame game, LGPlayer lgp) {
 
     }
 

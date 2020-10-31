@@ -5,8 +5,7 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.SoloRoleIdentity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,7 +28,17 @@ public class Cupidon extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("Cupidon", WinType.SOLO, RoleType.NEUTRAL);
+        ArrayList<ItemStack> rolesItems = new ArrayList<>();
+        ItemStack bow = new ItemStack(Material.BOW);
+        bow.addEnchantment(Enchantment.ARROW_KNOCKBACK, 1);
+        ItemStack arrows = new ItemStack(Material.ARROW, 64);
+        ItemStack string = new ItemStack(Material.STRING, 3);
+
+        rolesItems.add(bow);
+        rolesItems.add(arrows);
+        rolesItems.add(string);
+
+        return new SoloRoleIdentity("Cupidon", rolesItems, 20).getIdentity();
     }
 
     @Override
@@ -38,42 +47,32 @@ public class Cupidon extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
-    }
-
-    @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
-        ItemStack bow = new ItemStack(Material.BOW);
-        bow.addEnchantment(Enchantment.ARROW_KNOCKBACK, 1);
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
-        ItemStack arrows = new ItemStack(Material.ARROW, 64);
+    }
 
-        ItemStack string = new ItemStack(Material.STRING, 3);
-
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), bow);
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), arrows);
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), string);
+    @Override
+    public void discoverRole(LGGame game, LGPlayer lgp) {
         canCouple = true;
         lgp.sendMessage(getPrefix() + ChatColor.GOLD + " Tu peut choisir un couple en faisant /lg role couple <pseudo> <pseudo>");
         new BukkitRunnable() {

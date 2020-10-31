@@ -4,8 +4,7 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LGRoleIdentity;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Villager;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +19,7 @@ public class LGFeutre extends LoupGarou {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("LoupFeutre", WinType.LOUP_GAROU, RoleType.LOUP_GAROU);
+        return new LGRoleIdentity("LGFeutre", LoupGarou.getStaticRoleIdentity().getRoleItems(), LoupGarou.getStaticRoleIdentity().getPotionEffectsDay(), LoupGarou.getStaticRoleIdentity().getPotionEffectsNight(), 20).getIdentity();
     }
 
     @Override
@@ -29,7 +28,7 @@ public class LGFeutre extends LoupGarou {
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
         Role role = null;
         int i = 0;
         while (role == null || role.getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity())) {
@@ -40,8 +39,8 @@ public class LGFeutre extends LoupGarou {
                 break;
             }
         }
-        affichage=role;
-        super.OnNewEpisode(game, lgp);
+        affichage = role;
+        super.newEpisode(game, lgp);
         lgp.sendMessage(lgp.getLanguage().getMessage("roleFeutreAffichage", lgp).replace("%affichageName%", affichage.getName(lgp.getLanguage())));
     }
 

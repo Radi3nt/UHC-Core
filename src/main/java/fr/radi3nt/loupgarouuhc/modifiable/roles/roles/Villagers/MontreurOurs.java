@@ -1,5 +1,6 @@
 package fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers;
 
+import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
@@ -7,7 +8,6 @@ import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGFeutre;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
@@ -32,12 +32,12 @@ public class MontreurOurs extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
 
     }
 
@@ -63,31 +63,30 @@ public class MontreurOurs extends Role {
     }
 
     @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
+    public void discoverRole(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
+    public void newEpisode(LGGame game, LGPlayer lgp) {
         ArrayList<Location> blocks = generateSphere(lgp.getPlayer().getLocation().getBlock().getLocation(), 10);
         for (LGPlayer player : game.getGamePlayers()) {
             if (blocks.contains(player.getPlayer().getLocation().getBlock().getLocation())) {
                 if (player.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU && !player.getGameData().getRole().getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity())) {
-                    Bukkit.broadcastMessage(getPrefix() + ChatColor.GOLD + " Grrrrrr");
+                    LoupGarouUHC.broadcastMessage(getPrefix() + ChatColor.GOLD + " Grrrrrr");
                 }
                 if (player.getGameData().getRole().getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity()) && ((LGFeutre) player.getGameData().getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU) {
-                    Bukkit.broadcastMessage(getPrefix() + ChatColor.GOLD + " Grrrrrr");
+                    LoupGarouUHC.broadcastMessage(getPrefix() + ChatColor.GOLD + " Grrrrrr");
                 }
             }
         }

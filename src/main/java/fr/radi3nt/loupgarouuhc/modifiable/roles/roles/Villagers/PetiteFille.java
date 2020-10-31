@@ -5,13 +5,16 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.VillagerRoleIdentity;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
 
 public class PetiteFille extends Role {
 
@@ -22,7 +25,11 @@ public class PetiteFille extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("PetiteFille", WinType.VILLAGE, RoleType.VILLAGER);
+        ArrayList<ItemStack> rolesItems = new ArrayList<>();
+        ArrayList<PotionEffect> permanant = new ArrayList<>();
+        rolesItems.add(new ItemStack(Material.TNT, 4));
+        permanant.add(new PotionEffect(PotionEffectType.NIGHT_VISION, 99999 * 20, 0, true, false, Color.AQUA));
+        return new VillagerRoleIdentity("PetiteFille", rolesItems, permanant, 20).getIdentity();
     }
 
     @Override
@@ -31,7 +38,7 @@ public class PetiteFille extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
         day = false;
         new BukkitRunnable() {
 
@@ -66,30 +73,30 @@ public class PetiteFille extends Role {
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
         day = true;
         lgp.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         lgp.getPlayer().removePotionEffect(PotionEffectType.WEAKNESS);
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
-    }
-
-    @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999, 1, true, false), true);
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+
+    }
+
+    @Override
+    public void discoverRole(LGGame game, LGPlayer lgp) {
+
     }
 
 }

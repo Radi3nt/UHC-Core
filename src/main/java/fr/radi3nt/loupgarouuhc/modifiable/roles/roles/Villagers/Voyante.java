@@ -5,15 +5,17 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.VillagerRoleIdentity;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefixPrivé;
@@ -28,7 +30,14 @@ public class Voyante extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("Voyante", WinType.VILLAGE, RoleType.VILLAGER);
+        ArrayList<ItemStack> rolesItems = new ArrayList<>();
+        rolesItems.add(new ItemStack(Material.BOOKSHELF, 4));
+        rolesItems.add(new ItemStack(Material.OBSIDIAN, 4));
+
+        ArrayList<PotionEffect> potionEffects = new ArrayList<>();
+        potionEffects.add(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999 * 20, 0, true, false, Color.AQUA));
+
+        return new VillagerRoleIdentity("Voyante", rolesItems, potionEffects, 20).getIdentity();
     }
 
     @Override
@@ -37,23 +46,22 @@ public class Voyante extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
         this.canSee = false;
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
-        lgp.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999, 1, true, false), true);
+    public void newEpisode(LGGame game, LGPlayer lgp) {
         lgp.sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.GOLD + " Tu peut voir le role d'un joueur en faisant /lg role see <player>");
         this.canSee = true;
         new BukkitRunnable() {
             int i = 0;
+
             @Override
             public void run() {
                 if (!canSee) {
@@ -70,22 +78,18 @@ public class Voyante extends Role {
     }
 
     @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
-        ItemStack bookshelves = new ItemStack(Material.BOOKSHELF, 4);
-        ItemStack obsis = new ItemStack(Material.OBSIDIAN, 4);
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), bookshelves);
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), obsis);
-        lgp.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999, 1, true, false), true);
+    public void discoverRole(LGGame game, LGPlayer lgp) {
+
     }
 
     public boolean canSee() {

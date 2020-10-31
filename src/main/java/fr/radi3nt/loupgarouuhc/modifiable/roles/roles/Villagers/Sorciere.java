@@ -4,11 +4,13 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.VillagerRoleIdentity;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
+
+import java.util.ArrayList;
 
 public class Sorciere extends Role {
 
@@ -19,7 +21,12 @@ public class Sorciere extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("Sorciere", WinType.VILLAGE, RoleType.VILLAGER);
+        ArrayList<ItemStack> rolesItems = new ArrayList<>();
+        rolesItems.add(new Potion(PotionType.INSTANT_HEAL, 1, true).toItemStack(3));
+        rolesItems.add(new Potion(PotionType.REGEN, 1, true).toItemStack(1));
+        rolesItems.add(new Potion(PotionType.INSTANT_DAMAGE, 1, true).toItemStack(3));
+
+        return new VillagerRoleIdentity("Sorciere", rolesItems, 20).getIdentity();
     }
 
     @Override
@@ -28,38 +35,32 @@ public class Sorciere extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
-    }
-
-    @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
-        Potion pohealth1 = new Potion(PotionType.INSTANT_HEAL,1, true);
-        Potion poreg1 = new Potion(PotionType.REGEN,1, true);
-        Potion podam1 = new Potion(PotionType.INSTANT_DAMAGE,1, true);
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), pohealth1.toItemStack(3));
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), poreg1.toItemStack(1));
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), podam1.toItemStack(3));
+    }
+
+    @Override
+    public void discoverRole(LGGame game, LGPlayer lgp) {
+
     }
 }

@@ -4,12 +4,13 @@ import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LGRoleIdentity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
 
 public class LoupPerfide extends LoupGarou {
 
@@ -20,7 +21,7 @@ public class LoupPerfide extends LoupGarou {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("LoupPerfide", WinType.LOUP_GAROU, RoleType.LOUP_GAROU);
+        return new LGRoleIdentity("LoupPerfide", LoupGarou.getStaticRoleIdentity().getRoleItems(), LoupGarou.getStaticRoleIdentity().getPotionEffectsDay(), new ArrayList<>(), 20).getIdentity();
     }
 
     @Override
@@ -29,7 +30,7 @@ public class LoupPerfide extends LoupGarou {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
         day = false;
         new BukkitRunnable() {
 
@@ -64,7 +65,7 @@ public class LoupPerfide extends LoupGarou {
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
         day = true;
         lgp.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
         lgp.getPlayer().removePotionEffect(PotionEffectType.WEAKNESS);

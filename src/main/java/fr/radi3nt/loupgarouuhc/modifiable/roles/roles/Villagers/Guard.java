@@ -4,8 +4,7 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.VillagerRoleIdentity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
@@ -26,7 +26,13 @@ public class Guard extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("Guard", WinType.VILLAGE, RoleType.VILLAGER);
+        ArrayList<ItemStack> rolesItems = new ArrayList<>();
+        ItemStack itemStack = new ItemStack(Material.IRON_SWORD);
+        itemStack.addEnchantment(Enchantment.SWEEPING_EDGE, 3);
+        itemStack.setDurability((short) (new SecureRandom().nextInt(100) + 100));
+        itemStack.getItemMeta().setDisplayName("Guard's sword");
+        rolesItems.add(itemStack);
+        return new VillagerRoleIdentity("Guard", rolesItems, 20).getIdentity();
     }
 
     @Override
@@ -35,27 +41,27 @@ public class Guard extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
+    public void day(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
-    }
-
-    @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+
+    }
+
+    @Override
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
         if (killer != null && killer.getGameData().getGame() == killed.getGameData().getGame()) {
             killer.getPlayer().damage(2);
             killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 30, 1, true), true);
@@ -69,32 +75,8 @@ public class Guard extends Role {
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
-        ItemStack itemStack = new ItemStack(Material.IRON_SWORD);
-        itemStack.addEnchantment(Enchantment.SWEEPING_EDGE, 3);
-        itemStack.setDurability((short) 128);
-        itemStack.getItemMeta().setDisplayName("Guard's sword");
-        lgp.getPlayer().getWorld().dropItem(lgp.getPlayer().getLocation(), itemStack);
-    }
+    public void discoverRole(LGGame game, LGPlayer lgp) {
 
-    public static ArrayList<Location> generateSphere(Location center, int radius) {
-        ArrayList<Location> circlesBlocks = new ArrayList<>();
-        int bX = center.getBlockX();
-        int bY = center.getBlockY();
-        int bZ = center.getBlockZ();
-
-        for (int x = bX - radius; x <= bX + radius; x++) {
-            for (int y = bY - radius; y <= bY + radius; y++) {
-                for (int z = bZ - radius; z <= bZ + radius; z++) {
-                    double distance = ((bX - x) * (bX -x) + ((bZ - z) * (bZ - z)) + ((bY - y) * (bY - y)));
-                    if (distance < radius * radius) {
-                        Location block = new Location(center.getWorld(), x, y, z);
-                        circlesBlocks.add(block);
-                    }
-                }
-            }
-        }
-        return circlesBlocks;
     }
 
 }

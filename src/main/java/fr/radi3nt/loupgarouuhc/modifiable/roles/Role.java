@@ -2,8 +2,11 @@ package fr.radi3nt.loupgarouuhc.modifiable.roles;
 
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.lang.lang.Languages;
+import fr.radi3nt.loupgarouuhc.classes.message.Logger;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -56,25 +59,94 @@ public abstract class Role {
         return this.getRoleIdentity().getShortDescription(languages);
     }
 
-    public abstract void OnNight(LGGame game, LGPlayer lgp);
+    public void OnNight(LGGame game, LGPlayer lgp) {
+        lgp.getPlayerStats().refresh();
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionEffectsDay()) {
+            lgp.getPlayerStats().removePotionEffect(potionEffect.getType());
+        }
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionPermanant()) {
+            lgp.getPlayerStats().addPotionEffect(potionEffect);
+        }
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionEffectsNight()) {
+            lgp.getPlayerStats().addPotionEffect(potionEffect);
+        }
+        lgp.getPlayerStats().update();
+        night(game, lgp);
+    }
 
-    public abstract void OnDay(LGGame game, LGPlayer lgp);
+    protected abstract void night(LGGame game, LGPlayer lgp);
 
-    public abstract void OnNewEpisode(LGGame game, LGPlayer lgp);
+    public void OnDay(LGGame game, LGPlayer lgp) {
+        lgp.getPlayerStats().refresh();
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionEffectsNight()) {
+            lgp.getPlayerStats().removePotionEffect(potionEffect.getType());
+        }
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionPermanant()) {
+            lgp.getPlayerStats().addPotionEffect(potionEffect);
+        }
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionEffectsDay()) {
+            lgp.getPlayerStats().addPotionEffect(potionEffect);
+        }
+        lgp.getPlayerStats().update();
+        day(game, lgp);
+    }
 
-    public abstract void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed);
+    protected abstract void day(LGGame game, LGPlayer lgp);
 
-    public abstract void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location);
+    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
+        lgp.getPlayerStats().refresh();
+        lgp.getPlayerStats().setMaxHealth(this.getRoleIdentity().getMaxHealth());
+        lgp.getPlayerStats().update();
+        newEpisode(game, lgp);
+    }
 
-    public abstract void OnDiscoverRole(LGGame game, LGPlayer lgp);
+    protected abstract void newEpisode(LGGame game, LGPlayer lgp);
+
+    public void OnkillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+        killSomeone(game, killer, killed);
+    }
+
+    protected abstract void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed);
+
+    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+        killed(game, killed, killer, location);
+    }
+
+    protected abstract void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location);
+
+    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
+        for (ItemStack roleItem : this.getRoleIdentity().getRoleItems()) {
+            lgp.getPlayerStats().refresh();
+            if (lgp.getPlayerStats().getInventory().firstEmpty() == -1) {
+                lgp.getPlayerStats().getLastLocation().getChunk().load();
+                lgp.getPlayerStats().getLastLocation().getWorld().dropItem(lgp.getPlayerStats().getLastLocation(), roleItem);
+            } else {
+                lgp.getPlayerStats().getInventory().addItem(roleItem);
+            }
+            lgp.getPlayerStats().update();
+        }
+        lgp.getPlayerStats().refresh();
+        for (PotionEffect potionEffect : this.getRoleIdentity().getPotionPermanant()) {
+            lgp.getPlayerStats().addPotionEffect(potionEffect);
+        }
+        lgp.getPlayerStats().update();
+        discoverRole(game, lgp);
+    }
+
+    protected abstract void discoverRole(LGGame game, LGPlayer lgp);
 
     public void join(LGPlayer player, boolean sendMessage) {
-        System.out.println(player.getName() + " est " + this.getName(player.getLanguage()));
         player.getGameData().setRole(this);
         if (sendMessage) {
-            player.sendTitle((player.getLanguage().getMessage("joinRoleTitleTitle", player)), (player.getLanguage().getMessage("joinRoleTitleSubtitle", player)), 10, 200, 10);
-            player.sendMessage(player.getLanguage().getMessage("joinRoleMessage", player));
+            Logger.getGeneralLogger().logInConsole(player.getName() + " est " + this.getName(player.getLanguage()));
+            player.getGameData().getGame().getData().getLogChat().log(player.getName() + " est " + this.getName(player.getLanguage()));
+            displayRole(player);
         }
+    }
+
+    public void displayRole(LGPlayer player) {
+        player.sendTitle((player.getLanguage().getMessage("joinRoleTitleTitle", player)), (player.getLanguage().getMessage("joinRoleTitleSubtitle", player)), 10, 200, 10);
+        player.sendMessage(player.getLanguage().getMessage("joinRoleMessage", player));
     }
 
     public LGGame getGame() {

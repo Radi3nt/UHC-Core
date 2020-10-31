@@ -4,11 +4,12 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LGRoleIdentity;
 import org.bukkit.Location;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
 
 public class LoupGarou extends Role {
 
@@ -17,7 +18,13 @@ public class LoupGarou extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("LoupGarou", WinType.LOUP_GAROU, RoleType.LOUP_GAROU);
+        ArrayList<PotionEffect> potionEffects = new ArrayList<>();
+        potionEffects.add(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999, 0, true, false));
+
+        ArrayList<PotionEffect> potionEffectsNight = new ArrayList<>();
+        potionEffectsNight.add(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 0, true, false));
+
+        return new LGRoleIdentity("LoupGarou", new ArrayList<>(), potionEffects, new ArrayList<>(), potionEffectsNight, 20).getIdentity();
     }
 
     @Override
@@ -25,34 +32,34 @@ public class LoupGarou extends Role {
         return getStaticRoleIdentity();
     }
 
-    public void OnNight(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 0, true, false), true);
+    public void night(LGGame game, LGPlayer lgp) {
+
     }
 
 
-    public void OnDay(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+    public void day(LGGame game, LGPlayer lgp) {
+
     }
 
-    
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
+
+    public void newEpisode(LGGame game, LGPlayer lgp) {
+
     }
 
-    
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
-        killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60*20, 0, true, false), true);
-        killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60*20, 0, true, false), true);
+
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+        killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, true, false), true);
+        killer.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60 * 20, 0, true, false), true);
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
     }
 
 
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999, 1, true, false), true);
+    public void discoverRole(LGGame game, LGPlayer lgp) {
+
     }
 
 }

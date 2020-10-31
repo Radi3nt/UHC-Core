@@ -4,10 +4,13 @@ import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.VillagerRoleIdentity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefix;
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.getPrefixPrivé;
@@ -23,7 +26,11 @@ public class Renard extends Role {
     }
 
     public static RoleIdentity getStaticRoleIdentity() {
-        return new RoleIdentity("Renard", WinType.VILLAGE, RoleType.VILLAGER);
+        ArrayList<PotionEffect> potionEffects = new ArrayList<>();
+        ArrayList<PotionEffect> potionEffects2 = new ArrayList<>();
+        potionEffects.add(new PotionEffect(PotionEffectType.NIGHT_VISION, 999999 * 20, 0, true, false));
+        potionEffects2.add(new PotionEffect(PotionEffectType.SPEED, 999999 * 20, 0, true, false));
+        return new VillagerRoleIdentity("Renard", new ArrayList<>(), potionEffects, new ArrayList<>(), potionEffects2, 20).getIdentity();
     }
 
     @Override
@@ -32,7 +39,7 @@ public class Renard extends Role {
     }
 
     @Override
-    public void OnNight(LGGame game, LGPlayer lgp) {
+    public void night(LGGame game, LGPlayer lgp) {
         if (time < 3) {
             lgp.sendMessage(getPrefix() + " " + getPrefixPrivé() + ChatColor.GOLD + " Tu peut voir si un joueur est loup garou ou pas en faisant /lg role see <player>, tu pourras flairer un joueur encore " + ChatColor.YELLOW + (3 - time) + ChatColor.GOLD + " fois");
             this.canSee = true;
@@ -40,28 +47,27 @@ public class Renard extends Role {
     }
 
     @Override
-    public void OnDay(LGGame game, LGPlayer lgp) {
-        lgp.getPlayer().setMaxHealth(20F);
+    public void day(LGGame game, LGPlayer lgp) {
         canSee = false;
     }
 
     @Override
-    public void OnNewEpisode(LGGame game, LGPlayer lgp) {
+    public void newEpisode(LGGame game, LGPlayer lgp) {
 
     }
 
     @Override
-    public void OnKillSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
+    public void killSomeone(LGGame game, LGPlayer killer, LGPlayer killed) {
 
     }
 
     @Override
-    public void OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
+    public void killed(LGGame game, LGPlayer killed, LGPlayer killer, Location location) {
 
     }
 
     @Override
-    public void OnDiscoverRole(LGGame game, LGPlayer lgp) {
+    public void discoverRole(LGGame game, LGPlayer lgp) {
 
     }
 
