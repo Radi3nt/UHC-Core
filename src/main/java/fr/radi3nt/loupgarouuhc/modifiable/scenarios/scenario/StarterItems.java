@@ -20,12 +20,6 @@ public class StarterItems extends Scenario {
     public StarterItems(LGGame game) {
         super(game);
         items.add(new ItemStack(Material.COOKED_BEEF, 32));
-
-
-        items.add(new ItemStack(Material.COAL, 64));
-        items.add(new ItemStack(Material.IRON_ORE, 64));
-        items.add(new ItemStack(Material.FURNACE, 64));
-        items.add(new ItemStack(Material.IRON_PICKAXE, 64));
     }
 
     public static String getName() {

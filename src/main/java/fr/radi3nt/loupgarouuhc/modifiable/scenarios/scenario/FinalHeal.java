@@ -1,5 +1,6 @@
 package fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario;
 
+import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
 import fr.radi3nt.loupgarouuhc.exeptions.common.NoPermissionException;
@@ -8,7 +9,6 @@ import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioCommand;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioSetter;
 import fr.radi3nt.loupgarouuhc.timer.GameTimer;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -47,11 +47,11 @@ public class FinalHeal extends Scenario {
 
     private void doFinalHeal() {
         for (LGPlayer lgPlayer : game.getGamePlayers()) {
-            if (lgPlayer.getPlayer() != null) {
-                lgPlayer.getPlayer().setHealth(lgPlayer.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-            }
+            lgPlayer.getPlayerStats().refresh();
+            lgPlayer.getPlayerStats().setHealth(lgPlayer.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+            lgPlayer.getPlayerStats().update();
         }
-        Bukkit.broadcastMessage(getPrefix() + " " + ChatColor.GOLD + "Final heal >" + ChatColor.AQUA + " All players have been healed");
+        LoupGarouUHC.broadcastMessage(getPrefix() + " " + ChatColor.GOLD + "Final heal >" + ChatColor.AQUA + " All players have been healed");
     }
 
     @ScenarioCommand

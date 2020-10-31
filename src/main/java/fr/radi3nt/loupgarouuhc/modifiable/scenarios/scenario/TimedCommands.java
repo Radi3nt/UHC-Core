@@ -21,6 +21,9 @@ public class TimedCommands extends Scenario {
 
     public TimedCommands(LGGame game) {
         super(game);
+        startCommands.add("toggleeditwand");
+        startCommands.add("pa leave");
+        endCommands.add("toggleeditwand");
     }
 
     public static String getName() {
