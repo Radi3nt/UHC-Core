@@ -29,6 +29,7 @@ public class PlayerLeaveEvent implements Listener {
 
         Player p = e.getPlayer();
         LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer());
+        lgp.getPlayerStats().refresh();
         Location playerloc = p.getLocation();
         PlayerInventory inventory = p.getInventory();
         lgp.saveStats();

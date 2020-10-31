@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.DEFAULT_LANG_ID;
+
 
 public class LGPlayer {
 
@@ -20,6 +22,7 @@ public class LGPlayer {
 	private Stats stats;
 	private Languages language;
 	private Player player;
+	private final PlayerStats playerStats;
 	private Chat chat;
 	private PlayerGameData gameData = new PlayerGameData(null);
 
@@ -46,6 +49,8 @@ public class LGPlayer {
 		this.player = player;
 		this.uuid = player.getUniqueId();
 		stats = new Stats();
+		playerStats = new PlayerStats(player.getUniqueId());
+		playerStats.refresh();
 
 		for (Languages languages : Languages.getLanguages()) {
 			if (languages.getId().equals(Languages.DEFAULTID)) {
@@ -58,6 +63,8 @@ public class LGPlayer {
 		this.player = null;
 		this.uuid = uuid;
 		stats = new Stats();
+		playerStats = new PlayerStats(player.getUniqueId());
+		playerStats.refresh();
 
 		for (Languages languages : Languages.getLanguages()) {
 			if (languages.getId().equals(Languages.DEFAULTID)) {
@@ -67,13 +74,16 @@ public class LGPlayer {
 	}
 
 	public static LGPlayer removePlayer(Player player) {
-		return cachedPlayers.remove(player.getUniqueId());//.remove();
+		LGPlayer.thePlayer(player).playerStats.delete();
+		return cachedPlayers.remove(player.getUniqueId());
 	}
 
 
 	public void sendMessage(String msg) {
-		if (this.player != null)
+		if (isLinkedToPlayer() && player.isOnline())
 			player.sendMessage(msg);
+		else
+			playerStats.addMessages(msg);
 	}
 
 	public void sendTitle(String s, String s1, int i, int i1, int i2) {
@@ -130,7 +140,7 @@ public class LGPlayer {
 		String id = config.getConfiguration().getString("Lang");
 
 		if (id == null) {
-			config.getConfiguration().set("Lang", "fr");
+			config.getConfiguration().set("Lang", DEFAULT_LANG_ID);
 			config.saveConfig();
 			id = "fr";
 		}
@@ -139,9 +149,10 @@ public class LGPlayer {
 			if (id.equals(value.getId()))
 				language = value;
 		}
+
 		if (language.getId().equals(Languages.DEFAULTID)) {
 			for (Languages value : Languages.getLanguages()) {
-				if (id.equals("fr"))
+				if (id.equals(DEFAULT_LANG_ID))
 					language = value;
 			}
 		}
@@ -201,6 +212,10 @@ public class LGPlayer {
 
 	public void setGameData(PlayerGameData gameData) {
 		this.gameData = gameData;
+	}
+
+	public PlayerStats getPlayerStats() {
+		return playerStats;
 	}
 
 	@Override

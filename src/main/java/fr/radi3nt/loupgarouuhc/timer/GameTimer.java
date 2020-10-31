@@ -1,6 +1,5 @@
 package fr.radi3nt.loupgarouuhc.timer;
 
-import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
 import fr.radi3nt.loupgarouuhc.classes.message.Logger;
@@ -15,6 +14,7 @@ import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LoupPerfide;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
 import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.PetiteFille;
+import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Villager;
 import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioUtilis;
 import fr.radi3nt.loupgarouuhc.utilis.Maths;
 import net.md_5.bungee.api.ChatMessageType;
@@ -35,8 +35,6 @@ import java.util.Map;
 public class GameTimer extends BukkitRunnable {
 
     private LGGame game;
-
-
 
     private int shift = 1000;
 
@@ -59,7 +57,6 @@ public class GameTimer extends BukkitRunnable {
     @Override
     @SuppressWarnings("deprecated")
     public void run() {
-
         if (waiting) {
             game.getGameSpawn().getWorld().setTime(24000 - shift);
             game.getGameSpawn().getWorld().setFullTime(24000 - shift);
@@ -92,7 +89,9 @@ public class GameTimer extends BukkitRunnable {
                 if (lgp.getPlayer() != null) {
                     lgp.getPlayer().playSound(lgp.getPlayer().getLocation(), Sound.BLOCK_NOTE_PLING, SoundCategory.AMBIENT, 1f, 2f);
                 }
-                Bukkit.getPluginManager().callEvent(new OnNewEpisode(game, checkDay(ticks - 1)));
+                if (!game.isRoleTrolled() || ticks > game.getParameters().getTrollEndTime()) {
+                    Bukkit.getPluginManager().callEvent(new OnNewEpisode(game, checkDay(ticks - 1)));
+                }
                 game.getGameSpawn().getWorld().setTime(24000 - shift);
                 ticksday = -shift;
             }
@@ -106,6 +105,7 @@ public class GameTimer extends BukkitRunnable {
         }
 
         for (LGPlayer lgp : game.getGamePlayers()) {
+            lgp.getPlayerStats().refresh();
             if (lgp.getPlayer() != null) {
 
                 lgp.getPlayer().setCompassTarget(game.getGameSpawn());
@@ -262,9 +262,12 @@ public class GameTimer extends BukkitRunnable {
         }
         if (waiting) {
             for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
-                lgp.getPlayer().setWalkSpeed(0.2F);
-                lgp.getPlayer().removePotionEffect(PotionEffectType.JUMP);
-                lgp.getPlayer().removePotionEffect(PotionEffectType.SLOW);
+                if (lgp.getPlayer() != null)
+                    lgp.getPlayer().setWalkSpeed(0.2F);
+                lgp.getPlayerStats().refresh();
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.JUMP);
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.SLOW);
+                lgp.getPlayerStats().update();
             }
             waiting = false;
         }
@@ -282,9 +285,12 @@ public class GameTimer extends BukkitRunnable {
         }
         if (waiting) {
             for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
-                lgp.getPlayer().setWalkSpeed(0.2F);
-                lgp.getPlayer().removePotionEffect(PotionEffectType.JUMP);
-                lgp.getPlayer().removePotionEffect(PotionEffectType.SLOW);
+                if (lgp.getPlayer() != null)
+                    lgp.getPlayer().setWalkSpeed(0.2F);
+                lgp.getPlayerStats().refresh();
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.JUMP);
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.SLOW);
+                lgp.getPlayerStats().update();
             }
             waiting = false;
         }
@@ -303,21 +309,25 @@ public class GameTimer extends BukkitRunnable {
             Bukkit.getPluginManager().callEvent(new OnNight(game));
         }
         if (ticksday == 23000 && checkDay(ticks) > 1) {
-            Bukkit.getPluginManager().callEvent(new OnDay(game));
+            if ((game.getParameters().isTroll() || game.isRoleTrolled() || (new SecureRandom().nextBoolean() && game.getParameters().isRandomTroll())) && ticks < game.getParameters().getTrollEndTime()) {
+                game.setRoleTrolled(true);
+            } else {
+                Bukkit.getPluginManager().callEvent(new OnDay(game));
+            }
         }
 
         if (ticks == 3 * 20 && waiting) {
             for (LGPlayer lgp : game.getGamePlayersWithDeads()) {
-                try {
+                if (lgp.getPlayer() != null) {
                     lgp.getPlayer().setWalkSpeed(0.2F);
-                    lgp.getPlayer().removePotionEffect(PotionEffectType.JUMP);
-                    lgp.getPlayer().removePotionEffect(PotionEffectType.SLOW);
-                    lgp.getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
-                    lgp.getPlayer().removePotionEffect(PotionEffectType.SLOW_DIGGING);
                     lgp.getPlayer().setGameMode(GameMode.SURVIVAL);
-                } catch (NullPointerException e) {
-
                 }
+                lgp.getPlayerStats().refresh();
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.JUMP);
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.SLOW);
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.BLINDNESS);
+                lgp.getPlayerStats().removePotionEffect(PotionEffectType.SLOW_DIGGING);
+                lgp.getPlayerStats().update();
             }
             this.ticks = 0;
             waiting = false;
@@ -329,15 +339,36 @@ public class GameTimer extends BukkitRunnable {
         }
 
         if (ticks==24000*(game.getParameters().getDayRoleDivulged())-23999) {
-            for (LGPlayer lgp : game.getGamePlayers()) {
-                Role role = lgp.getGameData().getRole();
-                role.join(lgp, true);
+            if (game.isRoleTrolled()) {
+                for (LGPlayer lgp : game.getGamePlayers()) {
+                    Role role = new Villager(game);
+                    lgp.getGameData().setRole(role);
+                    role.displayRole(lgp);
+                }
+            } else {
+                for (LGPlayer lgp : game.getGamePlayers()) {
+                    Role role = lgp.getGameData().getRole();
+                    role.join(lgp, true);
+                }
+                Bukkit.getPluginManager().callEvent(new OnDiscoverRole(game));
             }
-            Bukkit.getPluginManager().callEvent(new OnDiscoverRole(game));
         }
 
-        if (ticks == 24000 * (checkDay(ticks)) - 23999 && checkDay(ticks) >= game.getParameters().getMinDayForVote()) { // debut
-            if (game.getGamePlayers().size() <= game.getParameters().getMinPlayerForVotes()) {
+        if (ticks == game.getParameters().getTrollEndTime() && game.isRoleTrolled()) {
+            game.setRoleTrolled(false);
+            Chat.broadcastIdMessage("roleTrollEnd", game.getGamePlayers());
+            game.giveRoles(true);
+            Bukkit.getPluginManager().callEvent(new OnDiscoverRole(game));
+            Bukkit.getPluginManager().callEvent(new OnNewEpisode(game, checkDay(ticks)));
+            if (ticksday >= 12000) {
+                Bukkit.getPluginManager().callEvent(new OnNight(game));
+            } else {
+                Bukkit.getPluginManager().callEvent(new OnDay(game));
+            }
+        }
+
+        if (ticks == 24000 * (checkDay(ticks)) - 23999 && checkDay(ticks) >= game.getParameters().getMinDayForVote()) {
+            if (game.getGamePlayers().size() < game.getParameters().getMinPlayerForVotes()) {
                 Chat.broadcastIdMessage("gameTimerVoteDeactivated", game.getGamePlayersWithDeads());
             } else {
                 for (LGPlayer lgp : game.getGamePlayers()) {
@@ -349,7 +380,7 @@ public class GameTimer extends BukkitRunnable {
                         if (heures == 0) {
                             if (minutes == 0) {
                                 if (seconds == 0) {
-                                    System.out.println("Erreur de paramatres");
+                                    Logger.getGeneralLogger().log("Erreur de paramatres");
                                 } else {
                                     lgp.sendMessage(lgp.getLanguage().getMessage("gameTimerVoteMessageSeconds").replace("%voteSeconds%", String.valueOf(seconds)));
                                 }
@@ -361,7 +392,7 @@ public class GameTimer extends BukkitRunnable {
                                 }
                             }
                         } else {
-                            Logger.getLogger().logWhenDebug("Wrong vote time : time is more than 1 hour", LoupGarouUHC.getConsole());
+                            Logger.getGeneralLogger().logInConsole("Wrong vote time : time is more than 1 hour");
                             minutes = 59;
                             seconds = 59;
                             lgp.sendMessage(lgp.getLanguage().getMessage("gameTimerVoteMessageMinutesSeconds").replace("%voteMinutes%", String.valueOf(minutes)).replace("%voteSeconds%", String.valueOf(seconds)));
@@ -371,7 +402,7 @@ public class GameTimer extends BukkitRunnable {
             }
         }
         if (ticks - ((checkDay(ticks) - 1) * 24000) == game.getParameters().getGetTimeForVote() && checkDay(ticks) >= game.getParameters().getMinDayForVote()) { // 5min
-            if (game.getGamePlayers().size() > game.getParameters().getMinPlayerForVotes()) {
+            if (game.getGamePlayers().size() >= game.getParameters().getMinPlayerForVotes()) {
                 Chat.broadcastIdMessage("gameTimerVoteResultsHeader", game.getGamePlayersWithDeads());
                 if (!game.getVoted().isEmpty()) {
                     ArrayList<LGPlayer> votes = new ArrayList<>();
@@ -398,7 +429,9 @@ public class GameTimer extends BukkitRunnable {
                     for (LGPlayer lgp : game.getGamePlayers()) {
                         lgp.sendMessage(lgp.getLanguage().getMessage("gameTimerVoteResultsPlayer").replace("%votedName%", result.getName()).replace("%numberVotes%", String.valueOf(max)));
                     }
-                    result.getPlayer().setMaxHealth(result.getPlayer().getMaxHealth() / 2);
+                    result.getPlayerStats().refresh();
+                    result.getPlayerStats().setMaxHealth(result.getPlayerStats().getMaxHealth() / 2);
+                    result.getPlayerStats().updateMaxHealth();
                 } else {
                     Chat.broadcastIdMessage("gameTimerVoteResultsNull", game.getGamePlayersWithDeads());
                 }

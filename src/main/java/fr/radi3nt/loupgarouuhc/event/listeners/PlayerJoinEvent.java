@@ -25,6 +25,7 @@ public class PlayerJoinEvent implements Listener {
             LoupGarouUHC.getPlayers().add(lgp);
         }
 
+        lgp.getPlayerStats().update();
         lgp.loadSavedLang();
         lgp.loadStats();
 
@@ -62,6 +63,7 @@ public class PlayerJoinEvent implements Listener {
                     lgp.setChat(DeadChatI);
                 }
             }
+            lgp.getPlayerStats().refresh();
         }
 
 
