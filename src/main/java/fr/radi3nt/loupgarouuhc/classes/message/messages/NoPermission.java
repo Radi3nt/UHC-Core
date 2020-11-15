@@ -1,6 +1,6 @@
 package fr.radi3nt.loupgarouuhc.classes.message.messages;
 
-import fr.radi3nt.loupgarouuhc.classes.message.Logger;
+import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.loupgarouuhc.classes.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -4,15 +4,15 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.game.Reason;
-import fr.radi3nt.loupgarouuhc.classes.message.Logger;
-import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.uhc.api.game.Reason;
+import fr.radi3nt.uhc.api.lang.Logger;
+import fr.radi3nt.uhc.api.player.npc.NPC;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.loupgarouuhc.event.events.OnKill;
 import fr.radi3nt.loupgarouuhc.event.events.OnKilled;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGInfect;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Sorciere;
+import fr.radi3nt.loupgarouuhc.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.roles.roles.LoupGarou.LGInfect;
+import fr.radi3nt.loupgarouuhc.roles.roles.Villagers.Sorciere;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
@@ -41,8 +41,8 @@ public class DamageEvent implements Listener {
     public void OnDamageEvent(EntityDamageEvent e) {
         if (!e.isCancelled() && e.getDamage() != 0) {
             if (e.getEntity() instanceof Player) {
-                LGGame game = LGPlayer.thePlayer((Player) e.getEntity()).getGameData().getGame();
-                if (LGPlayer.thePlayer((Player) e.getEntity()).isInGame()) {
+                LGGame game = UHCPlayer.thePlayer((Player) e.getEntity()).getGameData().getGame();
+                if (UHCPlayer.thePlayer((Player) e.getEntity()).isInGame()) {
                     if (game.getGameTimer() != null) {
                         if (e instanceof EntityDamageByEntityEvent || e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
                             EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
@@ -73,7 +73,7 @@ public class DamageEvent implements Listener {
 
                 if ((e.getEntity().isDead() || ((Player) e.getEntity()).getHealth() - e.getDamage() <= 0) && !e.isCancelled()) {
                     Player player = (Player) e.getEntity();
-                    LGPlayer lgp = LGPlayer.thePlayer((Player) e.getEntity());
+                    UHCPlayer lgp = UHCPlayer.thePlayer((Player) e.getEntity());
                     if (lgp.getGameData().getGame() != null && lgp.getGameData().getRole() != null) {
 
                         e.setCancelled(true);
@@ -83,13 +83,13 @@ public class DamageEvent implements Listener {
                         lgp.sendTitle(ChatColor.RED + "You died", ChatColor.GRAY + "You can only spectate the game", 5, 5 * 20, 5);
 
                         lgp.getGameData().setCanBeRespawned(true);
-                        LGPlayer lgDamager = null;
+                        UHCPlayer lgDamager = null;
 
                         if (e instanceof EntityDamageByEntityEvent || e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) || e.getCause().equals(EntityDamageEvent.DamageCause.PROJECTILE)) {
                             EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
                             if (e1.getDamager() instanceof Player) {
                                 if (!game.getPvP().isPvp()) {
-                                    lgDamager = LGPlayer.thePlayer((Player) e1.getDamager());
+                                    lgDamager = UHCPlayer.thePlayer((Player) e1.getDamager());
 
                                 }
                             }
@@ -97,41 +97,40 @@ public class DamageEvent implements Listener {
                                 Projectile projectile = (Projectile) e1.getDamager();
                                 if (projectile.getShooter() instanceof Player) {
                                     if (!game.getPvP().isPvp()) {
-                                        lgDamager = LGPlayer.thePlayer((Player) projectile.getShooter());
-
+                                        lgDamager = UHCPlayer.thePlayer((Player) projectile.getShooter());
                                     }
                                 }
                             }
                         }
 
-                        for (LGPlayer lgp2 : lgp.getGameData().getGame().getGamePlayers()) {
-                            if (lgp2.getGameData().getRole().getRoleIdentity().equals(Sorciere.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
-                                Sorciere role = (Sorciere) lgp2.getGameData().getRole();
-                                if (!role.hasrespwaned) {
-                                    lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
-                                    TextComponent tc = new TextComponent();
-                                    tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
-                                    tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
-                                    //tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.DARK_GREEN + "Réssusciter cette personne").create()));
+                        if (!lgp.getGameData().isInCouple() || !lgp.getGameData().getCouple().getGameData().isDead()) {
+                            for (UHCPlayer lgp2 : lgp.getGameData().getGame().getGamePlayers()) {
+                                if (lgp2.getGameData().getRole().getRoleIdentity().equals(Sorciere.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged()-1) {
+                                    Sorciere role = (Sorciere) lgp2.getGameData().getRole();
+                                    if (role.hasPower()) {
+                                        lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
+                                        TextComponent tc = new TextComponent();
+                                        tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
+                                        tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
+                                        //tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.DARK_GREEN + "Réssusciter cette personne").create()));
 
-                                    lgp2.getPlayer().spigot().sendMessage(tc);
-                                }
-                            }
-                            if (lgp.getGameData().getGame().getGameTimer() != null && e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
-                                if (lgp2.getGameData().getRole().getRoleIdentity().equals(LGInfect.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
-                                    LGInfect role = (LGInfect) lgp2.getGameData().getRole();
-                                    if (!role.hasrespwaned) {
-                                        if (lgDamager != null && lgDamager.isInGame() && lgDamager.getGameData().getRole().getRoleIdentity().getRoleType() == RoleType.LOUP_GAROU) {
-                                            lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
-                                            TextComponent tc = new TextComponent();
-                                            tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
-                                            tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
-                                            //tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.DARK_GREEN + "Réssusciter cette personne").create()));
-
-                                            lgp2.getPlayer().spigot().sendMessage(tc);
-                                        }
+                                        lgp2.getPlayer().spigot().sendMessage(tc);
                                     }
                                 }
+                                    if (lgp2.getGameData().getRole().getRoleIdentity().equals(LGInfect.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged()-1) {
+                                        LGInfect role = (LGInfect) lgp2.getGameData().getRole();
+                                        if (role.hasPower()) {
+                                            if (lgDamager != null && lgDamager.isInGame() && (lgDamager.getGameData().getRole().getRoleIdentity().getRoleType() == RoleType.LOUP_GAROU || lgDamager.getGameData().getRole().isInfected())){
+                                                lgp2.sendMessage(getPrefix() + " " + getPrefixPrivé() + " " + ChatColor.GOLD + player.getName() + " est mort, veut tu le réssusciter ? Tu a 5 secondes pour répondre.");
+                                                TextComponent tc = new TextComponent();
+                                                tc.setText(ChatColor.DARK_GREEN + "Réssusciter ce joueur ➤ " + lgp.getName());
+                                                tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role respawn " + lgp.getName()));
+                                                //tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.DARK_GREEN + "Réssusciter cette personne").create()));
+
+                                                lgp2.getPlayer().spigot().sendMessage(tc);
+                                            }
+                                        }
+                                    }
                             }
                         }
 
@@ -173,17 +172,20 @@ public class DamageEvent implements Listener {
                         if (lgp.getGameData().getGame().getGameTimer() != null && e.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
                             EntityDamageByEntityEvent e1 = (EntityDamageByEntityEvent) e;
                             if (e1.getDamager() instanceof Player) {
-                                Bukkit.getPluginManager().callEvent(new OnKill(lgp.getGameData().getGame(), LGPlayer.thePlayer((Player) e1.getDamager()), lgp));
+                                Bukkit.getPluginManager().callEvent(new OnKill(lgp.getGameData().getGame(), UHCPlayer.thePlayer((Player) e1.getDamager()), lgp));
                             }
                         }
                         lgp.setChat(DeadChatI);
 
-                        LGPlayer finalLgDamager = lgDamager;
+                        UHCPlayer finalLgDamager = lgDamager;
                         new BukkitRunnable() {
                             int i = 0;
 
                             @Override
                             public void run() {
+                                npc.spectateFix(player, player.getPlayer().getLocation().getYaw(), true);
+                                //todo sound ENTITY_ELDER_GUARDIAN_AMBIENT
+
                                 if (lgp.getGameData().getGame() == null) {
                                     if (lgp.getPlayer() != null)
                                         npc.spectate(lgp.getPlayer(), false);
@@ -243,7 +245,7 @@ public class DamageEvent implements Listener {
                                     }
                                 }
 
-                                if (i == 5 * 20) {
+                                if (i == 5 * 20 || lgp.getGameData().isInCouple() && lgp.getGameData().getCouple().getGameData().isDead()) {
                                     if (game.isRoleTrolled() && game.getGameTimer().getTicks() < game.getParameters().getTrollEndTime()) {
                                         SecureRandom random = new SecureRandom();
                                         lgp.getGameData().setRole(game.getRoles().get(random.nextInt(game.getRoles().size())));
@@ -278,9 +280,9 @@ public class DamageEvent implements Listener {
                                         }
                                     }
                                     if (lgp.getGameData().isInCouple() && lgp.getGameData().getCouple().getGameData().isDead()) {
-                                        game.kill(lgp, Reason.LOVE, false, playerloc);
+                                        game.kill(lgp, Reason.LOVE, playerloc);
                                     } else {
-                                        game.kill(lgp, Reason.TUÉ, false, playerloc);
+                                        game.kill(lgp, Reason.TUÉ, playerloc);
                                     }
                                     if (game.getGameTimer() != null) {
                                         if (finalLgDamager != null) {
@@ -293,7 +295,7 @@ public class DamageEvent implements Listener {
                                     lgp.getGameData().setCanBeRespawned(false);
                                     if (lgp.getGameData().isInCouple() && lgp.getGameData().isDead() && !lgp.getGameData().getCouple().getGameData().isDead()) {
                                         lgp.getGameData().getCouple().getPlayer().damage(20);
-                                        //lgp.getCouple().setCouple(null);
+                                        //lgp.KilledgetCouple().setCouple(null);
                                         lgp.getGameData().setCouple(null);
                                     }
                                     if (lgp.getGameData().isInCouple() && !lgp.getGameData().isDead() && lgp.getGameData().getCouple().getGameData().isDead()) {
@@ -302,6 +304,7 @@ public class DamageEvent implements Listener {
                                         lgp.getGameData().setCouple(null);
                                     }
                                     lgp.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+                                    lgp.getPlayer().setFlying(true);
                                 }
                                 if (i == 15 * 20) {
                                     cancel();

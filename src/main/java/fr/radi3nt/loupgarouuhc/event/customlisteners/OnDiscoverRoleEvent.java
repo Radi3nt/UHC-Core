@@ -1,6 +1,6 @@
 package fr.radi3nt.loupgarouuhc.event.customlisteners;
 
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.loupgarouuhc.event.events.OnDiscoverRole;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -11,7 +11,7 @@ public class OnDiscoverRoleEvent implements Listener {
 
     @EventHandler
     public void OnDiscoverRole(OnDiscoverRole e) {
-        for (LGPlayer lgp : e.getGame().getGamePlayers()) {
+        for (UHCPlayer lgp : e.getGame().getGamePlayers()) {
             if (lgp.isLinkedToPlayer() && lgp.getGameData().hasRole()) {
                 lgp.getGameData().getRole().OnDiscoverRole(e.getGame(), lgp);
                 lgp.getPlayer().playSound(lgp.getPlayer().getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.AMBIENT, 1f, 1f);

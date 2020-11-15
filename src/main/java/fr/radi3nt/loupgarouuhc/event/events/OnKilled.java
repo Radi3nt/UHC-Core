@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.event.events;
 
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -17,11 +17,11 @@ public class OnKilled extends Event {
     }
 
     private final LGGame game;
-    private final LGPlayer killed;
-    private final LGPlayer killer;
+    private final UHCPlayer killed;
+    private final UHCPlayer killer;
     private final Location location;
 
-    public OnKilled(LGGame game, LGPlayer killed, LGPlayer killer, Location playerloc) {
+    public OnKilled(LGGame game, UHCPlayer killed, UHCPlayer killer, Location playerloc) {
         this.game = game;
         this.killed = killed;
         this.location = playerloc;
@@ -31,7 +31,7 @@ public class OnKilled extends Event {
         return game;
     }
 
-    public LGPlayer getKilled() {
+    public UHCPlayer getKilled() {
         return killed;
     }
 
@@ -39,7 +39,7 @@ public class OnKilled extends Event {
         return location;
     }
 
-    public LGPlayer getKiller() {
+    public UHCPlayer getKiller() {
         return killer;
     }
 }

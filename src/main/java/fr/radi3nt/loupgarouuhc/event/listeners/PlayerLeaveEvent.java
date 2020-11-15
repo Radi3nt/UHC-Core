@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.event.listeners;
 
-import fr.radi3nt.loupgarouuhc.classes.game.Reason;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.uhc.api.game.Reason;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
 import fr.radi3nt.loupgarouuhc.classes.stats.Hologram;
 import org.bukkit.ChatColor;
@@ -28,7 +28,7 @@ public class PlayerLeaveEvent implements Listener {
         }
 
         Player p = e.getPlayer();
-        LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer());
+        UHCPlayer lgp = UHCPlayer.thePlayer(e.getPlayer());
         lgp.getPlayerStats().refresh();
         Location playerloc = p.getLocation();
         PlayerInventory inventory = p.getInventory();
@@ -37,7 +37,7 @@ public class PlayerLeaveEvent implements Listener {
         e.setQuitMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_RED + "-" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getName());
         if (lgp.isInGame() && lgp.getGameData().hasRole() && !lgp.getGameData().isDead()) {
             new BukkitRunnable() {
-                final LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer().getUniqueId());
+                final UHCPlayer lgp = UHCPlayer.thePlayer(e.getPlayer().getUniqueId());
                 int i = 0;
 
                 @Override
@@ -46,7 +46,7 @@ public class PlayerLeaveEvent implements Listener {
                         cancel();
                     }
                     if (lgp.isInGame() && (i >= lgp.getGameData().getGame().getParameters().getDisconnectTimeout() || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().isCanReconnectInPvp()))) {
-                        lgp.getGameData().getGame().kill(lgp, Reason.DISCONNECTED, false, playerloc);
+                        lgp.getGameData().getGame().kill(lgp, Reason.DISCONNECTED, playerloc);
                         for (ItemStack item : inventory.getContents()) {
                             if (item != null) {
                                 playerloc.getWorld().dropItem(playerloc, item.clone());

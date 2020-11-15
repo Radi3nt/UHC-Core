@@ -1,41 +1,37 @@
 package fr.radi3nt.loupgarouuhc.classes.param;
 
+import fr.radi3nt.uhc.api.game.Parameter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import java.util.HashMap;
-
-public class Parameters {
-
-
-    private HashMap<Integer, Integer> worldBorderTime = new HashMap<>();
+public class Parameters implements Parameter {
 
 
     private boolean autoMap = false;
     private boolean recreateMapAfterUse = false;
 
     private int dayRoleDivulged = 2;
-    private int minDayForVote = 3;
-    private int getTimeForVote = 60 * 20;
     private int timeMultiplication = 1;
 
     private boolean hiddenCompo = false;
+
     private boolean isTroll = false;
     private boolean isRandomTroll = true;
     private int trollEndTime = 3 * 60 * 20 + 20 * 60 * 20;
-    private boolean canReconnectInPvp = true;
-    private boolean respawnBeforeRoleDivulged = true;
+
     private boolean onlyBlockCanBeRemoved = false;
     private boolean preserveRareItem = true;
     private int numberOfBlockRemovedWhenRespawn = 30;
     private int percentageOfChanceToRemove = 40;
 
+    private boolean respawnBeforeRoleDivulged = true;
+    private boolean canReconnectInPvp = true;
     private int disconnectTimeout = 5 * 60 * 20;
-    private int minPlayerForVotes = 3;
+
+    private int baseRadius = 1000;
 
     private Location spawn = new Location(Bukkit.getWorlds().get(0), 0.5, 133, 0.5, 160, 0);
     private Location gameSpawn = new Location(Bukkit.getWorlds().get(0), 0, 100, 0);
-    private Integer baseRadius = 1000;
 
 
     public Location getSpawn() {
@@ -70,22 +66,6 @@ public class Parameters {
         this.dayRoleDivulged = dayRoleDivulged;
     }
 
-    public int getMinDayForVote() {
-        return minDayForVote;
-    }
-
-    public void setMinDayForVote(int minDayForVote) {
-        this.minDayForVote = minDayForVote;
-    }
-
-    public int getGetTimeForVote() {
-        return getTimeForVote;
-    }
-
-    public void setGetTimeForVote(int getTimeForVote) {
-        this.getTimeForVote = getTimeForVote;
-    }
-
     public int getTimeMultiplication() {
         return timeMultiplication;
     }
@@ -100,14 +80,6 @@ public class Parameters {
 
     public void setDisconnectTimeout(int disconnectTimeout) {
         this.disconnectTimeout = disconnectTimeout;
-    }
-
-    public int getMinPlayerForVotes() {
-        return minPlayerForVotes;
-    }
-
-    public void setMinPlayerForVotes(int minPlayerForVotes) {
-        this.minPlayerForVotes = minPlayerForVotes;
     }
 
     public boolean isRespawnBeforeRoleDivulged() {
@@ -156,14 +128,6 @@ public class Parameters {
 
     public void setAutoMap(boolean autoMap) {
         this.autoMap = autoMap;
-    }
-
-    public HashMap<Integer, Integer> getWorldBorderTime() {
-        return worldBorderTime;
-    }
-
-    public void setWorldBorderTime(HashMap<Integer, Integer> worldBorderTime) {
-        this.worldBorderTime = worldBorderTime;
     }
 
     public boolean isRecreateMapAfterUse() {

@@ -2,14 +2,16 @@ package fr.radi3nt.loupgarouuhc.event.listeners.gui;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
 import fr.radi3nt.loupgarouuhc.classes.GUIs.*;
+import fr.radi3nt.uhc.api.game.GameState;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.message.Logger;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.ScenarioCommands;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioGetter;
+import fr.radi3nt.uhc.api.gui.guis.MainGUI;
+import fr.radi3nt.uhc.api.lang.Logger;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
+import fr.radi3nt.loupgarouuhc.roles.Role;
+import fr.radi3nt.loupgarouuhc.roles.RoleIdentity;
+import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioCommands;
+import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,6 +26,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +66,7 @@ public class ClickEvent implements Listener {
             if (OptionsItems.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
                 if (e.getCurrentItem().isSimilar(OptionsItems.createRolesItem())) {
-                    player.openInventory(RoleConfigGui.createGUI(player, 0));
+                    player.openInventory(RoleConfigGui.createGUI(player, 0, RoleConfigGui.PageType.VILAGER));
                 }
                 if (e.getCurrentItem().isSimilar(OptionsItems.createBackItem())) {
                     player.openInventory(MainGUI.createGUI(player));
@@ -72,8 +76,8 @@ public class ClickEvent implements Listener {
             if (ManageGameGui.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
                 if (e.getCurrentItem().isSimilar(ManageGameGui.createSkipItem())) {
-                    if (LGPlayer.thePlayer(player).isInGame()) {
-                        LGPlayer.thePlayer(player).getGameData().getGame().getGameTimer().setDay(LGPlayer.thePlayer(player).getGameData().getGame().getGameTimer().getDays() + 1);
+                    if (UHCPlayer.thePlayer(player).isInGame()) {
+                        UHCPlayer.thePlayer(player).getGameData().getGame().getGameTimer().setDay(UHCPlayer.thePlayer(player).getGameData().getGame().getGameTimer().getDays() + 1);
                     }
                 }
                 if (e.getCurrentItem().isSimilar(ManageGameGui.createBackItem())) {
@@ -82,14 +86,15 @@ public class ClickEvent implements Listener {
             }
             if (RoleConfigGui.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
+
                 if (e.getCurrentItem().isSimilar(RoleConfigGui.createBackItem())) {
                     player.openInventory(OptionsItems.createGUI(player));
                     return;
                 }
                 if (e.getCurrentItem().isSimilar(RoleConfigGui.createNextPageItem())) {
                     try {
-                        if (RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView())) != null) {
-                            player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView())));
+                        if (RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()), RoleConfigGui.getPageType(e.getView())) != null) {
+                            player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()), RoleConfigGui.getPageType(e.getView())));
                         }
                     } catch (Exception e1) {
 
@@ -98,16 +103,40 @@ public class ClickEvent implements Listener {
                 }
                 if (e.getCurrentItem().isSimilar(RoleConfigGui.createBackPageItem())) {
                     try {
-                        if (RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 2) != null) {
-                            player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 2));
+                        if (RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 2, RoleConfigGui.getPageType(e.getView())) != null) {
+                            player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 2, RoleConfigGui.getPageType(e.getView())));
                         }
                     } catch (Exception e1) {
 
                     }
                     return;
                 }
+                if (e.getCurrentItem().isSimilar(RoleConfigGui.createRoleItem(RoleConfigGui.PageType.SOLO.getName(), RoleConfigGui.PageType.SOLO.getMaterial(), false))) {
+                    try {
+                        player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, RoleConfigGui.PageType.SOLO));
+                    } catch (Exception e1) {
+
+                    }
+                    return;
+                }
+                if (e.getCurrentItem().isSimilar(RoleConfigGui.createRoleItem(RoleConfigGui.PageType.VILAGER.getName(), RoleConfigGui.PageType.VILAGER.getMaterial(), false))) {
+                    try {
+                        player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, RoleConfigGui.PageType.VILAGER));
+                    } catch (Exception e1) {
+
+                    }
+                    return;
+                }
+                if (e.getCurrentItem().isSimilar(RoleConfigGui.createRoleItem(RoleConfigGui.PageType.LOUPGAROU.getName(), RoleConfigGui.PageType.LOUPGAROU.getMaterial(), false))) {
+                    try {
+                        player.openInventory(RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, RoleConfigGui.PageType.LOUPGAROU));
+                    } catch (Exception e1) {
+
+                    }
+                    return;
+                }
                 for (RoleIdentity sort : Role.getRoleLinkByStringKey().keySet()) {
-                    if (e.getCurrentItem().getItemMeta() != null && sort.getName(LGPlayer.thePlayer(player).getLanguage()).equals(ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()))) {
+                    if (e.getCurrentItem().getItemMeta() != null && sort.getName(UHCPlayer.thePlayer(player).getLanguage()).equals(ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()))) {
                         String key = sort.getId();
                         if (e.getClick().isLeftClick()) {
                             if (e.getClick().isShiftClick()) {
@@ -149,11 +178,11 @@ public class ClickEvent implements Listener {
                     Logger.getGeneralLogger().log(err);
                 }
                 LoupGarouUHC.saveRoleFile();
-                RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, e.getInventory());
+                RoleConfigGui.createGUI(player, RoleConfigGui.getPage(e.getView()) - 1, e.getInventory(), RoleConfigGui.getPageType(e.getView()));
             }
             if (e.getView().getTopInventory().getTitle().contains(ChatColor.GOLD + "Scenarios ")) {
-                LGGame game = LGPlayer.thePlayer(player).getGameData().getGame();
-                if (game == null || !game.getStarted()) {
+                LGGame game = UHCPlayer.thePlayer(player).getGameData().getGame();
+                if (game == null || game.getGameState() != GameState.LOBBY) {
                     game = getGameInstance();
                 }
                 String itemName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
@@ -205,7 +234,7 @@ public class ClickEvent implements Listener {
                         }
                         if (!value) {
                             game.getScenarios().add(scenario);
-                            if (game.getStarted()) {
+                            if (game.getGameState()==GameState.PLAYING) {
                                 scenario.activate();
                             }
                         }
@@ -270,132 +299,134 @@ public class ClickEvent implements Listener {
                 }
                 e.setCancelled(true);
             } else if (e.getView().getTopInventory().getTitle().contains(ChatColor.GOLD + "Options for ") && e.getCurrentItem() != null) {
-                LGGame game = LGPlayer.thePlayer(player).getGameData().getGame();
-                if (game == null || !game.getStarted()) {
-                    game = getGameInstance();
-                }
-                String scenarioName = ChatColor.stripColor(e.getView().getTopInventory().getTitle()).replace("Options for ", "").trim();
-                String itemStackName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
-                Class<? extends Scenario> aClass = null;
-                for (Class<? extends Scenario> scenariosClass : Scenario.getScenariosClasses()) {
-                    Method method = null;
-                    try {
-                        method = scenariosClass.getMethod("getName");
-                    } catch (NoSuchMethodException noSuchMethodException) {
-                        noSuchMethodException.printStackTrace();
+                if (e.getCurrentItem() != null) {
+                    LGGame game = UHCPlayer.thePlayer(player).getGameData().getGame();
+                    if (game == null || game.getGameState()!=GameState.LOBBY) {
+                        game = getGameInstance();
                     }
-                    if (method == null)
-                        continue;
-                    String obj = null;
-                    try {
-                        obj = (String) method.invoke(null);
-                    } catch (IllegalAccessException illegalAccessException) {
-                        illegalAccessException.printStackTrace();
-                    } catch (InvocationTargetException invocationTargetException) {
-                        invocationTargetException.printStackTrace();
-                    }
-                    if (obj == null)
-                        continue;
-
-                    if (obj.trim().equals(scenarioName))
-                        aClass = scenariosClass;
-                }
-                Scenario scenario = null;
-                boolean value = false;
-                for (Scenario gameScenario : game.getScenarios()) {
-                    if (gameScenario.getClass().equals(aClass)) {
-                        value = true;
-                        scenario = gameScenario;
-                        break;
-                    }
-                }
-                if (!value) {
-                    try {
-                        scenario = aClass.getConstructor(LGGame.class).newInstance(game);
-                    } catch (InstantiationException instantiationException) {
-                        instantiationException.printStackTrace();
-                    } catch (IllegalAccessException illegalAccessException) {
-                        illegalAccessException.printStackTrace();
-                    } catch (InvocationTargetException invocationTargetException) {
-                        invocationTargetException.printStackTrace();
-                    } catch (NoSuchMethodException noSuchMethodException) {
-                        noSuchMethodException.printStackTrace();
-                    }
-                }
-                for (ScenarioGetter annotation : scenario.getScenarioGetAnnotations()) {
-                    try {
-                        Class<?> aClass1 = null;
-                        ArrayList<String> lore = new ArrayList<>();
+                    String scenarioName = ChatColor.stripColor(e.getView().getTopInventory().getTitle()).replace("Options for ", "").trim();
+                    String itemStackName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
+                    Class<? extends Scenario> aClass = null;
+                    for (Class<? extends Scenario> scenariosClass : Scenario.getScenariosClasses()) {
+                        Method method = null;
                         try {
-                            aClass1 = scenario.getScenarioGetMethod(annotation.name()).getReturnType();
+                            method = scenariosClass.getMethod("getName");
                         } catch (NoSuchMethodException noSuchMethodException) {
                             noSuchMethodException.printStackTrace();
                         }
-                        if (itemStackName.equals(annotation.name())) {
-                            if (aClass1 == Boolean.class || aClass1 == boolean.class) {
-                                if (e.getClick().isLeftClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, true);
-                                if (e.getClick().isRightClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, false);
-                                if (e.getClick().isCreativeAction())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
-                                lore.add(0, String.valueOf((boolean) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
-                            } else if (aClass1 == Integer.class || aClass1 == int.class) {
-                                int valueToUp = 0;
-                                if (e.getClick().isShiftClick())
-                                    valueToUp = 10;
-                                else
-                                    valueToUp = 1;
-
-                                if (e.getClick().isLeftClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (int) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) + valueToUp);
-                                if (e.getClick().isRightClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (int) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) - valueToUp);
-                                if (e.getClick().isCreativeAction())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
-                                lore.add(0, String.valueOf((int) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
-                            } else if (aClass1 == Double.class || aClass1 == double.class) {
-                                float valueToUp = 0;
-                                if (e.getClick().isShiftClick())
-                                    valueToUp = 1;
-                                else
-                                    valueToUp = 0.1f;
-
-                                if (e.getClick().isLeftClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) + (double) valueToUp);
-                                if (e.getClick().isRightClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) - (double) valueToUp);
-                                if (e.getClick().isCreativeAction())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
-                                lore.add(0, String.valueOf((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
-                            } else if (aClass1 == Float.class || aClass1 == float.class) {
-                                float valueToUp = 0;
-                                if (e.getClick().isShiftClick())
-                                    valueToUp = 1;
-                                else
-                                    valueToUp = 0.1f;
-
-                                if (e.getClick().isLeftClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) + valueToUp);
-                                if (e.getClick().isRightClick())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) - valueToUp);
-                                if (e.getClick().isCreativeAction())
-                                    scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
-                                lore.add(0, String.valueOf((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
-                            } else if (aClass1 == List.class) {
-                                //todo list
-                            } else {
-                                //invalid field
-                            }
-                            ItemMeta meta = e.getCurrentItem().getItemMeta();
-                            meta.setLore(lore);
-                            e.getCurrentItem().setItemMeta(meta);
+                        if (method == null)
+                            continue;
+                        String obj = null;
+                        try {
+                            obj = (String) method.invoke(null);
+                        } catch (IllegalAccessException illegalAccessException) {
+                            illegalAccessException.printStackTrace();
+                        } catch (InvocationTargetException invocationTargetException) {
+                            invocationTargetException.printStackTrace();
                         }
-                    } catch (Exception err) {
-                        Logger.getGeneralLogger().log(err);
+                        if (obj == null)
+                            continue;
+
+                        if (obj.trim().equals(scenarioName))
+                            aClass = scenariosClass;
                     }
+                    Scenario scenario = null;
+                    boolean value = false;
+                    for (Scenario gameScenario : game.getScenarios()) {
+                        if (gameScenario.getClass().equals(aClass)) {
+                            value = true;
+                            scenario = gameScenario;
+                            break;
+                        }
+                    }
+                    if (!value) {
+                        try {
+                            scenario = aClass.getConstructor(LGGame.class).newInstance(game);
+                        } catch (InstantiationException instantiationException) {
+                            instantiationException.printStackTrace();
+                        } catch (IllegalAccessException illegalAccessException) {
+                            illegalAccessException.printStackTrace();
+                        } catch (InvocationTargetException invocationTargetException) {
+                            invocationTargetException.printStackTrace();
+                        } catch (NoSuchMethodException noSuchMethodException) {
+                            noSuchMethodException.printStackTrace();
+                        }
+                    }
+                    for (ScenarioGetter annotation : scenario.getScenarioGetAnnotations()) {
+                        try {
+                            Class<?> aClass1 = null;
+                            ArrayList<String> lore = new ArrayList<>();
+                            try {
+                                aClass1 = scenario.getScenarioGetMethod(annotation.name()).getReturnType();
+                            } catch (NoSuchMethodException noSuchMethodException) {
+                                noSuchMethodException.printStackTrace();
+                            }
+                            if (itemStackName.equals(annotation.name())) {
+                                if (aClass1 == Boolean.class || aClass1 == boolean.class) {
+                                    if (e.getClick().isLeftClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, true);
+                                    if (e.getClick().isRightClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, false);
+                                    if (e.getClick().isCreativeAction())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
+                                    lore.add(0, String.valueOf((boolean) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
+                                } else if (aClass1 == Integer.class || aClass1 == int.class) {
+                                    int valueToUp = 0;
+                                    if (e.getClick().isShiftClick())
+                                        valueToUp = 10;
+                                    else
+                                        valueToUp = 1;
+
+                                    if (e.getClick().isLeftClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (int) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) + valueToUp);
+                                    if (e.getClick().isRightClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, (int) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario) - valueToUp);
+                                    if (e.getClick().isCreativeAction())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
+                                    lore.add(0, String.valueOf((int) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
+                                } else if (aClass1 == Double.class || aClass1 == double.class) {
+                                    float valueToUp = 0;
+                                    if (e.getClick().isShiftClick())
+                                        valueToUp = 1;
+                                    else
+                                        valueToUp = 0.1f;
+
+                                    if (e.getClick().isLeftClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).add(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+                                    if (e.getClick().isRightClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).subtract(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+                                    if (e.getClick().isCreativeAction())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
+                                    lore.add(0, String.valueOf((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
+                                } else if (aClass1 == Float.class || aClass1 == float.class) {
+                                    float valueToUp = 0;
+                                    if (e.getClick().isShiftClick())
+                                        valueToUp = 1;
+                                    else
+                                        valueToUp = 0.1f;
+
+                                    if (e.getClick().isLeftClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).add(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).floatValue());
+                                    if (e.getClick().isRightClick())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).subtract(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).floatValue());
+                                    if (e.getClick().isCreativeAction())
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(LGGame.class).newInstance(game)));
+                                    lore.add(0, String.valueOf((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
+                                } else if (aClass1 == List.class) {
+                                    //todo list
+                                } else {
+                                    //invalid field
+                                }
+                                ItemMeta meta = e.getCurrentItem().getItemMeta();
+                                meta.setLore(lore);
+                                e.getCurrentItem().setItemMeta(meta);
+                            }
+                        } catch (Exception err) {
+                            Logger.getGeneralLogger().log(err);
+                        }
+                    }
+                    e.setCancelled(true);
                 }
-                e.setCancelled(true);
             }
         }
     }

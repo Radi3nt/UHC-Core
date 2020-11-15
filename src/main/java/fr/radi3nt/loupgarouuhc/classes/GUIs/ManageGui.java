@@ -41,10 +41,12 @@ public class ManageGui {
                 }
             }
         }
-        SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-        meta.setDisplayName("Players");
-        meta.setOwner("Red_white_200"); //TODO CHANGE MY PSEUDO !
-        itemStack.setItemMeta(meta);
+        if (itemStack.getType()!=Material.BARRIER) {
+            SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+            meta.setDisplayName("Players");
+            meta.setOwner("Red_white_200"); //TODO CHANGE MY PSEUDO !
+            itemStack.setItemMeta(meta);
+        }
         return itemStack;
     }
 

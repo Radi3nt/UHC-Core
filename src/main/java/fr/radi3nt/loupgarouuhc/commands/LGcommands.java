@@ -3,26 +3,30 @@ package fr.radi3nt.loupgarouuhc.commands;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.GUIs.MainGUI;
+import fr.radi3nt.uhc.api.gui.guis.MainGUI;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.lang.lang.Languages;
-import fr.radi3nt.loupgarouuhc.classes.message.Logger;
+import fr.radi3nt.uhc.api.scenarios.scenario.vote.Vote;
+import fr.radi3nt.uhc.api.lang.lang.Languages;
+import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.loupgarouuhc.classes.message.messages.NoPermission;
-import fr.radi3nt.loupgarouuhc.classes.npc.NPC;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
-import fr.radi3nt.loupgarouuhc.classes.player.PlayerGameData;
+import fr.radi3nt.uhc.api.player.npc.NPC;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
+import fr.radi3nt.loupgarouuhc.classes.player.LGPlayerGameData;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGFeutre;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.LGInfect;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Renard;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Sorciere;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.Voyante;
-import fr.radi3nt.loupgarouuhc.utilis.Maths;
+import fr.radi3nt.loupgarouuhc.roles.Role;
+import fr.radi3nt.loupgarouuhc.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.roles.RoleType;
+import fr.radi3nt.loupgarouuhc.roles.WinType;
+import fr.radi3nt.loupgarouuhc.roles.roles.LoupGarou.LGFeutre;
+import fr.radi3nt.loupgarouuhc.roles.roles.LoupGarou.LGInfect;
+import fr.radi3nt.loupgarouuhc.roles.roles.Solo.Cupidon;
+import fr.radi3nt.loupgarouuhc.roles.roles.Villagers.*;
+import fr.radi3nt.uhc.api.scenarios.scenario.vote.PlayerVote;
+import fr.radi3nt.uhc.api.utilis.Maths;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -34,14 +38,12 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Constructor;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 import static fr.radi3nt.loupgarouuhc.LoupGarouUHC.*;
 
@@ -75,10 +77,6 @@ public class LGcommands implements CommandExecutor {
         return false;
     }
 
-    public void hey() {
-
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length > 0) {
@@ -89,7 +87,7 @@ public class LGcommands implements CommandExecutor {
                             if (args.length > 1) {
                                 for (Languages language : Languages.getLanguages()) {
                                     if (args[1].equalsIgnoreCase(language.getId()) || args[1].equalsIgnoreCase(language.getName())) {
-                                        LGPlayer lgp = LGPlayer.thePlayer((Player) sender);
+                                        UHCPlayer lgp = UHCPlayer.thePlayer((Player) sender);
                                         lgp.setLanguage(language);
                                         lgp.saveLang();
                                     }
@@ -100,7 +98,7 @@ public class LGcommands implements CommandExecutor {
                     break;
                 case "kill":
                     if (checkPermission(sender, "lg.admin", "")) {
-                        LGPlayer lgp4 = LGPlayer.thePlayer((Player) sender);
+                        UHCPlayer lgp4 = UHCPlayer.thePlayer((Player) sender);
                         NPC npc = new NPC(lgp4.getName(), lgp4.getPlayer().getLocation(), getPlugin());
                         npc.addRecipient(lgp4.getPlayer());
                         EntityPlayer playerNMS = ((CraftPlayer) lgp4.getPlayer()).getHandle();
@@ -117,6 +115,8 @@ public class LGcommands implements CommandExecutor {
 
                             @Override
                             public void run() {
+                                lgp4.getPlayer().setSpectatorTarget(lgp4.getPlayer());
+                                npc.spectateFix(lgp4.getPlayer(), lgp4.getPlayer().getLocation().getYaw(), true);
                                 if (i == 5 * 20) {
                                     cancel();
                                     npc.spectate(lgp4.getPlayer(), false);
@@ -139,16 +139,16 @@ public class LGcommands implements CommandExecutor {
                             if (args.length > 1) {
                                 Player target = Bukkit.getPlayerExact(args[1]);
                                 if (target != null) {
-                                    if (!getGameInstance().getGamePlayers().contains(LGPlayer.thePlayer(target))) {
-                                        getGameInstance().join(LGPlayer.thePlayer(target));
-                                        target.sendMessage(LGPlayer.thePlayer(target).getLanguage().getMessage("commandsJoinMessage"));
+                                    if (!getGameInstance().getGamePlayers().contains(UHCPlayer.thePlayer(target))) {
+                                        getGameInstance().join(UHCPlayer.thePlayer(target));
+                                        target.sendMessage(UHCPlayer.thePlayer(target).getLanguage().getMessage("commandsJoinMessage"));
                                     }
                                 }
                             } else {
                                 if (sender instanceof Player) {
-                                    if (!getGameInstance().getGamePlayers().contains(LGPlayer.thePlayer((Player) sender))) {
-                                        getGameInstance().join(LGPlayer.thePlayer((Player) sender));
-                                        sender.sendMessage(LGPlayer.thePlayer((Player) sender).getLanguage().getMessage("commandsJoinMessage"));
+                                    if (!getGameInstance().getGamePlayers().contains(UHCPlayer.thePlayer((Player) sender))) {
+                                        getGameInstance().join(UHCPlayer.thePlayer((Player) sender));
+                                        sender.sendMessage(UHCPlayer.thePlayer((Player) sender).getLanguage().getMessage("commandsJoinMessage"));
                                     }
                                 }
                             }
@@ -157,8 +157,8 @@ public class LGcommands implements CommandExecutor {
                 case "leave":
                     if (sender instanceof Player) {
                         if (checkPermission(sender, "lg.leave", "")) {
-                            if (getGameInstance().getGamePlayers().contains(LGPlayer.thePlayer((Player) sender))) {
-                                getGameInstance().getGamePlayers().remove(LGPlayer.thePlayer((Player) sender));
+                            if (getGameInstance().getGamePlayers().contains(UHCPlayer.thePlayer((Player) sender))) {
+                                getGameInstance().getGamePlayers().remove(UHCPlayer.thePlayer((Player) sender));
                                 sender.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.GOLD + " Leaved game");
                             }
                         }
@@ -210,12 +210,12 @@ public class LGcommands implements CommandExecutor {
                         symbols.setGroupingSeparator(' ');
                         DecimalFormat df = new DecimalFormat("###,###", symbols);
                         //DecimalFormat df = new DecimalFormat("###,###.00", symbols);
-                        String pointsS = df.format(LGPlayer.thePlayer((Player) sender).getStats().getPoints());
+                        String pointsS = df.format(UHCPlayer.thePlayer((Player) sender).getStats().getPoints());
                         sender.sendMessage(ChatColor.GRAY + "- Points: " + ChatColor.RED + ChatColor.BOLD + pointsS);
-                        sender.sendMessage(ChatColor.GRAY + "- Nombre de game: " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getGameNumber());
-                        sender.sendMessage(ChatColor.GRAY + "- Nombre de game gagné: " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getWinnedGames());
-                        sender.sendMessage(ChatColor.GRAY + "- Ratio de win (" + ChatColor.GREEN + "game gagné" + ChatColor.GOLD + "/" + ChatColor.GREEN + "game" + ChatColor.GRAY + ") : " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getPercentageOfWin());
-                        sender.sendMessage(ChatColor.GRAY + "- Kills: " + ChatColor.RED + ChatColor.BOLD + LGPlayer.thePlayer((Player) sender).getStats().getKills());
+                        sender.sendMessage(ChatColor.GRAY + "- Nombre de game: " + ChatColor.RED + ChatColor.BOLD + UHCPlayer.thePlayer((Player) sender).getStats().getGameNumber());
+                        sender.sendMessage(ChatColor.GRAY + "- Nombre de game gagné: " + ChatColor.RED + ChatColor.BOLD + UHCPlayer.thePlayer((Player) sender).getStats().getWinnedGames());
+                        sender.sendMessage(ChatColor.GRAY + "- Ratio de win (" + ChatColor.GREEN + "game gagné" + ChatColor.GOLD + "/" + ChatColor.GREEN + "game" + ChatColor.GRAY + ") : " + ChatColor.RED + ChatColor.BOLD + UHCPlayer.thePlayer((Player) sender).getStats().getPercentageOfWin());
+                        sender.sendMessage(ChatColor.GRAY + "- Kills: " + ChatColor.RED + ChatColor.BOLD + UHCPlayer.thePlayer((Player) sender).getStats().getKills());
                     }
                     break;
 
@@ -248,14 +248,14 @@ public class LGcommands implements CommandExecutor {
                                     String msg2 = ChatColor.AQUA + "[" + ChatColor.GOLD + ((Player) sender).getPlayerListName() + ChatColor.RED + " -> " + ChatColor.GOLD + player.getPlayerListName() + ChatColor.AQUA + "]" + ChatColor.RESET + message;
                                     player.sendMessage(msg1);
                                     sender.sendMessage(msg);
-                                    if (LGPlayer.thePlayer((Player) sender).isInGame() || LGPlayer.thePlayer(player).isInGame()) {
+                                    if (UHCPlayer.thePlayer((Player) sender).isInGame() || UHCPlayer.thePlayer(player).isInGame()) {
                                         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                             if (onlinePlayer.hasPermission("lg.admin")) {
                                                 onlinePlayer.sendMessage(LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " [Admin] " + msg2);
                                             }
-                                            if (LGPlayer.thePlayer(player).isInGame() && LGPlayer.thePlayer(onlinePlayer).equals(LGPlayer.thePlayer(player).getGameData().getGame().getHost())) {
+                                            if (UHCPlayer.thePlayer(player).isInGame() && UHCPlayer.thePlayer(onlinePlayer).equals(UHCPlayer.thePlayer(player).getGameData().getGame().getHost())) {
                                                 onlinePlayer.sendMessage(LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " [Host] " + msg2);
-                                            } else if (LGPlayer.thePlayer((Player) sender).isInGame() && LGPlayer.thePlayer(onlinePlayer).equals(LGPlayer.thePlayer((Player) sender).getGameData().getGame().getHost())) {
+                                            } else if (UHCPlayer.thePlayer((Player) sender).isInGame() && UHCPlayer.thePlayer(onlinePlayer).equals(UHCPlayer.thePlayer((Player) sender).getGameData().getGame().getHost())) {
                                                 onlinePlayer.sendMessage(LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " [Host] " + msg2);
                                             }
                                         }
@@ -269,11 +269,20 @@ public class LGcommands implements CommandExecutor {
                 case "spectate":
                     if (sender instanceof Player) {
                         if (checkPermission(sender, "lg.spectate", "")) {
-                            if (LGPlayer.thePlayer((Player) sender).isInGame() || (LGPlayer.thePlayer((Player) sender).isInGame() && LGPlayer.thePlayer((Player) sender).getGameData().isDead()))
-                                for (LGPlayer lgp : getPlayers()) {
-                                    if (lgp.isInGame()) {
-                                        ((Player) sender).teleport(lgp.getPlayer().getLocation(), PlayerTeleportEvent.TeleportCause.SPECTATE);
+                            if (!UHCPlayer.thePlayer((Player) sender).isInGame() || (UHCPlayer.thePlayer((Player) sender).isInGame() && UHCPlayer.thePlayer((Player) sender).getGameData().isDead()))
+                                if (args.length > 1) {
+                                    UHCPlayer tlgp = checkIfInGame(args[1]);
+                                    if (tlgp!=null) {
+                                        ((Player) sender).teleport(tlgp.getPlayerStats().getLastLocation());
                                         ((Player) sender).setGameMode(GameMode.SPECTATOR);
+                                        tlgp.getGameData().getGame().getSpectators().add(UHCPlayer.thePlayer((Player) sender));
+                                    }
+                                }
+                                for (UHCPlayer lgp : getPlayers()) {
+                                    if (lgp.isInGame()) {
+                                        ((Player) sender).teleport(lgp.getPlayerStats().getLastLocation());
+                                        ((Player) sender).setGameMode(GameMode.SPECTATOR);
+                                        lgp.getGameData().getGame().getSpectators().add(UHCPlayer.thePlayer((Player) sender));
                                         break;
                                     }
                                 }
@@ -284,7 +293,7 @@ public class LGcommands implements CommandExecutor {
                 case "manage":
                     if (sender instanceof Player) {
                         if (checkPermission(sender, "lg.manage", "")) {
-                            LGPlayer lgp = LGPlayer.thePlayer((Player) sender);
+                            UHCPlayer lgp = UHCPlayer.thePlayer((Player) sender);
                             if (args.length > 1) {
                                 switch (args[1]) {
                                     case "skip":
@@ -307,7 +316,7 @@ public class LGcommands implements CommandExecutor {
                                                 return true;
                                             }
 
-                                            LGPlayer tlgp = LGPlayer.thePlayer(target);
+                                            UHCPlayer tlgp = UHCPlayer.thePlayer(target);
                                             if (tlgp.isInGame() && !tlgp.getGameData().isDead())
                                                 return true;
 
@@ -317,7 +326,7 @@ public class LGcommands implements CommandExecutor {
                                                 game = getGameInstance();
                                             }
                                             for (Map.Entry<RoleIdentity, Constructor<? extends Role>> sort : Role.getRoleLinkByStringKey().entrySet()) {
-                                                if (sort.getKey().getName(lgp.getLanguage()).equals(ChatColor.stripColor(roleName))) {
+                                                if (sort.getKey().getName(lgp.getLanguage()).equalsIgnoreCase(ChatColor.stripColor(roleName))) {
                                                     try {
                                                         role = sort.getValue().newInstance(game);
                                                     } catch (Exception err) {
@@ -327,16 +336,19 @@ public class LGcommands implements CommandExecutor {
                                                 }
                                             }
                                             if (role != null) {
+                                                LGPlayerGameData data = new LGPlayerGameData(game);
+                                                target.setGameMode(GameMode.SURVIVAL);
+                                                data.setRole(role);
+                                                tlgp.setGameData(data);
+                                                role.join(tlgp, true);
+                                                game.scatter(tlgp);
+
                                                 game.getRoles().add(role);
                                                 game.getRolesWithDeads().add(role);
                                                 game.getGamePlayers().add(tlgp);
                                                 game.getGamePlayersWithDeads().add(tlgp);
-                                                game.scatter(tlgp);
-                                                role.join(tlgp, true);
-                                                PlayerGameData data = new PlayerGameData(game);
-                                                data.setRole(role);
-                                                tlgp.setGameData(data);
-                                                role.OnDiscoverRole(game, lgp);
+                                                role.OnDiscoverRole(game, tlgp);
+                                                tlgp.setChat(game.getData().getGameChat());
                                             } else {
                                                 lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_RED + "Cannot get role for this name");
                                             }
@@ -347,7 +359,7 @@ public class LGcommands implements CommandExecutor {
                                         if (args.length > 2) {
                                             Player player = Bukkit.getPlayerExact(args[2]);
                                             if (player != null) {
-                                                LGPlayer lgT = LGPlayer.thePlayer(player);
+                                                UHCPlayer lgT = UHCPlayer.thePlayer(player);
                                                 if (lgT.isInGame())
                                                     lgT.getGameData().getGame().scatter(lgT);
                                             }
@@ -391,7 +403,7 @@ public class LGcommands implements CommandExecutor {
                                         if (args.length > 2) {
                                             Player player = Bukkit.getPlayerExact(args[2]);
                                             if (player != null) {
-                                                LGPlayer lgT = LGPlayer.thePlayer(player);
+                                                UHCPlayer lgT = UHCPlayer.thePlayer(player);
                                                 if (lgT.isInGame()) {
                                                     lgT.getGameData().getGame().getData().setHost(lgT);
                                                 } else {
@@ -432,15 +444,30 @@ public class LGcommands implements CommandExecutor {
                 case "vote":
                     if (sender instanceof Player) {
                         Player player = (Player) sender;
-                        LGPlayer lgp = LGPlayer.thePlayer(player);
+                        UHCPlayer lgp = UHCPlayer.thePlayer(player);
                         if (lgp.isInGame() && lgp.getGameData().canVote()) {
-                            if (args.length > 1) {
-                                LGPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[1]);
+                            PlayerVote playerVote = VoteManager.getPlayerVotes(lgp.getGameData().getGame());
+
+                            if (playerVote==null) {
+                                lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_RED + " Le vote n'est pas activé");
+                                return true;
+                            }
+
+                            if (args.length == 2) {
+                                UHCPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[1]);
                                 if (tlgp != null) {
-                                    if (tlgp.isInGame() && tlgp.getGameData().getGame() == lgp.getGameData().getGame()) {
+                                    if (tlgp.isInGame() && tlgp.getGameData().getGame().equals(lgp.getGameData().getGame())) {
                                         if (!tlgp.getGameData().isDead()) {
-                                            if (!lgp.getGameData().getGame().getVoted().containsKey(lgp)) {
-                                                lgp.getGameData().getGame().getVoted().put(lgp, tlgp);
+
+                                            boolean hasVoted = false;
+                                            for (Map.Entry<Vote, Integer> entry : playerVote.getVotes().entrySet()) {
+                                                Vote vote = entry.getKey();
+                                                Integer integer = entry.getValue();
+                                                if (vote.isSameVoter(lgp))
+                                                    hasVoted = true;
+                                            }
+                                            if (!hasVoted) {
+                                                playerVote.getVotes().put(new Vote(lgp, tlgp), 1);
                                                 lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_GREEN + " Votre vote a bien été comptabilisé.");
                                             } else {
                                                 lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_RED + " Vous avez dejà voté !");
@@ -454,6 +481,33 @@ public class LGcommands implements CommandExecutor {
                                 } else {
                                     lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_RED + " Cette personne n'existe pas");
                                 }
+                            } else if (lgp.getGameData().getRole().getRoleIdentity().equals(Corbeau.getStaticRoleIdentity())) {
+                                boolean hasVoted = false;
+                                for (Vote vote : playerVote.getVotes().keySet()) {
+                                    if (vote.isSameVoter(lgp)) {
+                                        hasVoted = true;
+                                        break;
+                                    }
+                                }
+                                if (!hasVoted) {
+                                    ArrayList<UHCPlayer> targetedPlayers = new ArrayList<>();
+                                    for (int i = 1; i < args.length; i++) {
+                                        UHCPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[i]);
+                                        if (tlgp != null) {
+                                            targetedPlayers.add(tlgp);
+                                        } else {
+                                            lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.RED + " Votre vote ne peut être comptabilisé.");
+                                            break;
+                                        }
+                                    }
+                                    for (int i = 0; i < targetedPlayers.size(); i++) {
+                                        if (i >= 3) {
+                                            break;
+                                        }
+                                        playerVote.getVotes().put(new Vote(lgp, targetedPlayers.get(i)), playerVote.getVotes().getOrDefault(new Vote(lgp, targetedPlayers.get(i)), 0)+1);
+                                    }
+                                    lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_GREEN + " Votre vote a bien été comptabilisé.");
+                                }
                             } else {
                                 lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.DARK_RED + " Cette personne n'existe pas");
                             }
@@ -465,7 +519,7 @@ public class LGcommands implements CommandExecutor {
 
                 case "list":
                     if (sender instanceof Player) {
-                        LGPlayer lgp = LGPlayer.thePlayer((Player) sender);
+                        UHCPlayer lgp = UHCPlayer.thePlayer((Player) sender);
                         if (lgp.isInGame()) {
                             if (!lgp.getGameData().getGame().getParameters().isHiddenCompo()) {
                                 for (Role role : lgp.getGameData().getGame().getRolesWithDeads()) {
@@ -483,15 +537,15 @@ public class LGcommands implements CommandExecutor {
 
                 case "role":
                     if (sender instanceof Player) {
-                        LGPlayer lgp = LGPlayer.thePlayer((Player) sender);
+                        UHCPlayer lgp = UHCPlayer.thePlayer((Player) sender);
                         if (args.length > 1) {
                             switch (args[1]) {
                                 case "see":
-                                    if (lgp.isInGame() && lgp.getGameData().getRole().getRoleIdentity().equals(Voyante.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                    if (lgp.isInGame() && lgp.getGameData().getRole().getRoleIdentity().equals(Voyante.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged() -1) {
                                         Voyante voyante = (Voyante) lgp.getGameData().getRole();
-                                        if (voyante.canSee()) {
+                                        if (voyante.hasPower()) {
                                             if (args.length > 2) {
-                                                LGPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[2]);
+                                                UHCPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[2]);
                                                 if (tlgp != null) {
                                                     if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && !tlgp.getGameData().isDead()) {
                                                         if (tlgp.getGameData().getRole().getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity())) {
@@ -500,7 +554,7 @@ public class LGcommands implements CommandExecutor {
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " est " + tlgp.getGameData().getRole().getName(lgp.getLanguage()));
 
                                                         }
-                                                        voyante.setCanSee(false);
+                                                        voyante.setPower(false);
                                                     } else {
                                                         lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ce joueur est invalide");
                                                     }
@@ -513,20 +567,20 @@ public class LGcommands implements CommandExecutor {
                                         } else {
                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
                                         }
-                                    } else if (lgp.isInGame() && lgp.getGameData().getRole().getRoleIdentity().equals(Renard.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                    } else if (lgp.isInGame() && lgp.getGameData().getRole().getRoleIdentity().equals(Renard.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged()-1) {
                                         Renard renard = (Renard) lgp.getGameData().getRole();
-                                        if (renard.canSee()) {
+                                        if (renard.hasPower()) {
                                             if (args.length > 2) {
-                                                LGPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[2]);
+                                                UHCPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[2]);
                                                 if (tlgp != null) {
-                                                    if (tlgp.isInGame() && tlgp.getGameData().hasRole() && !tlgp.getGameData().isDead() && Maths.getDistanceBetween2Points(lgp.getPlayer().getLocation(), tlgp.getPlayer().getLocation()) <= renard.getRadius()) {
+                                                    if (tlgp.isInGame() && tlgp.getGameData().hasRole() && !tlgp.getGameData().isDead() && Maths.distanceIn2D(lgp.getPlayer().getLocation(), tlgp.getPlayer().getLocation()) <= renard.getRadius()) {
                                                         if (tlgp.getGameData().getRole().getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity())) {
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " est " + (((LGFeutre) tlgp.getGameData().getRole()).affichage.getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "loup garou" : ChatColor.DARK_BLUE + "non loup Garou"));
                                                         } else {
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " est " + (tlgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU ? ChatColor.DARK_RED + "loup garou" : ChatColor.DARK_BLUE + "non loup garou"));
                                                         }
-                                                        renard.setTime(renard.getTime() + 1);
-                                                        renard.setCanSee(false);
+                                                        renard.setUse(renard.getUse() + 1);
+                                                        renard.setPower(false);
                                                     } else {
                                                         lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ce joueur est invalide");
                                                     }
@@ -538,6 +592,70 @@ public class LGcommands implements CommandExecutor {
                                             }
                                         } else {
                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
+                                        }
+                                    } else if (lgp.isInGame() && lgp.getGameData().getRole().getRoleIdentity().equals(Detective.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged() -1) {
+                                        Detective renard = (Detective) lgp.getGameData().getRole();
+                                        if (renard.hasPower()) {
+                                            if (args.length > 3) {
+                                                UHCPlayer tlgp = checkIfInGame(lgp.getGameData().getGame(), args[2]);
+                                                UHCPlayer tlgp2 = checkIfInGame(lgp.getGameData().getGame(), args[3]);
+                                                if (tlgp != null && tlgp2!=null) {
+                                                    if (tlgp.isInGame() && tlgp.getGameData().hasRole() && !tlgp.getGameData().isDead() && tlgp2.isInGame() && tlgp2.getGameData().hasRole() && !tlgp2.getGameData().isDead()) {
+                                                        Role role1 = tlgp.getGameData().getRole().getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity()) ? ((LGFeutre) tlgp.getGameData().getRole()).affichage : tlgp.getGameData().getRole();
+                                                        Role role2 = tlgp2.getGameData().getRole().getRoleIdentity().equals(LGFeutre.getStaticRoleIdentity()) ? ((LGFeutre) tlgp2.getGameData().getRole()).affichage : tlgp2.getGameData().getRole();
+                                                        if (role1.getRoleIdentity().getRoleType()==role2.getRoleIdentity().getRoleType()) {
+                                                            lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " et " + tlgp2.getName() + " sont dans le même camp");
+                                                        } else {
+                                                            lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " et " + tlgp2.getName() + " ne sont pas dans le même camp");
+                                                        }
+                                                        renard.setPower(false);
+                                                    } else {
+                                                        lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ce joueur est invalide");
+                                                    }
+                                                } else {
+                                                    lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ce joueur n'existe pas");
+                                                }
+                                            } else {
+                                                lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Tu doit mettre deux joueurs valide !");
+                                            }
+                                        } else {
+                                            lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Tu ne peut pas voir les roles pour l'instant");
+                                        }
+                                    } else if (lgp.isInGame() && lgp.getGameData().getRole().getRoleIdentity().equals(Citoyen.getStaticRoleIdentity()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged() -1) {
+                                        Citoyen citoyen = (Citoyen) lgp.getGameData().getRole();
+                                        if (citoyen.isCanCancel()) {
+                                            if (args.length > 2 && args[2].equalsIgnoreCase("cancel")) {
+                                                if (citoyen.hasPower()) {
+                                                    citoyen.setPower(false);
+                                                    citoyen.cancelVote();
+                                                    lgp.sendMessage(LoupGarouUHC.getPrefix() + ChatColor.GOLD + " Successfully cancelled vote");
+                                                } else {
+                                                    // TODO: 07/11/20 message
+                                                }
+                                            } else if (citoyen.getUse() != 0) {
+                                                citoyen.setUse(citoyen.getUse() - 1);
+                                                String message=ChatColor.GOLD + "" + ChatColor.BOLD + "Votes du jour:\n";
+                                                Vote[] votes = VoteManager.convertMapToArray(VoteManager.getPlayerVotes(citoyen.getGame()).getVotes());
+                                                for (Vote vote : votes) {
+                                                    message+="\n" + ChatColor.AQUA + vote.getVoter().getName() + ChatColor.GOLD + " -> " + ChatColor.AQUA + vote.getVoted().getName();
+                                                }
+                                                lgp.sendMessage(message);
+                                                TextComponent tc = new TextComponent();
+                                                if (citoyen.hasPower()) {
+                                                    tc.setText(ChatColor.GREEN + "-> " + ChatColor.DARK_GREEN + ChatColor.BOLD + "CANCEL VOTE");
+                                                    tc.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/lg role see cancel"));
+                                                    tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.GREEN + "Click to cancel votes").create()));
+                                                } else {
+                                                    tc.setText(ChatColor.RED + "-> " + ChatColor.GRAY + ChatColor.BOLD + "CANCEL VOTE");
+                                                    tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.GRAY + "You already cancelled votes").create()));
+                                                }
+
+                                                lgp.getPlayer().spigot().sendMessage(tc);
+                                            } else {
+                                                // TODO: 07/11/20 message
+                                            }
+                                        } else {
+                                            //todo message
                                         }
                                     } else {
                                         lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Tu n'est pas voyante ni renard");
@@ -548,16 +666,16 @@ public class LGcommands implements CommandExecutor {
                                     if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged() - 1) {
                                         if (lgp.getGameData().getRole().getRoleIdentity().equals(Sorciere.getStaticRoleIdentity())) {
                                             Sorciere sorciere = (Sorciere) lgp.getGameData().getRole();
-                                            if (!sorciere.hasrespwaned) {
+                                            if (sorciere.hasPower()) {
                                                 if (args.length > 2) {
                                                     Player target = Bukkit.getServer().getPlayerExact(args[2]);
                                                     if (target != null) {
-                                                        LGPlayer tlgp = LGPlayer.thePlayer(target);
+                                                        UHCPlayer tlgp = UHCPlayer.thePlayer(target);
                                                         if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && tlgp.getGameData().canBeRespawned()) {
                                                             tlgp.getGameData().setCanBeRespawned(false);
                                                             tlgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.GOLD + " Tu a été ressussié");
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " a été réssuscité !");
-                                                            sorciere.hasrespwaned = true;
+                                                            sorciere.setPower(false);
                                                             return true;
                                                         } else {
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ce joueur est invalide");
@@ -571,20 +689,19 @@ public class LGcommands implements CommandExecutor {
                                             } else {
                                                 lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Tu a déjà ressucité quelqu'un");
                                             }
-                                        } else if (lgp.getGameData().getRole().getRoleIdentity() == LGInfect.getStaticRoleIdentity()) {
+                                        } else if (lgp.getGameData().getRole().getRoleIdentity().equals(LGInfect.getStaticRoleIdentity())) {
                                             LGInfect infecte = (LGInfect) lgp.getGameData().getRole();
-                                            if (!infecte.hasrespwaned) {
+                                            if (infecte.hasPower()) {
                                                 if (args.length > 2) {
-                                                    Player target = Bukkit.getServer().getPlayerExact(args[2]);
-                                                    if (target != null) {
-                                                        LGPlayer tlgp = LGPlayer.thePlayer(target);
-                                                        if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && tlgp.getGameData().canBeRespawned() && tlgp.getGameData().getRoleType() != RoleType.LOUP_GAROU && tlgp.getGameData().getKiller().getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU) {
+                                                    UHCPlayer tlgp = checkIfInGame(args[2]);
+                                                    if (tlgp != null) {
+                                                        if (tlgp.isInGame() && tlgp.getGameData().getRole() != null && tlgp.getGameData().canBeRespawned() && tlgp.getGameData().getRole().getRoleType() != RoleType.LOUP_GAROU && tlgp.getGameData().getKiller()!=null && (tlgp.getGameData().getKiller().getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU || tlgp.getGameData().getKiller().getGameData().getRole().isInfected())) {
                                                             tlgp.getGameData().setCanBeRespawned(false);
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " " + tlgp.getName() + " a été infecté !");
                                                             tlgp.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.GOLD + " Tu a été infecté, tu gagne maintenant avec les loups garous");
                                                             tlgp.getGameData().setKiller(null);
-                                                            tlgp.getGameData().setInfected(true);
-                                                            infecte.hasrespwaned = true;
+                                                            tlgp.getGameData().getRole().setInfected(true);
+                                                            infecte.setPower(false);
                                                             return true;
                                                         } else {
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ce joueur est invalide");
@@ -607,11 +724,11 @@ public class LGcommands implements CommandExecutor {
                                     break;
 
                                 case "lg":
-                                    if (lgp.isInGame() && lgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
+                                    if (lgp.isInGame() && (lgp.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU || lgp.getGameData().getRole().isInfected()) && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged()-1) {
                                         String message = LoupGarouUHC.getPrefix() + ChatColor.RED + " ";
                                         boolean empty = true;
-                                        for (LGPlayer player : lgp.getGameData().getGame().getGamePlayersWithDeads()) {
-                                            if (player.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU) {
+                                        for (UHCPlayer player : lgp.getGameData().getGame().getGamePlayersWithDeads()) {
+                                            if (player.getGameData().getRole().getRoleType() == RoleType.LOUP_GAROU || lgp.getGameData().getRole().isInfected()) {
                                                 if (empty) {
                                                     if (player.getGameData().isDead()) {
                                                         message = message + ChatColor.STRIKETHROUGH + player.getName() + ChatColor.RED;
@@ -637,19 +754,20 @@ public class LGcommands implements CommandExecutor {
                                     break;
 
                                 case "couple":
-                                    if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer().getDays() > 1) {
-                                        if (lgp.getGameData().getRole().getRoleIdentity() == Cupidon.getStaticRoleIdentity()) {
+                                    if (lgp.isInGame() && lgp.getGameData().getGame().getGameTimer().getDays() > lgp.getGameData().getGame().getParameters().getDayRoleDivulged()-1) {
+                                        if (lgp.getGameData().getRole().getRoleIdentity().equals(Cupidon.getStaticRoleIdentity())) {
                                             Cupidon cupidon = (Cupidon) lgp.getGameData().getRole();
-                                            if (cupidon.canCouple) {
+                                            if (cupidon.hasPower()) {
                                                 if (args.length > 3) {
-                                                    LGPlayer target1 = checkIfInGame(lgp.getGameData().getGame(), args[2]);
-                                                    LGPlayer target2 = checkIfInGame(lgp.getGameData().getGame(), args[3]);
+                                                    UHCPlayer target1 = checkIfInGame(lgp.getGameData().getGame(), args[2]);
+                                                    UHCPlayer target2 = checkIfInGame(lgp.getGameData().getGame(), args[3]);
                                                     if (target1 != target2) {
                                                         if (target1 != null && target2 != null) {
                                                             target1.getGameData().setCouple(target2);
                                                             target2.getGameData().setCouple(target1);
                                                             target1.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + target2.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
                                                             target2.sendMessage(LoupGarouUHC.getPrefix() + " " + LoupGarouUHC.getPrefixPrivé() + ChatColor.BLUE + " Tu es maintenant uni avec " + ChatColor.DARK_AQUA + target1.getName() + ChatColor.BLUE + ".\nSi l'un de vous meurt, l'autre ne pourras supporter cette souffrance et se suicidera immédiatement.");
+                                                            cupidon.setPower(false);
                                                         } else {
                                                             lgp.sendMessage(LoupGarouUHC.getPrefix() + " " + ChatColor.RED + "Ces joueurs sont invalide");
                                                         }
@@ -729,11 +847,20 @@ public class LGcommands implements CommandExecutor {
         return true;
     }
 
-    private LGPlayer checkIfInGame(LGGame game, String name) {
-        for (LGPlayer gamePlayer : game.getGamePlayers()) {
+    private UHCPlayer checkIfInGame(LGGame game, String name) {
+        for (UHCPlayer gamePlayer : game.getGamePlayers()) {
             if (gamePlayer.getName().equals(name)) {
                 return gamePlayer;
             }
+        }
+        return null;
+    }
+
+    private UHCPlayer checkIfInGame(String name) {
+        if (Bukkit.getOfflinePlayer(name).hasPlayedBefore()) {
+            UHCPlayer player = UHCPlayer.thePlayer(Bukkit.getOfflinePlayer(name).getUniqueId());
+            if (player.isInGame())
+                return player;
         }
         return null;
     }

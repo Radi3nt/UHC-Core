@@ -4,46 +4,43 @@
 
 package fr.radi3nt.loupgarouuhc;
 
-import fr.radi3nt.loupgarouuhc.classes.chats.Chat;
-import fr.radi3nt.loupgarouuhc.classes.chats.DeadChat;
-import fr.radi3nt.loupgarouuhc.classes.chats.GameChat;
-import fr.radi3nt.loupgarouuhc.classes.chats.GeneralChat;
+import fr.radi3nt.uhc.api.chats.Chat;
+import fr.radi3nt.uhc.api.chats.DeadChat;
+import fr.radi3nt.uhc.api.chats.GameChat;
+import fr.radi3nt.uhc.api.chats.GeneralChat;
 import fr.radi3nt.loupgarouuhc.classes.game.LGGame;
-import fr.radi3nt.loupgarouuhc.classes.lang.Reader;
-import fr.radi3nt.loupgarouuhc.classes.lang.lang.Languages;
-import fr.radi3nt.loupgarouuhc.classes.message.Logger;
+import fr.radi3nt.uhc.api.lang.Reader;
+import fr.radi3nt.uhc.api.lang.lang.Languages;
+import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.loupgarouuhc.classes.param.Parameters;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
 import fr.radi3nt.loupgarouuhc.commands.LGTabCompleter;
 import fr.radi3nt.loupgarouuhc.commands.LGcommands;
 import fr.radi3nt.loupgarouuhc.event.customlisteners.*;
 import fr.radi3nt.loupgarouuhc.event.listeners.*;
 import fr.radi3nt.loupgarouuhc.event.listeners.gui.ClickEvent;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.Role;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.RoleIdentity;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.WinType;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.LoupGarou.*;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Assassin;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Solo.Cupidon;
-import fr.radi3nt.loupgarouuhc.modifiable.roles.roles.Villagers.*;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.Scenario;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.ScenarioCommands;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.ScenarioListener;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.scenario.*;
-import fr.radi3nt.loupgarouuhc.modifiable.scenarios.util.ScenarioUtilis;
-import fr.radi3nt.loupgarouuhc.utilis.Config;
-import fr.radi3nt.loupgarouuhc.utilis.Updater;
+import fr.radi3nt.loupgarouuhc.roles.Role;
+import fr.radi3nt.loupgarouuhc.roles.RoleIdentity;
+import fr.radi3nt.loupgarouuhc.roles.WinType;
+import fr.radi3nt.loupgarouuhc.roles.roles.LoupGarou.*;
+import fr.radi3nt.loupgarouuhc.roles.roles.Solo.Assassin;
+import fr.radi3nt.loupgarouuhc.roles.roles.Solo.Cupidon;
+import fr.radi3nt.loupgarouuhc.roles.roles.Villagers.*;
+import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioCommands;
+import fr.radi3nt.uhc.api.scenarios.scenario.*;
+import fr.radi3nt.uhc.api.scenarios.scenario.vote.PlayerVote;
+import fr.radi3nt.uhc.api.scenarios.util.ScenarioUtilis;
+import fr.radi3nt.uhc.api.utilis.Config;
+import fr.radi3nt.uhc.api.utilis.Updater;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -51,6 +48,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class LoupGarouUHC extends JavaPlugin implements Listener {
 
@@ -61,7 +60,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
     public static Chat DeadChatI;
 
     private static final HashMap<String, Integer> roleNumber = new HashMap<>();
-    private static final ArrayList<LGPlayer> players = new ArrayList<>();
+    private static final Set<UHCPlayer> players = new HashSet<>();
     private static final String prefix = ChatColor.AQUA + "[" + ChatColor.GOLD + ChatColor.BOLD + "LG UHC" + ChatColor.AQUA + "]" + ChatColor.RESET;
     private static final String prefixPrivé = ChatColor.BLUE + "[Privé]" + ChatColor.RESET;
     private static Plugin plugin;
@@ -127,6 +126,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new OnKillEvent(), this);
         getServer().getPluginManager().registerEvents(new OnStartGame(), this);
         getServer().getPluginManager().registerEvents(new OnEndGame(), this);
+        getServer().getPluginManager().registerEvents(new OnWinCheck(), this);
 
 
         getServer().getPluginManager().registerEvents(new SmallFeaturesListener(), this);
@@ -169,7 +169,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         return roleNumber;
     }
 
-    public static ArrayList<LGPlayer> getPlayers() {
+    public static Set<UHCPlayer> getPlayers() {
         return players;
     }
 
@@ -204,6 +204,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         try {
 
             new File(getDataFolder() + "/logs/general", "latest.yml").delete();
+            new File(getDataFolder() + "/logs/chat", "latest.yml").delete();
 
             Logger.setGeneralLogger(new Logger(Config.createConfig(getDataFolder() + "/logs/general", "latest.yml"), Bukkit.getConsoleSender()));
             Logger.setChat(new Logger(Config.createConfig(getDataFolder() + "/logs/chat", "latest.yml"), Bukkit.getConsoleSender()));
@@ -236,7 +237,6 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
             Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered PlaceHolders");
             RegisterEvents();
             Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Registered Events");
-            registerScenariosListeners();
             registerDefaultScenarios();
             Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[LG UHC] " + ChatColor.RED + "Loading Default Scenarios");
             RegisterCommands();
@@ -248,7 +248,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
 
 
             for (Player player : Bukkit.getOnlinePlayers()) {
-                LGPlayer lgp = LGPlayer.thePlayer(player);
+                UHCPlayer lgp = UHCPlayer.thePlayer(player);
                 lgp.loadStats();
                 lgp.loadSavedLang();
                 players.add(lgp);
@@ -267,21 +267,14 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
             Logger.getGeneralLogger().log(e);
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
         }
-    }
-
-    private void registerScenariosListeners() {
-
-        ScenarioListener listen = new ScenarioListener();
-        RegisteredListener registeredListener = new RegisteredListener(listen, (listener, event) -> listen.onEvent(event), EventPriority.NORMAL, this, true);
-        for (HandlerList handler : HandlerList.getHandlerLists()) {
-            handler.register(registeredListener);
-        }
-        Logger.getGeneralLogger().log("Registered listeners for all registered events");
+        //Bukkit.getScheduler().scheduleSyncDelayedTask(this, this::);
 
     }
+
 
     private void registerDefaultScenarios() {
 
+        ScenarioUtilis.addScenario(PlayerVote.class);
         ScenarioUtilis.addScenario(XPBoost.class);
         ScenarioUtilis.addScenario(VanillaPlus.class);
         ScenarioUtilis.addScenario(TimedCommands.class);
@@ -304,6 +297,11 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         ScenarioUtilis.addScenario(HungerLess.class);
         ScenarioUtilis.addScenario(NoDrown.class);
         ScenarioUtilis.addScenario(FastPlace.class);
+        ScenarioUtilis.addScenario(NoAbsorbtion.class);
+        ScenarioUtilis.addScenario(HorseLess.class);
+        ScenarioUtilis.addScenario(FightDetector.class);
+        ScenarioUtilis.addScenario(UHC.class);
+        ScenarioUtilis.addScenario(WorldBorder.class);
 
     }
 
@@ -326,6 +324,11 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
             registerRole(LGFeutre.getStaticRoleIdentity(), LGFeutre.class);
             registerRole(Mineur.getStaticRoleIdentity(), Mineur.class);
             registerRole(Renard.getStaticRoleIdentity(), Renard.class);
+            registerRole(Detective.getStaticRoleIdentity(), Detective.class);
+            registerRole(Corbeau.getStaticRoleIdentity(), Corbeau.class);
+            registerRole(Citoyen.getStaticRoleIdentity(), Citoyen.class);
+            //registerRole(Salvator.getStaticRoleIdentity(), Salvator.class);
+            //todo livre des roles
 
         } catch (SecurityException e) {
             Logger.getGeneralLogger().log("Error while enabling roles");
@@ -338,7 +341,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
         Logger.getGeneralLogger().archive();
         Logger.getChat().archive();
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
+            UHCPlayer lgp = UHCPlayer.thePlayer(onlinePlayer);
             if (lgp.isInGame())
                 lgp.getGameData().getGame().endGame(WinType.NONE, true);
         }
@@ -362,7 +365,7 @@ public final class LoupGarouUHC extends JavaPlugin implements Listener {
 
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            LGPlayer lgp = LGPlayer.thePlayer(onlinePlayer);
+            UHCPlayer lgp = UHCPlayer.thePlayer(onlinePlayer);
             lgp.saveLang();
             lgp.saveStats();
         }

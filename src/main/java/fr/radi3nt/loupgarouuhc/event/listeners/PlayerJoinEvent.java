@@ -1,7 +1,7 @@
 package fr.radi3nt.loupgarouuhc.event.listeners;
 
 import fr.radi3nt.loupgarouuhc.LoupGarouUHC;
-import fr.radi3nt.loupgarouuhc.classes.player.LGPlayer;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.loupgarouuhc.classes.stats.HoloStats;
 import fr.radi3nt.loupgarouuhc.classes.stats.Hologram;
 import org.bukkit.Bukkit;
@@ -19,8 +19,7 @@ public class PlayerJoinEvent implements Listener {
     @EventHandler
     public void OnPlayerJoin(org.bukkit.event.player.PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        p.setWalkSpeed(0.2f);
-        LGPlayer lgp = LGPlayer.thePlayer(e.getPlayer());
+        UHCPlayer lgp = UHCPlayer.thePlayer(e.getPlayer());
         if (!LoupGarouUHC.getPlayers().contains(lgp)) {
             LoupGarouUHC.getPlayers().add(lgp);
         }
@@ -39,8 +38,8 @@ public class PlayerJoinEvent implements Listener {
 
         e.setJoinMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getDisplayName() + " (" + ChatColor.YELLOW + LoupGarouUHC.getPlayers().size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
         HoloStats.updateAll();
-        lgp.getPlayer().setWalkSpeed(0.2F);
         if (!lgp.isInGame() || (lgp.isInGame() && lgp.getGameData().isDead()) || ((lgp.isInGame() && lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().isCanReconnectInPvp()))) {
+            p.setWalkSpeed(0.2F);
             p.resetMaxHealth();
             p.setFoodLevel(20);
             p.setHealth(20);
@@ -58,12 +57,16 @@ public class PlayerJoinEvent implements Listener {
             e.getPlayer().teleport(parameters.getSpawn(), PlayerTeleportEvent.TeleportCause.PLUGIN);
             e.getPlayer().setGameMode(Bukkit.getServer().getDefaultGameMode());
             lgp.setChat(GeneralChatI);
-            for (LGPlayer player : LoupGarouUHC.getPlayers()) {
+            for (UHCPlayer player : LoupGarouUHC.getPlayers()) {
                 if (player.isInGame()) {
                     lgp.setChat(DeadChatI);
                 }
             }
             lgp.getPlayerStats().refresh();
+        } else {
+            if (!lgp.getGameData().getGame().getGameTimer().isWaiting()) {
+                p.setWalkSpeed(0.2f);
+            }
         }
 
 
@@ -74,5 +77,11 @@ public class PlayerJoinEvent implements Listener {
         }
 
                  */
+        /*
+        p.getInventory().addItem(new GameInfoGUI().createBook(lgp.getLanguage(), RoleType.VILLAGER));
+        p.getInventory().addItem(new GameInfoGUI().createBook(lgp.getLanguage(), RoleType.NEUTRAL));
+        p.getInventory().addItem(new GameInfoGUI().createBook(lgp.getLanguage(), RoleType.LOUP_GAROU));
+
+         *///todo livres GUI
     }
 }
