@@ -1,0 +1,68 @@
+{
+  "Language": {
+    "name": "Francais",
+    "id": "fr"
+  },
+  "game": {
+    "start": {
+      "error": {
+        "player": "&4&lLa partie ne peut pas commencer, pas assez de joueurs ! (%playerSize%/%minSize%)"
+      },
+      "success": {
+        "tp": "%prefix.uhc% &7Téléportation de &f%playerName%",
+        "disconnect": "%prefix.uhc% &4&lMerci de ne pas vous déconnecter avant le debut de la partie",
+        "author": "&8Plugin développé par : &e&l%author%&8.",
+        "title": "&8&lBy %author%"
+      }
+    },
+    "timer": {
+      "start": {
+        "title": "&6GO",
+        "subtitle": "&7The UHC begin"
+      }
+    },
+    "scenarios": {
+      "PvP": {
+        "soon": "%prefix.uhc% &3PVP activé dans %pvpMinutes-% minutes !",
+        "on": "%prefix.uhc% &3PVP activé !",
+        "off": "%prefix.uhc% &3PVP desactivé !"
+      },
+      "StartInvincibility": {
+        "stop": "%prefix.uhc% &3Les dégats (sauf PVP) sont activés !"
+      },
+      "Vote": {
+        "deactivated": "%prefix.uhc% &4Il reste moins de %paramVoteMinPlayer% joueurs en vie, le vote est désormais désactivé.",
+        "results": {
+          "header": "%prefix.uhc% &6&lRESULTATS DU VOTE :\n",
+          "player": "%prefix.uhc% &bLe joueur &l%votedName%&b est le joueur ayant le plus de votes : &9&l%numberVotes%&b. Il perd la moitié de sa vie.",
+          "null": "%prefix.uhc% &bPersonne n'est victime du vote."
+        },
+        "message": {
+          "minutes": "%prefix.uhc% &6Vous avez %voteMinutes% min pour voter: /uhc vote <pseudo>.\n Le joueur recueillant la majorité des votes perdera la moitié de sa vie.",
+          "minutesSeconds": "%prefix.uhc% &6Vous avez %voteMinutes% min %voteSeconds% sec pour voter: /lg vote <pseudo>.\n Le joueur recueillant la majorité des votes perdera la moitié de sa vie.",
+          "seconds": "%prefix.uhc% &6Vous avez %voteSeconds% sec pour voter: /uhc vote <pseudo>.\n Le joueur recueillant la majorité des votes perdera la moitié de sa vie."
+        }
+      },
+      "CenterDistance": {
+        "min": "&dDistance du centre: &bMoins de %1% blocks du centre",
+        "normal": "&dDistance du centre: &bEntre %1% et %2% blocks du centre",
+        "max": "&dDistance du centre: &bPlus de %1% blocks du centre"
+      }
+    }
+  },
+  "commands": {
+    "join": "%prefix.uhc% &6Vous avez rejoint la partie",
+    "no": {
+      "perm": "%prefix.uhc% &4Vous n'avez pas la permission de faire cette action",
+      "command": "%prefix.uhc% &4Commande inconnue ! (&c&l/uhc help &4 pour l'aide)",
+      "args": "%prefix.uhc% &4Vous devez rentrer %s arguments"
+    }
+  },
+  "placeholders": {
+    "prefix": {
+      "uhc": "&b[&6&lUHC&b]&r",
+      "prive": "&9[Privé]&r"
+    },
+    "author": "Radi3nt"
+  }
+}

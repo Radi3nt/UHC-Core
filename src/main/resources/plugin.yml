@@ -1,13 +1,11 @@
-name: LoupGarouUHC
+name: UHCCore
 version: ${project.version}
-main: fr.radi3nt.loupgarouuhc.LoupGarouUHC
-api-version: 1.13
-prefix: LG UHC
-authors: [Radi3nt]
-description: Play to the Loup Garou UHC in minecraft
+main: fr.radi3nt.uhc.uhc.UHCCore
+api-version: 1.12
+prefix: UHC
+authors: [ Radi3nt ]
+description: Play to the UHC in minecraft
 load-before: [ LoupGarouUHC-Server ]
 commands:
-  lg:
-    description: "Main command of the lg plugin"
   uhc:
     description: "Scenarios command"
