@@ -23,7 +23,10 @@
     },
     "scenarios": {
       "PvP": {
-        "soon": "%prefix.uhc% &3PVP activé dans %pvpMinutes-% minutes !",
+        "soon": {
+          "minute": "%prefix.uhc% &3PVP activé dans %s minutes !",
+          "second": "%prefix.uhc% &3PVP activé dans %s secondes !"
+        },
         "on": "%prefix.uhc% &3PVP activé !",
         "off": "%prefix.uhc% &3PVP desactivé !"
       },
@@ -31,7 +34,7 @@
         "stop": "%prefix.uhc% &3Les dégats (sauf PVP) sont activés !"
       },
       "Vote": {
-        "deactivated": "%prefix.uhc% &4Il reste moins de %paramVoteMinPlayer% joueurs en vie, le vote est désormais désactivé.",
+        "deactivated": "%prefix.uhc% &4Il reste moins de %s joueurs en vie, le vote est désormais désactivé.",
         "results": {
           "header": "%prefix.uhc% &6&lRESULTATS DU VOTE :\n",
           "player": "%prefix.uhc% &bLe joueur &l%votedName%&b est le joueur ayant le plus de votes : &9&l%numberVotes%&b. Il perd la moitié de sa vie.",
@@ -52,6 +55,7 @@
   },
   "commands": {
     "join": "%prefix.uhc% &6Vous avez rejoint la partie",
+    "spectate": "%prefix.uhc% &6Vous regardez la partie de %s",
     "no": {
       "perm": "%prefix.uhc% &4Vous n'avez pas la permission de faire cette action",
       "command": "%prefix.uhc% &4Commande inconnue ! (&c&l/uhc help &4 pour l'aide)",
