@@ -7,6 +7,7 @@ import fr.radi3nt.uhc.api.gui.guis.MainGUI;
 import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Bukkit;
@@ -33,37 +34,44 @@ public class ClickEvent implements Listener {
     @EventHandler
     public void OnClickEvent(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
-        if (e.getCurrentItem() != null) {
+        if (e.getCurrentItem() != null && e.getCurrentItem().getType()==Material.AIR) {
             if (MainGUI.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
                 if (e.getCurrentItem().isSimilar(MainGUI.createStartItem())) {
-                    if (!UHCCore.getGames().isEmpty())
-                        UHCCore.getGames().get(0).updateStart();
+                    if (!UHCCore.getGameQueue().isEmpty())
+                        UHCCore.getGameQueue().get(0).updateStart();
                 }
             }
             if (e.getView().getTopInventory().getTitle().contains(ChatColor.GOLD + "Scenarios ")) {
                 UHCGame game = UHCPlayer.thePlayer(player).getGameData().getGame();
                 if (game == null || game.getState() == GameState.LOBBY) {
-                    if (!UHCCore.getGames().isEmpty())
-                        game = UHCCore.getGames().get(0);
+                    if (!UHCCore.getGameQueue().isEmpty())
+                        game = UHCCore.getGameQueue().get(0);
                     else
                         return;
                 }
                 String itemName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
                 int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle()).replace("Scenarios ", "").trim()) - 1;
+                if (ChatColor.stripColor(itemName).equalsIgnoreCase("+")) {
+                    System.out.println("ok");
+                    currentPage+=1;
+                }
+                if (ChatColor.stripColor(itemName).equalsIgnoreCase("-")) {
+                    currentPage-=1;
+                }
                 Class<?> aClass = null;
-                for (Class<? extends Scenario> scenariosClass : Scenario.getScenariosClasses()) {
+                for (Class<? extends Scenario> scenariosClass : Scenario.getRepertoriedScenariosClasses()) {
                     Method method = null;
                     try {
-                        method = scenariosClass.getMethod("getName");
+                        method = scenariosClass.getMethod("getData");
                     } catch (NoSuchMethodException noSuchMethodException) {
                         noSuchMethodException.printStackTrace();
                     }
                     if (method == null)
                         continue;
-                    String obj = null;
+                    ScenarioData obj = null;
                     try {
-                        obj = (String) method.invoke(null);
+                        obj = (ScenarioData) method.invoke(null);
                     } catch (IllegalAccessException illegalAccessException) {
                         illegalAccessException.printStackTrace();
                     } catch (InvocationTargetException invocationTargetException) {
@@ -72,7 +80,7 @@ public class ClickEvent implements Listener {
                     if (obj == null)
                         continue;
 
-                    if (obj.equals(itemName))
+                    if (obj.getName().equals(itemName))
                         aClass = scenariosClass;
                 }
                 if (aClass != null) {
@@ -97,7 +105,7 @@ public class ClickEvent implements Listener {
                             }
                         }
                         if (!value) {
-                            game.getScenarios().add(scenario);
+                            game.addScenario(scenario);
                             if (game.getState() == GameState.PLAYING) {
                                 scenario.activate();
                             }
@@ -166,14 +174,14 @@ public class ClickEvent implements Listener {
                 if (e.getCurrentItem() != null) {
                     UHCGame game = UHCPlayer.thePlayer(player).getGameData().getGame();
                     if (game == null || game.getState() == GameState.LOBBY) {
-                        if (!UHCCore.getGames().isEmpty())
-                            game = UHCCore.getGames().get(0);
+                        if (!UHCCore.getGameQueue().isEmpty())
+                            game = UHCCore.getGameQueue().get(0);
                         else return;
                     }
                     String scenarioName = ChatColor.stripColor(e.getView().getTopInventory().getTitle()).replace("Options for ", "").trim();
                     String itemStackName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
                     Class<? extends Scenario> aClass = null;
-                    for (Class<? extends Scenario> scenariosClass : Scenario.getScenariosClasses()) {
+                    for (Class<? extends Scenario> scenariosClass : Scenario.getRepertoriedScenariosClasses()) {
                         Method method = null;
                         try {
                             method = scenariosClass.getMethod("getName");

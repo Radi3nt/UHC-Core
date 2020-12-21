@@ -6,14 +6,16 @@ package fr.radi3nt.uhc.uhc;
 
 import fr.radi3nt.uhc.api.chats.Chat;
 import fr.radi3nt.uhc.api.chats.GeneralChat;
+import fr.radi3nt.uhc.api.command.UHCCommands;
+import fr.radi3nt.uhc.api.game.GameType;
 import fr.radi3nt.uhc.api.game.UHCGame;
+import fr.radi3nt.uhc.api.game.instances.DefaultsParameters;
 import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.lang.Reader;
 import fr.radi3nt.uhc.api.lang.lang.Language;
 import fr.radi3nt.uhc.api.listeners.*;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
-import fr.radi3nt.uhc.api.scenarios.UHCCommands;
 import fr.radi3nt.uhc.api.scenarios.scenario.*;
 import fr.radi3nt.uhc.api.scenarios.scenario.vote.PlayerVote;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioUtils;
@@ -21,6 +23,8 @@ import fr.radi3nt.uhc.api.stats.HoloStats;
 import fr.radi3nt.uhc.api.utilis.Config;
 import fr.radi3nt.uhc.api.utilis.Updater;
 import fr.radi3nt.uhc.uhc.listeners.ClassicGameCheck;
+import fr.radi3nt.uhc.uhc.listeners.DefaultPlayerKilledFinisher;
+import fr.radi3nt.uhc.uhc.listeners.UHCPlayerKillAnotherListener;
 import fr.radi3nt.uhc.uhc.listeners.gui.ClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -33,10 +37,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public final class UHCCore extends JavaPlugin implements Listener {
 
@@ -44,13 +45,26 @@ public final class UHCCore extends JavaPlugin implements Listener {
     public static final String DEFAULT_LANG_ID = "fr";
 
     private static final Set<UHCPlayer> players = new HashSet<>();
-    private static final List<UHCGame> games = new ArrayList<>();
+    private static final List<UHCGame> gameQueue = new ArrayList<>();
+    private static final Set<GameType> registeredGames = new HashSet<>();
     private static final String prefix = ChatColor.AQUA + "[" + ChatColor.GOLD + ChatColor.BOLD + "UHC" + ChatColor.AQUA + "]" + ChatColor.RESET;
     private static Plugin plugin;
     private static Updater updater;
 
     public static void registerScenario(Class<? extends Scenario> scenario) {
         ScenarioUtils.addScenario(scenario);
+    }
+
+    public static void registerGame(GameType gameType) {
+        if (gameType.getID().contains(" "))
+            return;
+        for (GameType registeredGame : registeredGames) {
+            if (registeredGame.getID().equalsIgnoreCase(gameType.getID()))
+                return;
+            if (registeredGame.getGameClass().equals(gameType.getGameClass()))
+                return;
+        }
+        registeredGames.add(gameType);
     }
 
     public static void broadcastMessage(String message) {
@@ -78,8 +92,8 @@ public final class UHCCore extends JavaPlugin implements Listener {
         return plugin.getDescription().getVersion();
     }
 
-    public static List<UHCGame> getGames() {
-        return games;
+    public static List<UHCGame> getGameQueue() {
+        return gameQueue;
     }
 
     private void RegisterCommands() {
@@ -95,14 +109,17 @@ public final class UHCCore extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents(new DamageEvent(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerChatEvent(), this);
-        getServer().getPluginManager().registerEvents(new ClassicGameCheck(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerDie(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerMoveEvent(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinEvent(), this);
-        getServer().getPluginManager().registerEvents(new PlayerKilledFinisherListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerLeaveEvent(), this);
         getServer().getPluginManager().registerEvents(new PlayerPreProcessCommand(), this);
         getServer().getPluginManager().registerEvents(new ClickEvent(), this);
+
+
+        getServer().getPluginManager().registerEvents(new ClassicGameCheck(), this);
+        getServer().getPluginManager().registerEvents(new DefaultPlayerKilledFinisher(), this);
+        getServer().getPluginManager().registerEvents(new UHCPlayerKillAnotherListener(), this);
     }
 
     @Override
@@ -182,13 +199,14 @@ public final class UHCCore extends JavaPlugin implements Listener {
             }
             return;
         }
+        registerAllLanguages(reader);
 
-        games.add(new ClassicGame());
+        gameQueue.add(new ClassicGame());
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
             @Override
             public void run() {
-                registerAllLanguages(reader);
                 loadPlayersOnline();
+                UHCCore.registerGame(new GameType(ClassicGame.class, DefaultsParameters.class, "Classic UHC", "ClassicUHC", "ClassicUHC"));
             }
         }, 0);
     }
@@ -243,6 +261,8 @@ public final class UHCCore extends JavaPlugin implements Listener {
         ScenarioUtils.addScenario(WorldBorder.class);
         ScenarioUtils.addScenario(StartInvincibility.class);
         ScenarioUtils.addScenario(CenterDistance.class);
+        ScenarioUtils.addScenario(Meetup.class);
+        ScenarioUtils.addScenario(MeetupAlert.class);
 
     }
 
@@ -254,10 +274,18 @@ public final class UHCCore extends JavaPlugin implements Listener {
         } catch (Exception e) {
             System.out.println("[UHC] Cannot archive logger !");
         }
+
+        /*
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             UHCPlayer lgp = UHCPlayer.thePlayer(onlinePlayer);
-            if (lgp.isInGame())
+            if (lgp.isPlaying())
                 lgp.getGameData().getGame().end(new ArrayList<>(), true);
+        }
+
+         */
+
+        for (UHCGame game : UHCCore.getGameQueue()) {
+            game.end(null, true);
         }
 
 
@@ -268,11 +296,15 @@ public final class UHCCore extends JavaPlugin implements Listener {
         }
 
 
-        for (HoloStats holoStats : HoloStats.getCachedHolo()) {
+        for (int i = 0; i < HoloStats.getCachedHolo().size(); i++) {
+            HoloStats holoStats = HoloStats.getCachedHolo().get(i);
             holoStats.remove();
+            i--;
         }
         HoloStats.getCachedHolo().clear();
     }
 
-
+    public static Set<GameType> getRegisteredGames() {
+        return registeredGames;
+    }
 }
