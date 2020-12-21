@@ -8,6 +8,7 @@ import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioCommand;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Material;
@@ -29,18 +30,14 @@ public class WorldBorder extends Scenario {
         worldBorder.put(0, game.getParameters().getBaseRadius());
         //--
 
-        worldBorder.put(2 * 20 * 60 * 20, 1000);
-        worldBorder.put(6 * 20 * 60 * 20, 300);
-        worldBorder.put(8 * 20 * 60 * 20, 100);
-        worldBorder.put(9 * 20 * 60 * 20, 50);
+        worldBorder.put(30 * 60 * 20, 1000);
+        worldBorder.put(40 * 60 * 20, 300);
+        worldBorder.put(50 * 60 * 20, 100);
+        worldBorder.put(70 * 60 * 20, 50);
     }
 
-    public static String getName() {
-        return "WorldBorder";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.BEDROCK);
+    public static ScenarioData getData() {
+        return new ScenarioData("WorldBorder").setItemStack(new ItemStack(Material.BEDROCK)).setDescription("Adds a customizable world border to force people to go to 0 0");
     }
 
     @Override
@@ -69,7 +66,7 @@ public class WorldBorder extends Scenario {
             if (maxKey.getKey() >= tick && !min.equals(maxKey.getKey())) {
                 float coef = ((float) maxKey.getValue() - worldBorder.getOrDefault(min, 0)) / ((float) maxKey.getKey() - min);
                 double worldBorderSize = worldBorder.getOrDefault(min, 0) + (coef * (tick - min));
-                game.getGameSpawn().getWorld().getWorldBorder().setSize(worldBorderSize * 2);
+                game.getParameters().getGameSpawn().getWorld().getWorldBorder().setSize(worldBorderSize * 2);
                 game.setRadius((int) worldBorderSize);
                 break;
             }
@@ -82,10 +79,10 @@ public class WorldBorder extends Scenario {
             try {
                 if (command.executeCommand("uhc.wb.add", "uhc.worldborder.add", 1, CommandUtilis.Checks.PLAYER)) {
                     UHCPlayer lgp = UHCPlayer.thePlayer((Player) command.getSender());
-                    if (UHCCore.getGames().isEmpty())
+                    if (UHCCore.getGameQueue().isEmpty())
                         return;
-                    UHCGame game = UHCCore.getGames().get(0);
-                    if (lgp.isInGame())
+                    UHCGame game = UHCCore.getGameQueue().get(0);
+                    if (lgp.isPlaying())
                         game = lgp.getGameData().getGame();
                     if (game.equals(this.game)) {
                         int integer = 0;
@@ -99,10 +96,10 @@ public class WorldBorder extends Scenario {
                 }
                 if (command.executeCommand("uhc.wb.remove", "uhc.worldborder.remove", 1, CommandUtilis.Checks.PLAYER)) {
                     UHCPlayer lgp = UHCPlayer.thePlayer((Player) command.getSender());
-                    if (UHCCore.getGames().isEmpty())
+                    if (UHCCore.getGameQueue().isEmpty())
                         return;
-                    UHCGame game = UHCCore.getGames().get(0);
-                    if (lgp.isInGame())
+                    UHCGame game = UHCCore.getGameQueue().get(0);
+                    if (lgp.isPlaying())
                         game = lgp.getGameData().getGame();
                     if (game.equals(this.game)) {
                         int integer = 0;
@@ -116,10 +113,10 @@ public class WorldBorder extends Scenario {
                 }
                 if (command.executeCommand("uhc.wb.set", "uhc.worldborder.set", 1, CommandUtilis.Checks.PLAYER)) {
                     UHCPlayer lgp = UHCPlayer.thePlayer((Player) command.getSender());
-                    if (UHCCore.getGames().isEmpty())
+                    if (UHCCore.getGameQueue().isEmpty())
                         return;
-                    UHCGame game = UHCCore.getGames().get(0);
-                    if (lgp.isInGame())
+                    UHCGame game = UHCCore.getGameQueue().get(0);
+                    if (lgp.isPlaying())
                         game = lgp.getGameData().getGame();
                     if (game.equals(this.game)) {
                         int integer = 0;
@@ -133,10 +130,10 @@ public class WorldBorder extends Scenario {
                 }
                 if (command.executeCommand("uhc.wb.start", "uhc.worldborder.start", 0, CommandUtilis.Checks.PLAYER)) {
                     UHCPlayer lgp = UHCPlayer.thePlayer((Player) command.getSender());
-                    if (UHCCore.getGames().isEmpty())
+                    if (UHCCore.getGameQueue().isEmpty())
                         return;
-                    UHCGame game = UHCCore.getGames().get(0);
-                    if (lgp.isInGame())
+                    UHCGame game = UHCCore.getGameQueue().get(0);
+                    if (lgp.isPlaying())
                         game = lgp.getGameData().getGame();
                     if (game.equals(this.game)) {
                         start();
@@ -144,10 +141,10 @@ public class WorldBorder extends Scenario {
                 }
                 if (command.executeCommand("uhc.wb.stop", "uhc.worldborder.stop", 0, CommandUtilis.Checks.PLAYER)) {
                     UHCPlayer lgp = UHCPlayer.thePlayer((Player) command.getSender());
-                    if (UHCCore.getGames().isEmpty())
+                    if (UHCCore.getGameQueue().isEmpty())
                         return;
-                    UHCGame game = UHCCore.getGames().get(0);
-                    if (lgp.isInGame())
+                    UHCGame game = UHCCore.getGameQueue().get(0);
+                    if (lgp.isPlaying())
                         game = lgp.getGameData().getGame();
                     if (game.equals(this.game)) {
                         stop();
@@ -187,5 +184,7 @@ public class WorldBorder extends Scenario {
         working = true;
     }
 
-
+    public HashMap<Integer, Integer> getWorldBorder() {
+        return worldBorder;
+    }
 }

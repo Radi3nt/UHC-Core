@@ -95,6 +95,7 @@ public class Language {
 
     public void update() {
         if (!id.equals(DEFAULTID)) {
+            languages.remove(this);
             Reader reader = new Reader();
             reader.loadLanguage(languageFile);
         }

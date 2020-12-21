@@ -1,5 +1,8 @@
 package fr.radi3nt.uhc.api.stats;
 
+import fr.radi3nt.uhc.api.events.stats.StatsPointChanges;
+import org.bukkit.Bukkit;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

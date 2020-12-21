@@ -23,6 +23,11 @@ public class DefaultsParameters implements Parameter {
     }
 
     @Override
+    public Boolean recreateMapAfterUse() {
+        return false;
+    }
+
+    @Override
     public DisconnectParameters getDisconnectParameters() {
         return new DisconnectParameters();
     }

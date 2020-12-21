@@ -21,6 +21,12 @@ public abstract class Chat {
         }
     }
 
+    public static void broadcastMessage(String message, UHCPlayer[] players) {
+        for (UHCPlayer lgp : players) {
+            lgp.sendMessage(message);
+        }
+    }
+
     public static void broadcastIdMessage(String messageID, UHCPlayer[] players) {
         Logger.getChat().log("id message: " + messageID);
         Language language = null;

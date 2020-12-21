@@ -2,13 +2,18 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 
 import fr.radi3nt.uhc.api.chats.Chat;
 import fr.radi3nt.uhc.api.command.CommandUtilis;
+import fr.radi3nt.uhc.api.exeptions.common.CannotFindMessageException;
 import fr.radi3nt.uhc.api.exeptions.common.NoArgsException;
 import fr.radi3nt.uhc.api.exeptions.common.NoPermissionException;
 import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
+import fr.radi3nt.uhc.api.lang.Logger;
+import fr.radi3nt.uhc.api.lang.lang.Language;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioCommand;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -32,14 +37,9 @@ public class PvP extends Scenario {
         this.timeAlert = timeAlert;
     }
 
-    public static String getName() {
-        return "PvP";
+    public static ScenarioData getData() {
+        return new ScenarioData("PvP").setItemStack(new ItemStack(Material.DIAMOND_SWORD)).setDescription("PvP option of the game");
     }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.DIAMOND_SWORD);
-    }
-
     @Override
     public void register() {
         super.register();
@@ -52,7 +52,21 @@ public class PvP extends Scenario {
                 if (timerActivated) {
                     for (Integer integer : timeAlert) {
                         if (tick == integer) {
-                            Chat.broadcastIdMessage(getMessagesId() + "soon", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+                            int minutes = (time-integer)/60/20;
+                            int secondes = (time-integer)/20;
+                            for (UHCPlayer alivePlayer : gameTimer.getGame().getAlivePlayers()) {
+                                try {
+                                    if (minutes!=0) {
+                                        alivePlayer.sendMessage(String.format(alivePlayer.getLanguage().getMessage(getMessagesId() + "soon.minute"), minutes));
+                                    } else {
+                                        alivePlayer.sendMessage(String.format(alivePlayer.getLanguage().getMessage(getMessagesId() + "soon.second"), secondes));
+                                    }
+                                } catch (CannotFindMessageException e) {
+                                    alivePlayer.sendMessage(Language.NO_MESSAGE);
+                                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                                    Logger.getGeneralLogger().log(e);
+                                }
+                            }
                         }
                     }
                     if (tick == time) {
@@ -69,7 +83,7 @@ public class PvP extends Scenario {
             if (e.getEntity() instanceof Player) {
                 if (e.getDamager() instanceof Player) {
                     UHCPlayer player = UHCPlayer.thePlayer((Player) e.getDamager());
-                    if (player.isInGame() && player.getGameData().getGame().equals(game))
+                    if (player.isPlaying() && player.getGameData().getGame().equals(game))
                         if (!game.getPvP().isPvp()) {
                             e.setCancelled(true);
                         }
@@ -78,7 +92,7 @@ public class PvP extends Scenario {
                     Projectile projectile = (Projectile) e.getDamager();
                     if (projectile.getShooter() instanceof Player) {
                         UHCPlayer player = UHCPlayer.thePlayer((Player) projectile.getShooter());
-                        if (player.isInGame() && player.getGameData().getGame().equals(game))
+                        if (player.isPlaying() && player.getGameData().getGame().equals(game))
                             if (!game.getPvP().isPvp()) {
                                 e.setCancelled(true);
                             }
@@ -90,12 +104,12 @@ public class PvP extends Scenario {
 
     public void activatePvp() {
         pvp = true;
-        Chat.broadcastIdMessage(getMessagesId() + "on", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+        Chat.broadcastIdMessage(getMessagesId() + "on", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
     }
 
     public void deactivatePvp() {
         pvp = false;
-        Chat.broadcastIdMessage(getMessagesId() + "off", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+        Chat.broadcastIdMessage(getMessagesId() + "off", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
     }
 
     @ScenarioCommand

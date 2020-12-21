@@ -5,6 +5,7 @@ import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -22,12 +23,8 @@ public class StartInvincibility extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "StartInvincibility";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.HAY_BLOCK);
+    public static ScenarioData getData() {
+        return new ScenarioData("StartInvincibility").setItemStack(new ItemStack(Material.LAPIS_BLOCK)).setDescription("Cancel damage before a certain amount of time after the game started");
     }
 
     @Override
@@ -36,7 +33,7 @@ public class StartInvincibility extends Scenario {
         if (gameTimer.getGame().equals(game)) {
             if (isActive()) {
                 if (tick == timeOfInvincibilityEnd * 20) {
-                    Chat.broadcastIdMessage(getMessagesId() + "stop", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+                    Chat.broadcastIdMessage(getMessagesId() + "stop", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
                 }
             }
         }
@@ -46,7 +43,7 @@ public class StartInvincibility extends Scenario {
     public void onPlayerDamagingOtherPlayer(EntityDamageEvent e) {
         if (e.getEntity() instanceof Player) {
             UHCPlayer player = UHCPlayer.thePlayer((Player) e.getEntity());
-            if (player.isInGame() && player.getGameData().getGame().equals(game)) {
+            if (player.isPlaying() && player.getGameData().getGame().equals(game)) {
                 if (isActive()) {
                     if (player.getGameData().getGame().getGameTimer().getTicks() <= timeOfInvincibilityEnd * 20) {
                         e.setCancelled(true);

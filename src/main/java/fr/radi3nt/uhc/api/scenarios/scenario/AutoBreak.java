@@ -4,6 +4,7 @@ import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.player.npc.NMSBase;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import fr.radi3nt.uhc.uhc.UHCCore;
@@ -30,12 +31,11 @@ public class AutoBreak extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "AutoBreak";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.COBBLESTONE);
+    public static ScenarioData getData() {
+        ScenarioData scenarioData = new ScenarioData("AutoBreak");
+        scenarioData.setDescription("Auto breaks player placed blocks after a certain amount of time defined in the parameters");
+        scenarioData.setItemStack(new ItemStack(Material.COBBLESTONE));
+        return scenarioData;
     }
 
     @EventHandler

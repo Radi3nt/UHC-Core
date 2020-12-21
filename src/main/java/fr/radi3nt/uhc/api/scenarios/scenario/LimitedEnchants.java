@@ -151,7 +151,7 @@ public class LimitedEnchants extends Scenario {
         Map<Enchantment, Integer> tempEnchant = new HashMap<>();
         ItemStack result = new ItemStack(item);
         UHCPlayer lgp = UHCPlayer.thePlayer(player);
-        if (lgp.isInGame() && !bypassedPlayer.contains(lgp)) {
+        if (lgp.isPlaying() && !bypassedPlayer.contains(lgp)) {
             for (Enchantment e : enchant.keySet()) {
                 result.removeEnchantment(e);
                 if (disabledEnchantement.contains(e)) {

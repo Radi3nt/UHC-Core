@@ -6,6 +6,8 @@ import fr.radi3nt.uhc.api.events.UHCPlayerKilledEvent;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -27,20 +29,15 @@ public class TimedCommands extends Scenario {
         endCommands.add("toggleeditwand");
     }
 
-    public static String getName() {
-        return "TimedCommands";
+    public static ScenarioData getData() {
+        return new ScenarioData("TimedCommands").setItemStack(new ItemStack(Material.BOOK)).setDescription("Run commands for player at &7EVERY " + ChatColor.DARK_PURPLE + ChatColor.ITALIC + "start, death and end");
     }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.BOOK);
-    }
-
 
     @EventHandler
     public void event(UHCGameStartsEvent e) {
         if (game == e.getGame()) {
             if (isActive()) {
-                for (UHCPlayer gamePlayer : e.getGame().getDeadAndAlivePlayers()) {
+                for (UHCPlayer gamePlayer : e.getGame().getAlivePlayers()) {
                     for (String item : startCommands) {
                         gamePlayer.getPlayer().performCommand(item);
                     }
@@ -64,7 +61,7 @@ public class TimedCommands extends Scenario {
     public void event(UHCGameEndsEvent e) {
         if (game == e.getGame()) {
             if (isActive()) {
-                for (UHCPlayer gamePlayer : e.getGame().getDeadAndAlivePlayers()) {
+                for (UHCPlayer gamePlayer : e.getGame().getAlivePlayers()) {
                     for (String item : endCommands) {
                         gamePlayer.getPlayer().performCommand(item);
                     }

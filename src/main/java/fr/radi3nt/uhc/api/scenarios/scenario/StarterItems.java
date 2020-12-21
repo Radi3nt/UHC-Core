@@ -34,7 +34,7 @@ public class StarterItems extends Scenario {
     public void event(UHCGameStartsEvent e) {
         if (game == e.getGame()) {
             if (isActive()) {
-                for (UHCPlayer gamePlayer : e.getGame().getDeadAndAlivePlayers()) {
+                for (UHCPlayer gamePlayer : e.getGame().getAlivePlayers()) {
                     for (ItemStack item : items) {
                         gamePlayer.getPlayer().getInventory().addItem(item.clone());
                     }

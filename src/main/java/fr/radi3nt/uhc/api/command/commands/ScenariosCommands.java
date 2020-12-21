@@ -4,6 +4,7 @@ import fr.radi3nt.uhc.api.command.CommandArg;
 import fr.radi3nt.uhc.api.command.CommandUtilis;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,12 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-public class ScenariosCommands extends CommandArg {
+public class ScenariosCommands implements CommandArg {
 
     private static final int inventoryListSize = 1024;
     private static final HashMap<InventoryHolder, Inventory[]> inventories = new HashMap<>();
@@ -104,7 +102,7 @@ public class ScenariosCommands extends CommandArg {
         int i = 0;
         int iOffset = 0;
         ArrayList<ItemStack> itemStacks = new ArrayList<>();
-        for (Class<?> aClass : Scenario.getScenariosClasses()) {
+        for (Class<? extends Scenario> aClass : Scenario.getRepertoriedScenariosClasses()) {
             if (i >= number + offset)
                 break;
 
@@ -112,9 +110,9 @@ public class ScenariosCommands extends CommandArg {
             if (iOffset < offset)
                 continue;
 
-            ItemStack itemStack = null;
+            ScenarioData scenarioData = null;
             try {
-                itemStack = (ItemStack) aClass.getMethod("getItem").invoke(null);
+                scenarioData = (ScenarioData) aClass.getMethod("getData").invoke(null);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
@@ -122,17 +120,63 @@ public class ScenariosCommands extends CommandArg {
             } catch (NoSuchMethodException noSuchMethodException) {
                 noSuchMethodException.printStackTrace();
             }
+            ItemStack itemStack = scenarioData.getItemStack();
             ItemMeta meta = itemStack.getItemMeta();
-            try {
-                meta.setDisplayName((String) aClass.getMethod("getName").invoke(null));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException noSuchMethodException) {
-                noSuchMethodException.printStackTrace();
+            meta.setDisplayName(ChatColor.RED + scenarioData.getName());
+            List<String> lore = new ArrayList<>();
+            /*
+            for (int i1 = 1; i1 < scenarioData.getDescription().length()/(ScenarioData.MAX_CHAR_BEFORE_LINE_RETURN)+2; i1++) {
+                lore.add(scenarioData.getDescription().substring(ScenarioData.MAX_CHAR_BEFORE_LINE_RETURN*(i1-1), Math.min(scenarioData.getDescription().length(), ScenarioData.MAX_CHAR_BEFORE_LINE_RETURN * i1)));
             }
-            meta.setDisplayName(ChatColor.RED + meta.getDisplayName());
+
+             */
+
+            List<String> list = Arrays.asList(scenarioData.getDescription().split(" "));
+            int maxChar = 0;
+            List<String> line = new ArrayList<>();
+            for (int i1 = 0; i1 < list.size(); i1++) {
+                String s = list.get(i1);
+                maxChar+=s.length();
+                if (s.length()>ScenarioData.MAX_CHAR_BEFORE_LINE_RETURN) {
+                    lore.add(s);
+                    line.clear();
+                    maxChar=0;
+                    continue;
+                }
+                if (maxChar>ScenarioData.MAX_CHAR_BEFORE_LINE_RETURN) {
+                    String text = "";
+                    for (int i2 = 0; i2 < line.size(); i2++) {
+                        if (i2==0) {
+                            text+=line.get(i2);
+                        } else {
+                            text+=" " + line.get(i2);
+                        }
+                    }
+                    maxChar=0;
+                    lore.add(text);
+                    line.clear();
+                    i1--;
+                    continue;
+                }
+                line.add(s);
+            }
+            if (!line.isEmpty()) {
+                String text = "";
+                for (int i2 = 0; i2 < line.size(); i2++) {
+                    if (i2==0) {
+                        text+=line.get(i2);
+                    } else {
+                        text+=" " + line.get(i2);
+                    }
+                }
+                lore.add(text);
+                line.clear();
+            }
+
+
+
+            meta.setLore(lore);
+            meta.setDisplayName(ChatColor.RED + scenarioData.getName());
             for (Scenario activatedScenario : activatedScenarios) {
                 if (activatedScenario.getClass() == aClass) {
                     if (activatedScenario.isActive())
@@ -164,19 +208,19 @@ public class ScenariosCommands extends CommandArg {
     @Override
     public void onCommand(CommandUtilis utilis) {
         if (utilis.checkIfPlayer()) {
-            if (UHCPlayer.thePlayer((Player) utilis.getSender()).isInGame()) {
+            if (UHCPlayer.thePlayer((Player) utilis.getSender()).isPlaying()) {
                 updateInventory((InventoryHolder) utilis.getSender(), UHCPlayer.thePlayer((Player) utilis.getSender()).getGameData().getGame().getScenarios());
                 ((Player) utilis.getSender()).openInventory(createInventory((InventoryHolder) utilis.getSender(), UHCPlayer.thePlayer((Player) utilis.getSender()).getGameData().getGame().getScenarios())[0]);
             } else {
-                updateInventory((InventoryHolder) utilis.getSender(), UHCCore.getGames().get(0).getScenarios());
-                if (!UHCCore.getGames().isEmpty())
-                    ((Player) utilis.getSender()).openInventory(createInventory((InventoryHolder) utilis.getSender(), UHCCore.getGames().get(0).getScenarios())[0]);
+                updateInventory((InventoryHolder) utilis.getSender(), UHCCore.getGameQueue().get(0).getScenarios());
+                if (!UHCCore.getGameQueue().isEmpty())
+                    ((Player) utilis.getSender()).openInventory(createInventory((InventoryHolder) utilis.getSender(), UHCCore.getGameQueue().get(0).getScenarios())[0]);
             }
         }
     }
 
     @Override
-    protected List<String> tabComplete(CommandUtilis utilis) {
+    public List<String> tabComplete(CommandUtilis utilis) {
         return null;
     }
 }

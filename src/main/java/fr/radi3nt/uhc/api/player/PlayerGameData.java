@@ -2,20 +2,25 @@ package fr.radi3nt.uhc.api.player;
 
 import fr.radi3nt.uhc.api.game.UHCGame;
 
-public interface PlayerGameData {
+public class PlayerGameData {
 
-    UHCGame getGame();
+    private UHCGame game;
+    private PlayerState playerState = PlayerState.NOT_PLAYING;
 
-    UHCPlayer getKiller();
+    public PlayerGameData(UHCGame game) {
+        this.game = game;
+    }
 
-    void setKiller(UHCPlayer killer);
+    public UHCGame getGame() {
+        return game;
+    }
 
-    boolean isDead();
+    public PlayerState getPlayerState() {
+        return playerState;
+    }
 
-    void setDead(boolean dead);
-
-    int getKills();
-
-    void setKills(int kills);
+    public void setPlayerState(PlayerState playerState) {
+        this.playerState=playerState;
+    }
 
 }

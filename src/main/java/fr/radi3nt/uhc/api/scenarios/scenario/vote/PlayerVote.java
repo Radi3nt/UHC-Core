@@ -19,10 +19,11 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static fr.radi3nt.uhc.api.scenarios.scenario.vote.PlayerVoteUtil.*;
 
 public class PlayerVote extends Scenario {
 
@@ -54,16 +55,6 @@ public class PlayerVote extends Scenario {
             hm.put(key.getVoted(), hm.getOrDefault(key.getVoted(), 0) + 1);
         }
         return hm;
-    }
-
-    private static Vote[] convertMapToArray(Map<Vote, Integer> votes) {
-        ArrayList<Vote> votesArray = new ArrayList<>();
-        for (Map.Entry<Vote, Integer> voteIntegerEntry : votes.entrySet()) {
-            for (int integer = 0; integer < voteIntegerEntry.getValue(); integer++) {
-                votesArray.add(voteIntegerEntry.getKey());
-            }
-        }
-        return votesArray.toArray(new Vote[0]);
     }
 
     @Override
@@ -102,12 +93,10 @@ public class PlayerVote extends Scenario {
         try {
             if (command.executeCommand("uhc.vote", "", 1, CommandUtilis.Checks.GAME)) {
                 UHCPlayer sender = UHCPlayer.thePlayer((Player) command.getSender());
-                if (!sender.getGameData().isDead() && playerCanVotes) {
+                if (playerCanVotes) {
                     UHCPlayer target = game.getUHCPlayerInThisGame(command.getArgs()[1]);
                     if (target != null) {
-                        if (target.isInGame() && target.getGameData().getGame().equals(sender.getGameData().getGame())) {
-                            if (!target.getGameData().isDead()) {
-
+                        if (target.isPlaying() && target.getGameData().getGame().equals(sender.getGameData().getGame())) {
                                 boolean hasVoted = false;
                                 for (Map.Entry<Vote, Integer> entry : this.getVotes().entrySet()) {
                                     Vote vote = entry.getKey();
@@ -120,9 +109,6 @@ public class PlayerVote extends Scenario {
                                 } else {
                                     sender.sendMessage(UHCCore.getPrefix() + ChatColor.DARK_RED + " Vous avez dejà voté !");
                                 }
-                            } else {
-                                sender.sendMessage(UHCCore.getPrefix() + ChatColor.DARK_RED + " Vous ne pouvez pas voter cette personne");
-                            }
                         } else {
                             sender.sendMessage(UHCCore.getPrefix() + ChatColor.DARK_RED + " Vous ne pouvez pas voter cette personne");
                         }
@@ -140,8 +126,17 @@ public class PlayerVote extends Scenario {
         if (checkCanVote(minPlayerToVote)) {
             sendPreVoteMessage(timeToVote * 20);
             authoriseVote();
-        } else
-            Chat.broadcastIdMessage(getMessagesId() + "deactivated", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+        } else {
+            for (UHCPlayer deadAndAlivePlayer : game.getSpectatorsAndAlivePlayers()) {
+                try {
+                    deadAndAlivePlayer.sendMessage(deadAndAlivePlayer.getLanguage().getMessage(String.format(getMessagesId() + "deactivated", minPlayerToVote)));
+                } catch (CannotFindMessageException e) {
+                    deadAndAlivePlayer.sendMessage(Language.NO_MESSAGE);
+                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                    Logger.getGeneralLogger().log(e);
+                }
+            }
+        }
     }
 
     private void authoriseVote() {
@@ -160,7 +155,7 @@ public class PlayerVote extends Scenario {
         UHCPlayer result = getPlayerWithMostVote(votes);
         Integer mostVotes = getMostVote(votes);
 
-        Chat.broadcastIdMessage(getMessagesId() + "results.header", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+        Chat.broadcastIdMessage(getMessagesId() + "results.header", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
         if (mostVotes != 0) {
             sendResults(result.getName(), mostVotes);
             applyResults(result);
@@ -176,14 +171,14 @@ public class PlayerVote extends Scenario {
         if (!votes.isEmpty())
             proceedVote(convertMapToArray(votes));
         else {
-            Chat.broadcastIdMessage(getMessagesId() + "results.header", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+            Chat.broadcastIdMessage(getMessagesId() + "results.header", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
             sendNullResults();
         }
         unAuthoriseVoteFor(game.getAlivePlayers());
     }
 
     private boolean checkCanVote(int maxSize) {
-        return game.getDeadAndAlivePlayers().size() >= maxSize;
+        return game.getSpectatorsAndAlivePlayers().size() >= maxSize;
     }
 
     private void sendPreVoteMessage(int time) {
@@ -196,7 +191,7 @@ public class PlayerVote extends Scenario {
                 if (seconds == 0) {
                     Logger.getGeneralLogger().log("Erreur de paramatres");
                 } else {
-                    for (UHCPlayer lgp : game.getDeadAndAlivePlayers()) {
+                    for (UHCPlayer lgp : game.getSpectatorsAndAlivePlayers()) {
                         try {
                             lgp.sendMessage(getMessage(lgp.getLanguage(), "message.seconds").replace("%voteSeconds%", String.valueOf(seconds)));
                         } catch (CannotFindMessageException e) {
@@ -208,7 +203,7 @@ public class PlayerVote extends Scenario {
                 }
             } else {
                 if (seconds == 0) {
-                    for (UHCPlayer lgp : game.getDeadAndAlivePlayers()) {
+                    for (UHCPlayer lgp : game.getSpectatorsAndAlivePlayers()) {
                         try {
                             lgp.sendMessage(getMessage(lgp.getLanguage(), "message.minutes").replace("%voteMinutes%", String.valueOf(minutes)));
                         } catch (CannotFindMessageException e) {
@@ -217,7 +212,7 @@ public class PlayerVote extends Scenario {
                         }
                     }
                 } else {
-                    for (UHCPlayer lgp : game.getDeadAndAlivePlayers()) {
+                    for (UHCPlayer lgp : game.getSpectatorsAndAlivePlayers()) {
                         try {
                             lgp.sendMessage(getMessage(lgp.getLanguage(), "message.minutesSeconds").replace("%voteMinutes%", String.valueOf(minutes)).replace("%voteSeconds%", String.valueOf(seconds)));
                         } catch (CannotFindMessageException e) {
@@ -231,7 +226,7 @@ public class PlayerVote extends Scenario {
             Logger.getGeneralLogger().logInConsole("Wrong vote time : time is more than 1 hour");
             minutes = 59;
             seconds = 59;
-            for (UHCPlayer lgp : game.getDeadAndAlivePlayers()) {
+            for (UHCPlayer lgp : game.getSpectatorsAndAlivePlayers()) {
                 try {
                     lgp.sendMessage(getMessage(lgp.getLanguage(), "message.minutesSeconds").replace("%voteMinutes%", String.valueOf(minutes)).replace("%voteSeconds%", String.valueOf(seconds)));
                 } catch (CannotFindMessageException e) {
@@ -242,34 +237,8 @@ public class PlayerVote extends Scenario {
         }
     }
 
-    private UHCPlayer getPlayerWithMostVote(Vote[] votes) {
-        HashMap<UHCPlayer, Integer> hm = convertVotesToMap(votes);
-        UHCPlayer result = null;
-        for (Map.Entry<UHCPlayer, Integer> entry : hm.entrySet()) {
-            if (entry.getValue().equals(getMostVote(votes))) {
-                result = entry.getKey();
-            }
-        }
-        return result;
-    }
-
-    private Integer getMostVote(Vote[] votes) {
-        HashMap<UHCPlayer, Integer> hm = convertVotesToMap(votes);
-        int max = 0;
-        for (Map.Entry<UHCPlayer, Integer> entry : hm.entrySet()) {
-            if (entry.getValue() > max) {
-                max = entry.getValue();
-            }
-        }
-        return max;
-    }
-
-    private UHCPlayer getPlayerWithMostVote(Map<Vote, Integer> votes) {
-        return getPlayerWithMostVote(convertMapToArray(votes));
-    }
-
     private void sendResults(String name, int votes) {
-        for (UHCPlayer lgp : game.getDeadAndAlivePlayers()) {
+        for (UHCPlayer lgp : game.getSpectatorsAndAlivePlayers()) {
             try {
                 lgp.sendMessage(getMessage(lgp.getLanguage(), "results.header").replace("%votedName%", name).replace("%numberVotes%", String.valueOf(votes)));
             } catch (CannotFindMessageException e) {
@@ -281,7 +250,7 @@ public class PlayerVote extends Scenario {
     }
 
     private void sendNullResults() {
-        Chat.broadcastIdMessage(getMessagesId() + "null", game.getDeadAndAlivePlayers().toArray(new UHCPlayer[0]));
+        Chat.broadcastIdMessage(getMessagesId() + "null", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
     }
 
     private void applyResults(UHCPlayer lgp) {

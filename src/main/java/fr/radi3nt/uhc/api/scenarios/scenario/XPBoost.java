@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -24,12 +25,8 @@ public class XPBoost extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "XpBoost";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.BEACON);
+    public static ScenarioData getData() {
+        return new ScenarioData("XPBoost").setItemStack(new ItemStack(Material.BEACON)).setDescription("Add extra XP when receiving xp");
     }
 
 

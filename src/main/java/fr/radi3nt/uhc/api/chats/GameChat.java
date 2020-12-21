@@ -11,8 +11,8 @@ public class GameChat extends Chat{
         String finalMessage = ChatColor.GOLD + "[" + ChatColor.YELLOW + "GAME" + ChatColor.GOLD + "] " + ChatColor.RESET + user.getPlayer().getDisplayName() + ChatColor.GOLD + " » " + ChatColor.RESET + message;
         Logger.getChat().logInConsole(finalMessage);
         UHCGame game = user.getGameData().getGame();
-        for (UHCPlayer lgp : user.getGameData().getGame().getDeadAndAlivePlayers()) {
-            if (lgp.isInGame())
+        for (UHCPlayer lgp : user.getGameData().getGame().getSpectatorsAndAlivePlayers()) {
+            if (lgp.isPlaying())
                 if (lgp.getGameData().getGame().equals(game)) {
                     lgp.sendMessage(finalMessage);
                 }

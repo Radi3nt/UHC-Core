@@ -33,7 +33,7 @@ public class NPC {
 	private Integer specStand;
 
 	private final List<Player> recipients;
-	private Recipient recipient_type = Recipient.ALL;
+	private Recipient recipient_type;
 
 	private String display_name;
 	private String tablist_name;
@@ -517,10 +517,19 @@ public class NPC {
 		if (specStand != null) {
 			PacketPlayOutEntityDestroy packet1 = new PacketPlayOutEntityDestroy(this.specStand);
 			this.sendPacket(packet1);
+			specStand=null;
 		}
 		this.removeFromTabList();
 		this.sendPacket(packet);
 		this.isDestroyed = true;
+	}
+
+	public void destroySpecStand() {
+		if (specStand != null) {
+			PacketPlayOutEntityDestroy packet1 = new PacketPlayOutEntityDestroy(this.specStand);
+			this.sendPacket(packet1);
+			specStand=null;
+		}
 	}
 
 	
@@ -916,7 +925,7 @@ public class NPC {
 	}
 
 
-	enum Recipient {
+	public enum Recipient {
 		ALL, LISTED_RECIPIENTS
 	}
 

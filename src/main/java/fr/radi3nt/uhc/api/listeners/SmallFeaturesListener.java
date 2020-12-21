@@ -17,7 +17,7 @@ public class SmallFeaturesListener implements Listener {
 
     @EventHandler
     private void onPlayerTeleport(final PlayerTeleportEvent event) {
-        if (UHCPlayer.thePlayer(event.getPlayer()).isInGame())
+        if (UHCPlayer.thePlayer(event.getPlayer()).isPlaying())
             if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)) {
                 event.setCancelled(true);
             } else if (event.getCause().equals(PlayerTeleportEvent.TeleportCause.END_PORTAL)) {
@@ -28,7 +28,7 @@ public class SmallFeaturesListener implements Listener {
     @EventHandler
     public void onDrinkMilkAndNapple(final PlayerInteractEvent event) {
         final Action a = event.getAction();
-        if (UHCPlayer.thePlayer(event.getPlayer()).isInGame()) {
+        if (UHCPlayer.thePlayer(event.getPlayer()).isPlaying()) {
             if ((a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) && event.getPlayer().getInventory().getItemInMainHand().getType() == Material.MILK_BUCKET) {
                 event.setCancelled(true);
             }
@@ -56,7 +56,7 @@ public class SmallFeaturesListener implements Listener {
 
     @EventHandler
     public void onAppleEat(final PlayerItemConsumeEvent event) {
-        if (UHCPlayer.thePlayer(event.getPlayer()).isInGame())
+        if (UHCPlayer.thePlayer(event.getPlayer()).isPlaying())
             if (new ItemStack(Material.GOLDEN_APPLE, 1, (byte) 1).isSimilar(event.getItem())) {
                 event.setCancelled(true);
                 event.setItem(new ItemStack(Material.GOLDEN_APPLE, event.getItem().getAmount()));

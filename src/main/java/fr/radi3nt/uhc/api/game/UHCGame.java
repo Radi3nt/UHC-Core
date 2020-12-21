@@ -8,12 +8,19 @@ import org.bukkit.Location;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public interface UHCGame {
 
+    UUID getUUID();
+
     void join(UHCPlayer player);
+    void forceJoin(UHCPlayer player);
+    void spectate(UHCPlayer player);
 
     boolean updateStart();
+
+    void updateWin();
 
     void start();
 
@@ -22,10 +29,6 @@ public interface UHCGame {
     void kill(UHCPlayer player, Reason reason, Location playerloc);
 
     void scatter(UHCPlayer player);
-
-    Location getGameSpawn();
-
-    Set<UHCPlayer> getDeadAndAlivePlayers();
 
     GameState getState();
 
@@ -41,11 +44,17 @@ public interface UHCGame {
 
     Set<UHCPlayer> getAlivePlayers();
 
-    Set<UHCPlayer> getDeadPlayers();
-
     Set<UHCPlayer> getSpectators();
 
+    Set<UHCPlayer> getSpectatorsAndAlivePlayers();
+
+    Set<UHCPlayer> getWaitQueue();
+
     List<Scenario> getScenarios();
+
+    void addScenario(Scenario scenario);
+
+    void removeScenario(Scenario scenario);
 
     UHCPlayer getUHCPlayerInThisGame(String name);
 

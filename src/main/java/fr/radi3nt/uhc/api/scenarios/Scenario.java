@@ -10,11 +10,9 @@ import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -26,7 +24,7 @@ import java.util.Set;
 public abstract class Scenario implements Listener {
 
     private static final ArrayList<Scenario> activeScenarios = new ArrayList<>();
-    private static final Set<Class<? extends Scenario>> registredScenarios = new HashSet<>();
+    private static final Set<Class<? extends Scenario>> repertoriedScenarios = new HashSet<>();
 
 
     private static final String DEFAULT_NAME = "NaN";
@@ -37,20 +35,16 @@ public abstract class Scenario implements Listener {
         this.game = game;
     }
 
-    public static String getName() {
-        return DEFAULT_NAME;
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.BARRIER);
+    public static ScenarioData getData() {
+        return new ScenarioData(DEFAULT_NAME);
     }
 
     public static ArrayList<Scenario> getActiveScenarios() {
         return activeScenarios;
     }
 
-    public static Set<Class<? extends Scenario>> getScenariosClasses() {
-        return registredScenarios;
+    public static Set<Class<? extends Scenario>> getRepertoriedScenariosClasses() {
+        return repertoriedScenarios;
     }
 
     public void register() {
@@ -167,7 +161,7 @@ public abstract class Scenario implements Listener {
 
     protected String getMessagesId() {
         try {
-            return "game.scenarios." + this.getClass().getMethod("getName").invoke(this) + ".";
+            return "game.scenarios." + ((ScenarioData) this.getClass().getMethod("getData").invoke(this)).getName() + ".";
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             Logger.getGeneralLogger().log(e);
         }
@@ -179,7 +173,7 @@ public abstract class Scenario implements Listener {
     }
 
     protected boolean isSameGame(UHCPlayer player) {
-        return player.isInGame() && player.getGameData().getGame().equals(game);
+        return player.isPlaying() && player.getGameData().getGame().equals(game);
     }
 
     public UHCGame getGame() {

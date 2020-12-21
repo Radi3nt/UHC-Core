@@ -5,15 +5,15 @@ import fr.radi3nt.uhc.api.command.CommandUtilis;
 
 import java.util.List;
 
-public class HelpCommand extends CommandArg {
+public class HelpCommand implements CommandArg {
 
     @Override
-    protected void onCommand(CommandUtilis utilis) {
+    public void onCommand(CommandUtilis utilis) {
 
     }
 
     @Override
-    protected List<String> tabComplete(CommandUtilis utilis) {
+    public List<String> tabComplete(CommandUtilis utilis) {
         return null;
     }
 }

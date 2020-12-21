@@ -7,6 +7,7 @@ public enum GameState {
     STARTING(),
     PLAYING(),
     END(),
+    INACCESSIBLE(),
     ;
 
 

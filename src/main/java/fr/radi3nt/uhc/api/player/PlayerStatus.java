@@ -11,9 +11,9 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
-public class PlayerStats {
+public class PlayerStatus {
 
-    private static final List<PlayerStats> players = new ArrayList<>();
+    private static final List<PlayerStatus> players = new ArrayList<>();
 
     private final UUID uuid;
     private final HashMap<PotionEffect, Long> activePotionsEffect = new HashMap<>();
@@ -26,12 +26,12 @@ public class PlayerStats {
     private int food = 20;
     private int xp = 0;
 
-    public PlayerStats(UUID uuid) {
+    public PlayerStatus(UUID uuid) {
         this.uuid = uuid;
     }
 
     public static void updateAll() {
-        for (PlayerStats player : players) {
+        for (PlayerStatus player : players) {
             player.update();
         }
     }

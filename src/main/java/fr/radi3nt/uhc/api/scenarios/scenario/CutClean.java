@@ -48,7 +48,7 @@ public class CutClean extends Scenario {
                 for (ItemStack drop : e.getBlock().getDrops(e.getPlayer().getItemInHand())) {
                     if (materials.containsKey(drop.getType())) {
                         e.setDropItems(false);
-                        player.getPlayer().getWorld().dropItem(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5), new ItemStack(materials.get(e.getBlock().getType())));
+                        player.getPlayer().getWorld().dropItem(e.getBlock().getLocation().clone().add(0.5, 0.5, 0.5), new ItemStack(materials.get(e.getBlock().getType()), drop.getAmount()));
                     }
                 }
             }
@@ -62,7 +62,7 @@ public class CutClean extends Scenario {
             for (ItemStack drop : e.getDrops()) {
                 if (materials.containsKey(drop.getType())) {
                     itemStacks.add(drop);
-                    e.getEntity().getWorld().dropItem(e.getEntity().getLocation().clone().add(0.5, 0.5, 0.5), new ItemStack(materials.get(drop.getType())));
+                    e.getEntity().getWorld().dropItem(e.getEntity().getLocation().clone().add(0.5, 0.5, 0.5), new ItemStack(materials.get(drop.getType()), drop.getAmount()));
                 }
             }
             for (ItemStack itemStack : itemStacks) {

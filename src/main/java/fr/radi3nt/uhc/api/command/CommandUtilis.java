@@ -77,7 +77,7 @@ public class CommandUtilis {
     public boolean checkIfGame() {
         if (checkIfPlayer()) {
             UHCPlayer lgp = UHCPlayer.thePlayer((Player) sender);
-            return lgp.isInGame();
+            return lgp.isPlaying();
         } else {
             return false;
         }

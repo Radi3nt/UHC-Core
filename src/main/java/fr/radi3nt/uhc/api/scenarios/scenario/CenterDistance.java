@@ -48,8 +48,9 @@ public class CenterDistance extends Scenario {
         super.tick(gameTimer, tick);
         if (gameTimer.getGame().equals(game)) {
             if (isActive()) {
+                if (tick % 20 == 0)
                 for (UHCPlayer lgp : gameTimer.getGame().getAlivePlayers()) {
-                    int distance = (int) Maths.distanceIn2D(lgp.getPlayer().getLocation(), game.getGameSpawn());
+                    int distance = (int) Maths.distanceIn2D(lgp.getPlayer().getLocation(), game.getParameters().getGameSpawn());
 
                     String disM = "";
                     try {
@@ -57,6 +58,7 @@ public class CenterDistance extends Scenario {
                     } catch (CannotFindMessageException e) {
                         lgp.sendMessage(Language.NO_MESSAGE);
                         Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                        Logger.getGeneralLogger().log(e);
                     }
                     String disS = "NaN";
                     int maxNumber = 0;

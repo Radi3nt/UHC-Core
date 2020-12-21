@@ -5,8 +5,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Logger {
 
@@ -90,6 +92,25 @@ public class Logger {
             }
         }
         Config config1 = Config.createConfig(config.getFile().getParent(), name + i + ".yml");
+        config1.getConfiguration().set("Logs", logs);
+        config1.saveConfig();
+    }
+
+    public void archive(Path path, UUID uuid) {
+        ArrayList<String> logs = (ArrayList<String>) config.getConfiguration().getStringList("Logs");
+        LocalDateTime now = LocalDateTime.now();
+        String name = now.getYear() + "-" + now.getMonthValue() + "-" + now.getDayOfMonth() + "-";
+        boolean found = false;
+        int i = 1;
+        while (!found) {
+            File file = new File(path.toFile().getAbsolutePath() + "/" + name + i + "-" + uuid + ".yml");
+            if (file.exists()) {
+                i++;
+            } else {
+                found = true;
+            }
+        }
+        Config config1 = Config.createConfig(path.toFile().getAbsolutePath(), name + i + "-" + uuid + ".yml");
         config1.getConfiguration().set("Logs", logs);
         config1.saveConfig();
     }

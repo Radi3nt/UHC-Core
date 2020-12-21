@@ -1,5 +1,6 @@
 package fr.radi3nt.uhc.api.game;
 
+import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioUtils;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -14,11 +15,10 @@ public abstract class GameTimer extends BukkitRunnable {
 
     @Override
     public void run() {
-        _run();
         try {
-            ScenarioUtils.tickAll(this, getTicks());
+            _run();
         } catch (Exception e) {
-
+            Logger.getGeneralLogger().log(e);
         }
     }
 
@@ -27,6 +27,8 @@ public abstract class GameTimer extends BukkitRunnable {
     public int getTicks() {
         return ticks;
     }
+
+    public abstract void setTicks(int ticks);
 
     public UHCGame getGame() {
         return game;

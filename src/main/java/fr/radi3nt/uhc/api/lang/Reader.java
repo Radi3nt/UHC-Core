@@ -24,8 +24,7 @@ public class Reader {
     public void loadLanguage(File file) {
         String name;
         String id;
-        HashMap<String, String> messages = new HashMap<>();
-        messages.putAll(loadTranslations(FileUtils_.loadContent(file)));
+        HashMap<String, String> messages = new HashMap<>(loadTranslations(FileUtils_.loadContent(file)));
         name = messages.get("Language.name");
         id = messages.get("Language.id");
 
@@ -79,7 +78,7 @@ public class Reader {
         }
     }
 
-    private File[] getLangFiles() {
+    public File[] getLangFiles() {
         File directoryPath = new File(UHCCore.getPlugin().getDataFolder() + "/langs");
         return directoryPath.listFiles();
     }

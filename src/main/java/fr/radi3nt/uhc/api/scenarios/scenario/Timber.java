@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import fr.radi3nt.uhc.uhc.UHCCore;
@@ -34,12 +35,8 @@ public class Timber extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "Timber";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.LOG);
+    public static ScenarioData getData() {
+        return new ScenarioData("Timber").setItemStack(new ItemStack(Material.LOG)).setDescription("When breaking a block of a tree, it breaks all the tree");
     }
 
     @EventHandler

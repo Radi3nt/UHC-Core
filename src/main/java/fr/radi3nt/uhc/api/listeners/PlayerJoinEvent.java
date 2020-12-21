@@ -1,10 +1,13 @@
 package fr.radi3nt.uhc.api.listeners;
 
+import fr.radi3nt.uhc.api.command.commands.SpectateCommand;
 import fr.radi3nt.uhc.api.game.GameState;
 import fr.radi3nt.uhc.api.game.instances.DefaultsParameters;
+import fr.radi3nt.uhc.api.player.PlayerState;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.stats.HoloStats;
 import fr.radi3nt.uhc.api.stats.Hologram;
+import fr.radi3nt.uhc.api.utilis.ScoreboardsUtil;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,6 +26,7 @@ public class PlayerJoinEvent implements Listener {
         UHCCore.getPlayers().add(lgp);
 
         lgp.getPlayerStats().update();
+        lgp.getPlayerStats().refresh();
         lgp.loadSavedLang();
         lgp.loadStats();
 
@@ -35,7 +39,7 @@ public class PlayerJoinEvent implements Listener {
 
         e.setJoinMessage(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "+" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getDisplayName() + " (" + ChatColor.YELLOW + Bukkit.getOnlinePlayers().size() + ChatColor.GRAY + "/" + ChatColor.YELLOW + Bukkit.getMaxPlayers() + ChatColor.GRAY + ")");
         HoloStats.updateAll();
-        if (!lgp.isInGame() || (lgp.isInGame() && lgp.getGameData().isDead()) || ((lgp.isInGame() && lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().getDisconnectParameters().canReconnectInPvp()))) {
+        if ( !lgp.isPlaying() || ( lgp.isPlaying() && lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().getDisconnectParameters().canReconnectInPvp())) {
             p.setWalkSpeed(0.2F);
             p.resetMaxHealth();
             p.setFoodLevel(20);
@@ -58,6 +62,9 @@ public class PlayerJoinEvent implements Listener {
             }
         }
 
+        ScoreboardsUtil.sendDefaultScoreboardToPlayer(lgp);
+        ScoreboardsUtil.sendDefaultTabToPlayer(lgp);
+
 
                 /*
         Updater.UpdateResults results = LoupGarouUHC.getUpdater().checkForUpdates();
@@ -72,5 +79,7 @@ public class PlayerJoinEvent implements Listener {
         p.getInventory().addItem(new GameInfoGUI().createBook(lgp.getLanguage(), RoleType.LOUP_GAROU));
 
          *///todo livres GUI
+       SpectateCommand.mapmap(lgp, "https://www.prchecker.info/free-icons/128x128/twitter_128_px.png");
+
     }
 }

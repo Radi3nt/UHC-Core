@@ -16,15 +16,15 @@ import java.util.List;
 
 import static fr.radi3nt.uhc.api.command.CommandUtilis.requirePermission;
 
-public class StatsCommand extends CommandArg {
+public class StatsCommand implements CommandArg {
     @Override
     public void onCommand(CommandUtilis utilis) throws NoPermissionException {
         if (utilis.getArgs().length > 0) {
-            if (requirePermission(utilis.getSender(), "lg.stats.manage", "")) {
+            if (requirePermission(utilis.getSender(), "uhc.stats.manage", "")) {
                 switch (utilis.getArgs()[0]) {
                     case "place":
                         if (utilis.checkIfPlayer())
-                            if (requirePermission(utilis.getSender(), "lg.stats.place", ""))
+                            if (requirePermission(utilis.getSender(), "uhc.stats.place", ""))
                                 HoloStats.createHoloStats(((Player) utilis.getSender()).getLocation(), 9);
                         break;
 
@@ -45,7 +45,7 @@ public class StatsCommand extends CommandArg {
                         break;
                 }
             }
-        } else if (requirePermission(utilis.getSender(), "lg.stats", "")) {
+        } else if (requirePermission(utilis.getSender(), "uhc.stats", "")) {
             if (utilis.checkIfPlayer()) {
                 utilis.getSender().sendMessage(ChatColor.BOLD + "STATS:\n");
                 DecimalFormatSymbols symbols = new DecimalFormatSymbols();
@@ -64,7 +64,7 @@ public class StatsCommand extends CommandArg {
     }
 
     @Override
-    protected List<String> tabComplete(CommandUtilis utilis) {
+    public List<String> tabComplete(CommandUtilis utilis) {
         ArrayList<String> arrayList = new ArrayList<>();
         arrayList.add("place");
         arrayList.add("remove");

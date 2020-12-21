@@ -1,17 +1,27 @@
-package fr.radi3nt.uhc.api.scenarios;
+package fr.radi3nt.uhc.api.command;
 
 import fr.radi3nt.uhc.api.command.CommandArg;
 import fr.radi3nt.uhc.api.command.CommandUtilis;
 import fr.radi3nt.uhc.api.command.commands.*;
+import fr.radi3nt.uhc.api.exeptions.common.CannotFindMessageException;
+import fr.radi3nt.uhc.api.exeptions.common.NoPermissionException;
 import fr.radi3nt.uhc.api.game.GameState;
+import fr.radi3nt.uhc.api.lang.Logger;
+import fr.radi3nt.uhc.api.lang.lang.Language;
+import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioUtils;
 import fr.radi3nt.uhc.uhc.UHCCore;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 import java.util.*;
+
+import static fr.radi3nt.uhc.api.command.CommandUtilis.requirePermission;
 
 public class UHCCommands implements CommandExecutor, TabCompleter {
 
@@ -32,6 +42,10 @@ public class UHCCommands implements CommandExecutor, TabCompleter {
         commands.put("scenario", new ScenariosCommands());
         commands.put("msg", new MsgCommand());
         commands.put("whisper", new MsgCommand());
+        commands.put("tell", new TellCommand());
+        commands.put("game", new GameCommand());
+        commands.put("spec", new SpectateCommand());
+        commands.put("spectate", new SpectateCommand());
     }
 
     public static Map<String, CommandArg> getCommands() {
@@ -48,14 +62,33 @@ public class UHCCommands implements CommandExecutor, TabCompleter {
         String[] newArgs = new String[strings.length - 1];
         System.arraycopy(strings, 1, newArgs, 0, strings.length - 1);
         CommandUtilis newCommandUtilis = new CommandUtilis(commandSender, command, s, newArgs);
+        CommandUtilis oldCommandUtilis = new CommandUtilis(commandSender, command, s, strings);
 
         if (strings[0].equalsIgnoreCase("start")) {
-            if (UHCCore.getGames().get(0).getState() == GameState.LOBBY) {
-                UHCCore.getGames().get(0).getAlivePlayers().addAll(UHCCore.getPlayers());
-                UHCCore.getGames().get(0).getDeadPlayers().addAll(UHCCore.getPlayers());
-                if (!UHCCore.getGames().get(0).updateStart()) {
-                    UHCCore.getGames().get(0).getAlivePlayers().removeAll(UHCCore.getPlayers());
-                    UHCCore.getGames().get(0).getDeadPlayers().removeAll(UHCCore.getPlayers());
+            if (UHCCore.getGameQueue().get(0).getState() == GameState.LOBBY) {
+                if (UHCCore.getGameQueue().get(0).getWaitQueue().isEmpty()) {
+                    UHCCore.getGameQueue().get(0).getWaitQueue().addAll(UHCCore.getPlayers());
+                    if (!UHCCore.getGameQueue().get(0).updateStart()) {
+                        UHCCore.getGameQueue().get(0).getWaitQueue().removeAll(UHCCore.getPlayers());
+                    }
+                } else {
+                    UHCCore.getGameQueue().get(0).updateStart();
+                }
+            }
+        } else if (strings[0].equalsIgnoreCase("leave")) {
+            if (commandSender instanceof Player) {
+                try {
+                    if (requirePermission(commandSender, "uhc.leave", "")) {
+                        if (UHCCore.getGameQueue().get(0).getAlivePlayers().contains(UHCPlayer.thePlayer((Player) commandSender))) {
+                            if (UHCCore.getGameQueue().get(0).getState()==GameState.LOBBY) {
+                                UHCCore.getGameQueue().get(0).getAlivePlayers().remove(UHCPlayer.thePlayer((Player) commandSender));
+                                commandSender.sendMessage(UHCCore.getPrefix() + ChatColor.GOLD + " Leaved game");
+                            }
+                        }
+                    }
+                } catch (NoPermissionException e) {
+                    if (oldCommandUtilis.checkIfPlayer())
+                        UHCPlayer.thePlayer((Player) commandSender).sendIdMessage("commands.no.command");
                 }
             }
         } else if (commands.containsKey(strings[0])) {
@@ -85,7 +118,8 @@ public class UHCCommands implements CommandExecutor, TabCompleter {
             }
         }
         Collections.sort(arrayList);
-        System.out.println(arrayList);
+        if (arrayList.isEmpty())
+            return null;
         return arrayList;
     }
 }

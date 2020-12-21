@@ -2,11 +2,14 @@ package fr.radi3nt.uhc.api.player;
 
 import fr.radi3nt.uhc.api.chats.Chat;
 import fr.radi3nt.uhc.api.exeptions.common.CannotFindMessageException;
+import fr.radi3nt.uhc.api.game.UHCGame;
+import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.lang.lang.Language;
 import fr.radi3nt.uhc.api.stats.Stats;
 import fr.radi3nt.uhc.api.utilis.Config;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -21,15 +24,17 @@ public class UHCPlayer {
 	private Stats stats;
 	private Language language;
 	private Player player;
-	private final PlayerStats playerStats;
+	private final PlayerStatus playerStats;
 	private Chat chat;
-	private PlayerGameData gameData = new NullPlayerGameData();
+	private PlayerGameData gameData = new PlayerGameData(null);
+	private GameInformation gameInformation = new GameInformation();
+	private UHCGame queuedGame = null;
 
 	private UHCPlayer(Player player) {
 		this.player = player;
 		this.uuid = player.getUniqueId();
 		stats = new Stats();
-		playerStats = new PlayerStats(player.getUniqueId());
+		playerStats = new PlayerStatus(player.getUniqueId());
 		playerStats.refresh();
 
 		for (Language languages : Language.getLanguages()) {
@@ -43,7 +48,7 @@ public class UHCPlayer {
 		this.player = null;
 		this.uuid = uuid;
 		stats = new Stats();
-		playerStats = new PlayerStats(uuid);
+		playerStats = new PlayerStatus(uuid);
 		playerStats.refresh();
 
 		for (Language languages : Language.getLanguages()) {
@@ -98,6 +103,8 @@ public class UHCPlayer {
 			sendMessage(language.getMessage(id));
 		} catch (CannotFindMessageException e) {
 			sendMessage(Language.NO_MESSAGE);
+			Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
+			Logger.getGeneralLogger().log(e);
 		}
 	}
 
@@ -172,6 +179,20 @@ public class UHCPlayer {
 		}
 	}
 
+	public UHCGame getWaitingGame() {
+		return queuedGame;
+	}
+
+	public void setWaitingGame(UHCGame game) {
+		if (queuedGame!=null) queuedGame.getWaitQueue().remove(this);
+		queuedGame=game;
+	}
+
+	public void clearWaitingGame() {
+		if (queuedGame!=null) queuedGame.getWaitQueue().remove(this);
+		queuedGame=null;
+	}
+
 	public Chat getChat() {
 		return chat;
 	}
@@ -212,8 +233,12 @@ public class UHCPlayer {
 		this.language = language;
 	}
 
+	public boolean isPlaying() {
+		return isInGame() && gameData.getPlayerState()==PlayerState.ALIVE;
+	}
+
 	public boolean isInGame() {
-		return gameData.getGame() != null;
+		return gameData!=null && gameData.getGame() != null;
 	}
 
 	public boolean isOnline() {
@@ -228,8 +253,16 @@ public class UHCPlayer {
 		this.gameData = gameData;
 	}
 
-	public PlayerStats getPlayerStats() {
+	public PlayerStatus getPlayerStats() {
 		return playerStats;
+	}
+
+	public GameInformation getGameInformation() {
+		return gameInformation;
+	}
+
+	public void setGameInformation(GameInformation gameInformation) {
+		this.gameInformation = gameInformation;
 	}
 
 	@Override

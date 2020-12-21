@@ -1,6 +1,7 @@
 package fr.radi3nt.uhc.api.scenarios.scenario;
 
 import fr.radi3nt.uhc.api.command.CommandUtilis;
+import fr.radi3nt.uhc.api.exeptions.common.NoArgsException;
 import fr.radi3nt.uhc.api.exeptions.common.NoPermissionException;
 import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
@@ -59,7 +60,7 @@ public class FinalHeal extends Scenario {
                 if (command.executeCommand("uhc.fh.activate", "uhc.finalheal.activate", 0, CommandUtilis.Checks.GAME)) {
                     doFinalHeal();
                 }
-            } catch (NoPermissionException e) {
+            } catch (NoPermissionException | NoArgsException e) {
 
             }
         }

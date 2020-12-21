@@ -12,11 +12,11 @@ import java.util.List;
 
 import static fr.radi3nt.uhc.api.command.CommandUtilis.requirePermission;
 
-public class LangCommand extends CommandArg {
+public class LangCommand implements CommandArg {
     @Override
-    protected void onCommand(CommandUtilis utilis) throws NoPermissionException {
+    public void onCommand(CommandUtilis utilis) throws NoPermissionException {
         if (utilis.checkIfPlayer()) {
-            if (requirePermission(utilis.getSender(), "lg.lang", "")) {
+            if (requirePermission(utilis.getSender(), "uhc.lang", "")) {
                 if (utilis.getArgs().length > 0) {
                     for (Language language : Language.getLanguages()) {
                         if (utilis.getArgs()[0].equalsIgnoreCase(language.getId()) || utilis.getArgs()[0].equalsIgnoreCase(language.getName())) {
@@ -31,7 +31,7 @@ public class LangCommand extends CommandArg {
     }
 
     @Override
-    protected List<String> tabComplete(CommandUtilis utilis) {
+    public List<String> tabComplete(CommandUtilis utilis) {
         ArrayList<String> arrayList = new ArrayList<>();
         for (Language language : Language.getLanguages()) {
             if (!language.getId().equals(Language.DEFAULTID))

@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -22,19 +23,14 @@ public class VanillaPlus extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "Vanilla+";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.APPLE);
+    public static ScenarioData getData() {
+        return new ScenarioData("Vanilla+").setItemStack(new ItemStack(Material.APPLE)).setDescription("Option to customize the percentage of apple and flint drop");
     }
 
     @EventHandler
     public void event(BlockBreakEvent e) {
         UHCPlayer player = UHCPlayer.thePlayer(e.getPlayer());
-        if (player.isInGame() && !player.getGameData().isDead()) {
-
+        if (player.isPlaying()) {
             if (player.getGameData().getGame() == game) {
                 if (isActive()) {
                     if (e.getBlock().getType() == Material.LEAVES || e.getBlock().getType() == Material.LEAVES_2) {

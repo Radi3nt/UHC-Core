@@ -13,10 +13,10 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MsgCommand extends CommandArg {
+public class MsgCommand implements CommandArg {
 
     @Override
-    protected void onCommand(CommandUtilis utilis) throws NoPermissionException, NoArgsException {
+    public void onCommand(CommandUtilis utilis) throws NoPermissionException, NoArgsException {
         if (utilis.checkIfPlayer()) {
             if (CommandUtilis.requirePermission(utilis.getSender(), "uhc.msg", "")) {
                 if (utilis.requireMinArgs(1)) {
@@ -31,14 +31,14 @@ public class MsgCommand extends CommandArg {
                         String msg2 = ChatColor.AQUA + "[" + ChatColor.GOLD + ((Player) utilis.getSender()).getPlayerListName() + ChatColor.RED + " -> " + ChatColor.GOLD + target.getName() + ChatColor.AQUA + "]" + ChatColor.RESET + message;
                         target.sendMessage(msg1);
                         utilis.getSender().sendMessage(msg);
-                        if (UHCPlayer.thePlayer((Player) utilis.getSender()).isInGame() || target.isInGame()) {
+                        if (UHCPlayer.thePlayer((Player) utilis.getSender()).isPlaying() || target.isPlaying()) {
                             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                 if (onlinePlayer.hasPermission("uhc.admin")) {
                                     onlinePlayer.sendMessage(UHCCore.getPrefix() + ChatColor.BLUE + " [Admin] " + msg2);
                                 }
-                                if (target.isInGame() && UHCPlayer.thePlayer(onlinePlayer).equals(target.getGameData().getGame().getData().getHost())) {
+                                if (target.isPlaying() && UHCPlayer.thePlayer(onlinePlayer).equals(target.getGameData().getGame().getData().getHost())) {
                                     onlinePlayer.sendMessage(UHCCore.getPrefix() + ChatColor.BLUE + " [Host] " + msg2);
-                                } else if (UHCPlayer.thePlayer((Player) utilis.getSender()).isInGame() && UHCPlayer.thePlayer(onlinePlayer).equals(UHCPlayer.thePlayer((Player) utilis.getSender()).getGameData().getGame().getData().getHost())) {
+                                } else if (UHCPlayer.thePlayer((Player) utilis.getSender()).isPlaying() && UHCPlayer.thePlayer(onlinePlayer).equals(UHCPlayer.thePlayer((Player) utilis.getSender()).getGameData().getGame().getData().getHost())) {
                                     onlinePlayer.sendMessage(UHCCore.getPrefix() + ChatColor.BLUE + " [Host] " + msg2);
                                 }
                             }
@@ -50,7 +50,7 @@ public class MsgCommand extends CommandArg {
     }
 
     @Override
-    protected List<String> tabComplete(CommandUtilis utilis) {
+    public List<String> tabComplete(CommandUtilis utilis) {
         List<String> list = new ArrayList<>();
         if (utilis.getArgs().length == 1) {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

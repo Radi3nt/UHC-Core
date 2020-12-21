@@ -10,6 +10,8 @@ public interface Parameter {
 
     Integer getBaseRadius();
 
+    Boolean recreateMapAfterUse();
+
     DisconnectParameters getDisconnectParameters();
 
 }

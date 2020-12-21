@@ -1,10 +1,12 @@
 package fr.radi3nt.uhc.api.listeners;
 
+import fr.radi3nt.uhc.api.events.UHCPlayerKilledEvent;
 import fr.radi3nt.uhc.api.game.Reason;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.stats.HoloStats;
 import fr.radi3nt.uhc.api.stats.Hologram;
 import fr.radi3nt.uhc.uhc.UHCCore;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -14,6 +16,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.UUID;
 
 
 public class PlayerLeaveEvent implements Listener {
@@ -35,61 +39,33 @@ public class PlayerLeaveEvent implements Listener {
         lgp.saveStats();
         lgp.saveLang();
         e.setQuitMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_RED + "-" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY + e.getPlayer().getName());
-        if (lgp.isInGame() && !lgp.getGameData().isDead()) {
+        if (lgp.isPlaying()) {
             new BukkitRunnable() {
-                final UHCPlayer lgp = UHCPlayer.thePlayer(e.getPlayer().getUniqueId());
+                final UUID uuid = e.getPlayer().getUniqueId();
                 int i = 0;
 
                 @Override
                 public void run() {
-                    if (!lgp.isInGame()) {
+                    UHCPlayer lgp = UHCPlayer.thePlayer(uuid);
+                    if (!lgp.isPlaying()) {
                         cancel();
                     }
-                    if (lgp.isInGame() && (i >= lgp.getGameData().getGame().getParameters().getDisconnectParameters().getDisconnectTimeout() * 60 * 20 || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().getDisconnectParameters().canReconnectInPvp()))) {
-                        lgp.getGameData().getGame().kill(lgp, Reason.DISCONNECTED, playerloc);
-                        for (ItemStack item : inventory.getContents()) {
-                            if (item != null) {
-                                playerloc.getWorld().dropItem(playerloc, item.clone());
-                                item.setAmount(0);
-                            }
-                        }
-                        for (ItemStack item : inventory.getArmorContents()) {
-                            if (item != null) {
-                                playerloc.getWorld().dropItem(playerloc, item.clone());
-                                item.setAmount(0);
-                            }
-                        }
-                        for (ItemStack item : inventory.getExtraContents()) {
-                            if (item != null) {
-                                playerloc.getWorld().dropItem(playerloc, item.clone());
-                                item.setAmount(0);
-                            }
-                        }
-                        for (ItemStack item : inventory.getStorageContents()) {
-                            if (item != null) {
-                                playerloc.getWorld().dropItem(playerloc, item.clone());
-                                item.setAmount(0);
-                            }
-                        }
-
-                        lgp.getStats().setKills(lgp.getStats().getKills() + lgp.getGameData().getKills());
-                        lgp.getGameData().setKills(0);
-
-
-                        lgp.getGameData().setKiller(null);
-
+                    if (lgp.isPlaying() && (i >= lgp.getGameData().getGame().getParameters().getDisconnectParameters().getDisconnectTimeout() * 60 * 20 || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().getDisconnectParameters().canReconnectInPvp()))) {
+                        Bukkit.getPluginManager().callEvent(new UHCPlayerKilledEvent(lgp.getGameData().getGame(), lgp, null, Reason.DISCONNECTED, lgp.getPlayerStats().getLastLocation()));
+                        lgp.clearWaitingGame();
                         UHCCore.getPlayers().remove(lgp);
                         lgp.remove();
                         this.cancel();
                     }
-                    if (i > 20 && lgp.getPlayer() != null && lgp.getPlayer().isOnline()) {
+                    if (i > 20 && lgp.isOnline()) {
                         this.cancel();
                     }
                     i++;
                 }
             }.runTaskTimer(UHCCore.getPlugin(), 1L, 1L);
         }
-        if (!lgp.isInGame() || lgp.getGameData().isDead()) {
+        if (!lgp.isPlaying()) {
+            lgp.clearWaitingGame();
             UHCCore.getPlayers().remove(lgp);
             lgp.remove();
         }
