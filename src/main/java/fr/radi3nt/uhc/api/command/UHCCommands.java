@@ -65,6 +65,12 @@ public class UHCCommands implements CommandExecutor, TabCompleter {
         CommandUtilis oldCommandUtilis = new CommandUtilis(commandSender, command, s, strings);
 
         if (strings[0].equalsIgnoreCase("start")) {
+            try {
+                requirePermission(commandSender, "uhc.start", "");
+            } catch (NoPermissionException e) {
+                if (oldCommandUtilis.checkIfPlayer())
+                    UHCPlayer.thePlayer((Player) oldCommandUtilis.getSender()).sendIdMessage("commands.no.perm");
+            }
             if (UHCCore.getGameQueue().get(0).getState() == GameState.LOBBY) {
                 if (UHCCore.getGameQueue().get(0).getWaitQueue().isEmpty()) {
                     UHCCore.getGameQueue().get(0).getWaitQueue().addAll(UHCCore.getPlayers());

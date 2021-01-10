@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -19,12 +20,8 @@ public class FireLess extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "FireLess";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.LAVA_BUCKET);
+    public static ScenarioData getData() {
+        return new ScenarioData("FireLess").setItemStack(new ItemStack(Material.FLINT_AND_STEEL)).setDescription("Prevent from getting damaged by fire");
     }
 
     @EventHandler

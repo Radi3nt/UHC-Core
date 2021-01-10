@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -29,16 +30,11 @@ public class FightDetector extends Scenario {
     }
 
 
-    public static String getName() {
-        return "FightDetector";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.IRON_SWORD);
-    }
+    public static ScenarioData getData() { return new ScenarioData("FightDetector").setItemStack(new ItemStack(Material.IRON_AXE)).setDescription("Detect fight for spectators");}
 
 
-    @EventHandler
+
+        @EventHandler
     public void event(EntityDamageByEntityEvent e) {
         if (isActive()) {
             if (e.getEntity() instanceof Player) {

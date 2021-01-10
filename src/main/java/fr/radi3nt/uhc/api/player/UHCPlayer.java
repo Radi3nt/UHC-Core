@@ -102,9 +102,7 @@ public class UHCPlayer {
 		try {
 			sendMessage(language.getMessage(id));
 		} catch (CannotFindMessageException e) {
-			sendMessage(Language.NO_MESSAGE);
-			Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-			Logger.getGeneralLogger().log(e);
+			UHCCore.handleCannotFindMessageException(e, this);
 		}
 	}
 

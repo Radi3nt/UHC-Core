@@ -4,6 +4,7 @@ import fr.radi3nt.uhc.api.events.UHCGameStartsEvent;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -22,12 +23,8 @@ public class StarterItems extends Scenario {
         items.add(new ItemStack(Material.COOKED_BEEF, 32));
     }
 
-    public static String getName() {
-        return "StarterItems";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.COOKED_BEEF);
+    public static ScenarioData getData() {
+        return new ScenarioData("StarterItems").setItemStack(new ItemStack(Material.COOKED_BEEF)).setDescription("Gives items at the start of the game");
     }
 
     @EventHandler

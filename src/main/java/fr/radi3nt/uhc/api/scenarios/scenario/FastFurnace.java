@@ -2,6 +2,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import fr.radi3nt.uhc.uhc.UHCCore;
@@ -27,12 +28,8 @@ public class FastFurnace extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "FastFurnace";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.FURNACE);
+    public static ScenarioData getData() {
+        return new ScenarioData("FastFurnace").setItemStack(new ItemStack(Material.FURNACE)).setDescription("Change general cook time");
     }
 
     private void startUpdate(Location block) {

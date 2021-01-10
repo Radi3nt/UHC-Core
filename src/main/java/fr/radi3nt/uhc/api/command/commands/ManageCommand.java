@@ -7,6 +7,7 @@ import fr.radi3nt.uhc.api.game.GameState;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.GameInformation;
 import fr.radi3nt.uhc.api.player.PlayerGameData;
+import fr.radi3nt.uhc.api.player.PlayerState;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.uhc.ClassicGame;
 import fr.radi3nt.uhc.uhc.UHCCore;
@@ -49,6 +50,7 @@ public class ManageCommand implements CommandArg {
                                 if (game instanceof ClassicGame) {
                                     target.setGameMode(GameMode.SURVIVAL);
                                     tlgp.setGameData(new PlayerGameData(game));
+                                    tlgp.getGameData().setPlayerState(PlayerState.ALIVE);
                                     tlgp.setGameInformation(new GameInformation());
                                     game.scatter(tlgp);
 

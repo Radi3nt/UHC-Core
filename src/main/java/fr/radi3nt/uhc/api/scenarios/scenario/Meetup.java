@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Meetup extends Scenario {
 
-    private List<ItemStack> itemStacks = new ArrayList<>();
+    private final List<ItemStack> itemStacks = new ArrayList<>();
 
     public Meetup(UHCGame game) {
         super(game);

@@ -34,7 +34,7 @@ public class ClickEvent implements Listener {
     @EventHandler
     public void OnClickEvent(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
-        if (e.getCurrentItem() != null && e.getCurrentItem().getType()==Material.AIR) {
+        if (e.getCurrentItem() != null && e.getCurrentItem().getType()!=Material.AIR) {
             if (MainGUI.checkInventoryView(e.getView())) {
                 e.setCancelled(true);
                 if (e.getCurrentItem().isSimilar(MainGUI.createStartItem())) {
@@ -53,7 +53,6 @@ public class ClickEvent implements Listener {
                 String itemName = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
                 int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle()).replace("Scenarios ", "").trim()) - 1;
                 if (ChatColor.stripColor(itemName).equalsIgnoreCase("+")) {
-                    System.out.println("ok");
                     currentPage+=1;
                 }
                 if (ChatColor.stripColor(itemName).equalsIgnoreCase("-")) {
@@ -184,15 +183,15 @@ public class ClickEvent implements Listener {
                     for (Class<? extends Scenario> scenariosClass : Scenario.getRepertoriedScenariosClasses()) {
                         Method method = null;
                         try {
-                            method = scenariosClass.getMethod("getName");
+                            method = scenariosClass.getMethod("getData");
                         } catch (NoSuchMethodException noSuchMethodException) {
                             noSuchMethodException.printStackTrace();
                         }
                         if (method == null)
                             continue;
-                        String obj = null;
+                        ScenarioData obj = null;
                         try {
-                            obj = (String) method.invoke(null);
+                            obj = (ScenarioData) method.invoke(null);
                         } catch (IllegalAccessException illegalAccessException) {
                             illegalAccessException.printStackTrace();
                         } catch (InvocationTargetException invocationTargetException) {
@@ -201,7 +200,7 @@ public class ClickEvent implements Listener {
                         if (obj == null)
                             continue;
 
-                        if (obj.trim().equals(scenarioName))
+                        if (obj.getName().trim().equals(scenarioName))
                             aClass = scenariosClass;
                     }
                     Scenario scenario = null;
@@ -216,14 +215,8 @@ public class ClickEvent implements Listener {
                     if (!value) {
                         try {
                             scenario = aClass.getConstructor(UHCGame.class).newInstance(game);
-                        } catch (InstantiationException instantiationException) {
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException instantiationException) {
                             instantiationException.printStackTrace();
-                        } catch (IllegalAccessException illegalAccessException) {
-                            illegalAccessException.printStackTrace();
-                        } catch (InvocationTargetException invocationTargetException) {
-                            invocationTargetException.printStackTrace();
-                        } catch (NoSuchMethodException noSuchMethodException) {
-                            noSuchMethodException.printStackTrace();
                         }
                     }
                     for (ScenarioGetter annotation : scenario.getScenarioGetAnnotations()) {
@@ -266,9 +259,9 @@ public class ClickEvent implements Listener {
                                         valueToUp = 0.1f;
 
                                     if (e.getClick().isLeftClick())
-                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).add(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, BigDecimal.valueOf((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).add(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).doubleValue());
                                     if (e.getClick().isRightClick())
-                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).subtract(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).doubleValue());
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, BigDecimal.valueOf((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).subtract(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).doubleValue());
                                     if (e.getClick().isCreativeAction())
                                         scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(UHCGame.class).newInstance(game)));
                                     lore.add(0, String.valueOf((double) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
@@ -280,16 +273,16 @@ public class ClickEvent implements Listener {
                                         valueToUp = 0.1f;
 
                                     if (e.getClick().isLeftClick())
-                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).add(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).floatValue());
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, BigDecimal.valueOf((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).add(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).floatValue());
                                     if (e.getClick().isRightClick())
-                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, new BigDecimal((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).subtract(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).floatValue());
+                                        scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, BigDecimal.valueOf((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)).subtract(new BigDecimal(valueToUp)).setScale(1, RoundingMode.HALF_UP).floatValue());
                                     if (e.getClick().isCreativeAction())
                                         scenario.getScenarioSetMethod(annotation.name()).invoke(scenario, scenario.getScenarioGetMethod(annotation.name()).invoke(scenario.getClass().getConstructor(UHCGame.class).newInstance(game)));
                                     lore.add(0, String.valueOf((float) scenario.getScenarioGetMethod(annotation.name()).invoke(scenario)));
                                 } else if (aClass1 == List.class) {
                                     //todo list
                                 } else {
-                                    //invalid field
+                                    //todo invalid field
                                 }
                                 ItemMeta meta = e.getCurrentItem().getItemMeta();
                                 meta.setLore(lore);

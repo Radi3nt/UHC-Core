@@ -3,17 +3,24 @@
     "name": "Francais",
     "id": "fr"
   },
+
   "game": {
     "start": {
       "error": {
         "player": "&4&lLa partie ne peut pas commencer, pas assez de joueurs ! (%playerSize%/%minSize%)"
       },
       "success": {
-        "tp": "%prefix.uhc% &7Téléportation de &f%playerName%",
+        "tp": "%prefix.uhc% &7Téléportation de &f%s",
         "disconnect": "%prefix.uhc% &4&lMerci de ne pas vous déconnecter avant le debut de la partie",
         "author": "&8Plugin développé par : &e&l%author%&8.",
         "title": "&8&lBy %author%"
       }
+    },
+    "death": {
+      "disconnected": "est mort car son internet a laché",
+      "slain-player": "a été tué par %s",
+      "slain": "a été tué",
+      "death": "est mort"
     },
     "timer": {
       "start": {

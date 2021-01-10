@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -19,12 +20,8 @@ public class HungerLess extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "HungerLess";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.ROTTEN_FLESH);
+    public static ScenarioData getData() {
+        return new ScenarioData("HungerLess").setItemStack(new ItemStack(Material.ROTTEN_FLESH)).setDescription("Reduce the amount of hunger");
     }
 
     @EventHandler

@@ -4,6 +4,7 @@ import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,19 +12,15 @@ import org.bukkit.inventory.ItemStack;
 
 public class MeetupAlert extends Scenario {
 
-    private int meetupTime = 30;
-    private int timeBeforeSurfaceAlert = 5;
+    private final int meetupTime = 30;
+    private final int timeBeforeSurfaceAlert = 5;
 
     public MeetupAlert(UHCGame game) {
         super(game);
     }
 
-    public static String getName() {
-        return "MeetupAlert";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.LEATHER_CHESTPLATE);
+    public static ScenarioData getData() {
+        return new ScenarioData("MeetupAlert").setItemStack(new ItemStack(Material.LEATHER_CHESTPLATE)).setDescription("Alerts player that they need to go to 0 0 and get out of the caves");
     } //todo sound
 
     @Override

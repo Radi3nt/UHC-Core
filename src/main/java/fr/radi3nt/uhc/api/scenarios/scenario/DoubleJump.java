@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -27,12 +28,8 @@ public class DoubleJump extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "DoubleJump";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.LEATHER_BOOTS);
+    public static ScenarioData getData() {
+        return new ScenarioData("DoubleJump").setItemStack(new ItemStack(Material.LEATHER_BOOTS)).setDescription("Allows players to double jump");
     }
 
     @Override

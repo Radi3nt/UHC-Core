@@ -167,7 +167,12 @@ public class JsonObject extends JsonValue implements Iterable<JsonObject.Member>
             throw new NullPointerException("object is null");
         }
         for (Member member : object) {
-            this.add(member.getName(), member.getValue());
+            if (this.indexOf(member.name) != -1 && member.getValue().isObject() && get(member.name).isObject()) {
+                JsonObject jsonObject = get(member.name).asObject();
+                jsonObject.merge(member.getValue().asObject());
+            } else {
+                this.add(member.getName(), member.getValue());
+            }
         }
         return this;
     }

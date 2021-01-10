@@ -4,7 +4,7 @@ import org.bukkit.Location;
 
 import java.util.ArrayList;
 
-public class Maths {
+public final class Maths {
 
     /**
      * This method use the pythagoras theorem

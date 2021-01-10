@@ -1,7 +1,6 @@
-package fr.radi3nt.uhc.api.utilis;
+package fr.radi3nt.uhc.api.utilis.announcements;
 
 import fr.radi3nt.uhc.api.lang.Logger;
-import fr.radi3nt.uhc.uhc.UHCCore;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.ChatColor;
 
@@ -16,7 +15,11 @@ import java.util.List;
 
 public class AnnouncementUtils {
 
-    private static final HashSet<String> announcementCache = new HashSet<>();
+    private static final HashSet<Announcement> announcementCache = new HashSet<>();
+
+    public static void main(String[] args) {
+        broadcastNewAnnouncements();
+    }
 
     public static void broadcastNewAnnouncements() {
         String[] lines = new String[1];
@@ -28,32 +31,32 @@ public class AnnouncementUtils {
         }
          */
 
-        lines[0] = "(" + LocalDateTime.of(2020, Month.NOVEMBER, 1, 18, 54, 0).toString() + ") " + "hey"; //todo
+        lines[0] = "(" + LocalDateTime.of(2020, Month.NOVEMBER, 1, 18, 54, 0).toString() + ") " + "Coucou"; //todo
         broadcastLines(lines);
     }
 
     private static void broadcastLines(String[] lines) {
         for (String line : lines) {
-            if (!announcementCache.contains(line)) {
-                if (line.startsWith("(")) {
-                    String dateAndMessage = line.replace("(", "");
-                    String dateOnly = dateAndMessage.split("\\) ")[0];
-                    String message = line.replace("(" + dateOnly + ") ", "");
-                    LocalDateTime dateTime = LocalDateTime.parse(dateOnly);
-                    if (LocalDateTime.now().isAfter(dateTime) || LocalDateTime.now().isEqual(dateTime)) {
-                        announcementCache.add(message);
-                        broadcastMessage(message);
+                if (ScheduledAnnouncement.isScheduledAnnouncement(line)) {
+                    ScheduledAnnouncement scheduledAnnouncement = ScheduledAnnouncement.theAnnouncement(line);
+                    if (!announcementCache.contains(scheduledAnnouncement))
+                    if (LocalDateTime.now().isAfter(scheduledAnnouncement.getLocalDateTime()) || LocalDateTime.now().isEqual(scheduledAnnouncement.getLocalDateTime())) {
+                        announcementCache.add(scheduledAnnouncement);
+                        broadcastMessage(scheduledAnnouncement.getMessage());
                     }
                 } else {
-                    broadcastMessage(line);
-                    announcementCache.add(line);
+                    SimpleAnnouncement announcement = SimpleAnnouncement.theAnnouncement(line);
+                        if (!announcementCache.contains(announcement)) {
+                            announcementCache.add(announcement);
+                            broadcastMessage(line);
+                        }
                 }
             }
         }
-    }
 
     private static void broadcastMessage(String text) {
-        UHCCore.broadcastMessage(ChatColor.translateAlternateColorCodes('&', text));
+        System.out.println(ChatColor.translateAlternateColorCodes('&', text));
+        //UHCCore.broadcastMessage(ChatColor.translateAlternateColorCodes('&', text));
     }
 
     private static String[] getLinesFromURL(String url) throws IOException {

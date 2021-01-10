@@ -11,7 +11,7 @@ import java.util.List;
 
 public class WinConditionsCheckEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
-    private List<UHCPlayer> winners;
+    private final List<UHCPlayer> winners;
     private final UHCGame game;
     private boolean cancel;
 

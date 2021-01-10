@@ -2,6 +2,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
@@ -14,12 +15,8 @@ public class RodLess extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "RodLess";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.FISHING_ROD);
+    public static ScenarioData getData() {
+        return new ScenarioData("RodLess").setItemStack(new ItemStack(Material.FISHING_ROD)).setDescription("No fishing rod");
     }
 
     @EventHandler

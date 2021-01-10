@@ -1,6 +1,5 @@
 package fr.radi3nt.uhc.api.command.commands;
 
-import com.github.sarxos.webcam.Webcam;
 import fr.radi3nt.uhc.api.command.CommandArg;
 import fr.radi3nt.uhc.api.command.CommandUtilis;
 import fr.radi3nt.uhc.api.exeptions.common.CannotFindMessageException;
@@ -45,6 +44,7 @@ public class SpectateCommand implements CommandArg {
 
     @Override
     public void onCommand(CommandUtilis utilis) throws NoArgsException, NoPermissionException, NoUHCPlayerException {
+        requirePermission(utilis.getSender(), "uhc.spectate", "");
         if (utilis.requireMinArgs(1)) {
             UHCPlayer player = UHCPlayer.thePlayer((Player) utilis.getSender());
             for (UHCGame game : UHCCore.getGameQueue()) {
@@ -55,8 +55,7 @@ public class SpectateCommand implements CommandArg {
                     try {
                         player.sendMessage(String.format(player.getLanguage().getMessage("commands.spectate"), utilis.getArgs()[0]));
                     } catch (CannotFindMessageException e) {
-                        player.sendMessage(Language.NO_MESSAGE);
-                        Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                        UHCCore.handleCannotFindMessageException(e, player);
                     }
                     return;
                 }
@@ -78,12 +77,15 @@ public class SpectateCommand implements CommandArg {
             @Override
             public void render(MapView map, MapCanvas canvas, Player player) {
                 if (MinecraftServer.currentTick % 60 == 0) {
+                    /*
                     Webcam webcam = Webcam.getDefault();
                     webcam.open();
                     BufferedImage photo = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
                     photo.getGraphics().drawImage(webcam.getImage(), 0, 0, null);
 
                     canvas.drawImage(0, 0, webcam.getImage());
+
+                     */
                 }
 
             }

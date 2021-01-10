@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 
 public class Attribute<T> {
 
-    private T object;
+    private final T object;
 
     public Attribute(T object) {
         this.object=object;

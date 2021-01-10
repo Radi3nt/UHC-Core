@@ -1,10 +1,12 @@
 package fr.radi3nt.uhc.api.scenarios.scenario;
 
+import fr.radi3nt.uhc.api.events.UHCPlayerKillAnotherEvent;
 import fr.radi3nt.uhc.api.events.UHCPlayerKilledEvent;
 import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -28,12 +30,8 @@ public class NoClean extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "NoClean";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.BED);
+    public static ScenarioData getData() {
+        return new ScenarioData("NoClean").setItemStack(new ItemStack(Material.WOOD_SWORD)).setDescription("Cancel player damage for a certain amount of tme after killing someone");
     }
 
     @Override
@@ -51,7 +49,7 @@ public class NoClean extends Scenario {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void event(UHCPlayerKilledEvent e) {
+    public void event(UHCPlayerKillAnotherEvent e) {
         if (e.getGame() == game) {
             if (isActive()) {
                 players.put(e.getKiller(), 0);

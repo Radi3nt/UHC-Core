@@ -1,6 +1,7 @@
 package fr.radi3nt.uhc.api.listeners;
 
 import fr.radi3nt.uhc.api.command.commands.SpectateCommand;
+import fr.radi3nt.uhc.api.events.UHCPlayerJoinEvent;
 import fr.radi3nt.uhc.api.game.GameState;
 import fr.radi3nt.uhc.api.game.instances.DefaultsParameters;
 import fr.radi3nt.uhc.api.player.PlayerState;
@@ -66,6 +67,8 @@ public class PlayerJoinEvent implements Listener {
         ScoreboardsUtil.sendDefaultTabToPlayer(lgp);
 
 
+
+        Bukkit.getPluginManager().callEvent(new UHCPlayerJoinEvent(lgp));
                 /*
         Updater.UpdateResults results = LoupGarouUHC.getUpdater().checkForUpdates();
         if (results.getResult().equals(Updater.UpdateResult.UPDATE_AVAILABLE) && p.hasPermission("lg.updater")) {
@@ -79,7 +82,7 @@ public class PlayerJoinEvent implements Listener {
         p.getInventory().addItem(new GameInfoGUI().createBook(lgp.getLanguage(), RoleType.LOUP_GAROU));
 
          *///todo livres GUI
-       SpectateCommand.mapmap(lgp, "https://www.prchecker.info/free-icons/128x128/twitter_128_px.png");
+       //SpectateCommand.mapmap(lgp, "https://www.prchecker.info/free-icons/128x128/twitter_128_px.png");
 
     }
 }

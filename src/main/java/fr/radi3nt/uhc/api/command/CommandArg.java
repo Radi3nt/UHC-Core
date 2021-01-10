@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface CommandArg {
 
-    public default List<String> onTabComplete(CommandUtilis utilis) {
+    default List<String> onTabComplete(CommandUtilis utilis) {
         List<String> list = tabComplete(utilis);
         if (list==null) {
             list = new ArrayList<>();
@@ -21,7 +21,7 @@ public interface CommandArg {
         return list;
     }
 
-    public default void runCommand(CommandUtilis utilis) {
+    default void runCommand(CommandUtilis utilis) {
         try {
             onCommand(utilis);
         } catch (NoPermissionException e) {
@@ -37,7 +37,7 @@ public interface CommandArg {
                     message = String.format(message, e.getArgs());
                     utilis.getSender().sendMessage(message);
                 } catch (CannotFindMessageException cannotFindMessageException) {
-                    utilis.getSender().sendMessage(Language.NO_MESSAGE);
+                    UHCCore.handleCannotFindMessageException(cannotFindMessageException, UHCPlayer.thePlayer((Player) utilis.getSender()));
                 }
             }
         } catch (NoUHCPlayerException e) {
@@ -49,7 +49,7 @@ public interface CommandArg {
                     message = String.format(message, e.getMessage());
                     utilis.getSender().sendMessage(message);
                 } catch (CannotFindMessageException cannotFindMessageException) {
-                    utilis.getSender().sendMessage(Language.NO_MESSAGE);
+                    UHCCore.handleCannotFindMessageException(cannotFindMessageException, UHCPlayer.thePlayer((Player) utilis.getSender()));
                 }
             }
 

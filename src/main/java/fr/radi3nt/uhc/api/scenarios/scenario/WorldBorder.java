@@ -43,7 +43,7 @@ public class WorldBorder extends Scenario {
     @Override
     public void tick(GameTimer gameTimer, int tick) {
         super.tick(gameTimer, tick);
-        if (gameTimer.getGame() == game) {
+        if (gameTimer.getGame().equals(game)) {
             if (isActive()) {
                 if (gameTimer.getGame().getState() == GameState.PLAYING) {
                     lastTick = tick;

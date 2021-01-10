@@ -1,7 +1,8 @@
 package fr.radi3nt.uhc.api.listeners;
 
 import fr.radi3nt.uhc.api.events.UHCPlayerKilledEvent;
-import fr.radi3nt.uhc.api.game.Reason;
+import fr.radi3nt.uhc.api.game.reasons.Reason;
+import fr.radi3nt.uhc.api.game.reasons.ReasonDisconnected;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.stats.HoloStats;
 import fr.radi3nt.uhc.api.stats.Hologram;
@@ -13,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -48,10 +48,13 @@ public class PlayerLeaveEvent implements Listener {
                 public void run() {
                     UHCPlayer lgp = UHCPlayer.thePlayer(uuid);
                     if (!lgp.isPlaying()) {
+                        lgp.clearWaitingGame();
+                        UHCCore.getPlayers().remove(lgp);
+                        lgp.remove();
                         cancel();
                     }
                     if (lgp.isPlaying() && (i >= lgp.getGameData().getGame().getParameters().getDisconnectParameters().getDisconnectTimeout() * 60 * 20 || (lgp.getGameData().getGame().getPvP().isPvp() && !lgp.getGameData().getGame().getParameters().getDisconnectParameters().canReconnectInPvp()))) {
-                        Bukkit.getPluginManager().callEvent(new UHCPlayerKilledEvent(lgp.getGameData().getGame(), lgp, null, Reason.DISCONNECTED, lgp.getPlayerStats().getLastLocation()));
+                        Bukkit.getPluginManager().callEvent(new UHCPlayerKilledEvent(lgp.getGameData().getGame(), lgp, new ReasonDisconnected()));
                         lgp.clearWaitingGame();
                         UHCCore.getPlayers().remove(lgp);
                         lgp.remove();

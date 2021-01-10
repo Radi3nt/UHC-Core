@@ -6,12 +6,14 @@ import fr.radi3nt.uhc.api.chats.GameChat;
 import fr.radi3nt.uhc.api.events.WinConditionsCheckEvent;
 import fr.radi3nt.uhc.api.exeptions.common.CannotFindMessageException;
 import fr.radi3nt.uhc.api.game.GameState;
-import fr.radi3nt.uhc.api.game.Reason;
+import fr.radi3nt.uhc.api.game.reasons.BroadcastReason;
+import fr.radi3nt.uhc.api.game.reasons.Reason;
 import fr.radi3nt.uhc.api.game.UHCGameImpl;
 import fr.radi3nt.uhc.api.game.instances.DefaultsParameters;
 import fr.radi3nt.uhc.api.game.instances.GameData;
+import fr.radi3nt.uhc.api.game.reasons.ReasonDisconnected;
+import fr.radi3nt.uhc.api.game.reasons.ReasonSlainByPlayer;
 import fr.radi3nt.uhc.api.lang.Logger;
-import fr.radi3nt.uhc.api.lang.lang.Language;
 import fr.radi3nt.uhc.api.lang.lang.SystemPlaceHolder;
 import fr.radi3nt.uhc.api.player.*;
 import fr.radi3nt.uhc.api.scenarios.scenario.PvP;
@@ -19,7 +21,9 @@ import fr.radi3nt.uhc.api.stats.Stats;
 import fr.radi3nt.uhc.api.utilis.Config;
 import fr.radi3nt.uhc.api.utilis.ScoreboardsUtil;
 import org.bukkit.*;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,6 +36,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 public class ClassicGame extends UHCGameImpl {
+
+    private static final int MINIMUM_PLAYER_TO_START = 1;
 
     private static final Integer GAME_POINTS = 10;
     private static final Integer DEAD_POINTS = 5;
@@ -73,7 +79,7 @@ public class ClassicGame extends UHCGameImpl {
     @Override
     protected void _join(UHCPlayer player) {
         if (state == GameState.LOBBY) {
-            if (!player.isPlaying()) {
+            if (!player.isInGame()) {
                 waitQueue.add(player);
                 player.setWaitingGame(this);
             }
@@ -96,9 +102,9 @@ public class ClassicGame extends UHCGameImpl {
     @Override
     protected boolean _updateStart() {
         if (state == GameState.LOBBY) {
-            if (waitQueue.size()==1) {
+            if (waitQueue.size()<MINIMUM_PLAYER_TO_START) {
                 Chat.broadcastMessage(UHCCore.getPrefix() + " " + ChatColor.DARK_RED + "You tried to start with only one player !");
-                //return false; //todo remettre
+                return false;
             }
 
             state = GameState.WAITING;
@@ -110,31 +116,23 @@ public class ClassicGame extends UHCGameImpl {
                 try {
                     lgp.sendMessage(lgp.getLanguage().getMessage("game.start.success.disconnect", lgp));
                 } catch (CannotFindMessageException e) {
-                    lgp.sendMessage(Language.NO_MESSAGE);
-                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                    Logger.getGeneralLogger().log(e);
+                    UHCCore.handleCannotFindMessageException(e, lgp);
                 }
 
                 String message = null;
                 try {
                     message = lgp.getLanguage().getMessage("game.start.success.author");
                 } catch (CannotFindMessageException e) {
-                    lgp.sendMessage(Language.NO_MESSAGE);
-                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                    Logger.getGeneralLogger().log(e);
+                    UHCCore.handleCannotFindMessageException(e, lgp);
                 }
                 if (message != null && !message.contains(SystemPlaceHolder.getMessageReplaced("%author%", lgp))) {
                     message = message + " " + SystemPlaceHolder.getMessageReplaced("%author%", lgp);
-                    lgp.sendMessage(message);
-                } else {
-                    lgp.sendMessage(message);
                 }
+                lgp.sendMessage(message);
                 try {
                     lgp.sendTitle(data.getDisplayName(), lgp.getLanguage().getMessage("game.start.success.title", lgp), 5, 60, 5);
                 } catch (CannotFindMessageException e) {
-                    lgp.sendMessage(Language.NO_MESSAGE);
-                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                    Logger.getGeneralLogger().log(e);
+                    UHCCore.handleCannotFindMessageException(e, lgp);
                 }
             }
             new BukkitRunnable() {
@@ -197,11 +195,9 @@ public class ClassicGame extends UHCGameImpl {
 
                             for (UHCPlayer player : alivePlayers) {
                                 try {
-                                    player.sendMessage(player.getLanguage().getMessage("game.start.success.tp").replace("%playerName%", alivePlayer.getName()));
+                                    player.sendMessage(String.format( player.getLanguage().getMessage("game.start.success.tp"), alivePlayer.getName()));
                                 } catch (CannotFindMessageException e) {
-                                    player.sendMessage(Language.NO_MESSAGE);
-                                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                                    Logger.getGeneralLogger().log(e);
+                                    UHCCore.handleCannotFindMessageException(e, player);
                                 }
                                 player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 100, 1);
                             }
@@ -284,6 +280,33 @@ public class ClassicGame extends UHCGameImpl {
                     lgp.sendTitle("§7§lÉgalité", "§8Personne n'a gagné...", 5, 200, 5);
                     if (winner) {
                         lgp.sendTitle("§a§lVictoire !", "§6Vous avez gagné la partie.", 5, 200, 5);
+                        ArrayList<Color> colors = new ArrayList<>();
+                        colors.add(Color.fromRGB(57, 234, 0));
+                        colors.add(Color.fromRGB(234, 147, 0));
+                        colors.add(Color.AQUA);
+                        for (int i = 0; i < 3; i++) {
+                            Firework fw = (Firework) parameter.getGameSpawn().getWorld().spawnEntity(lgp.getPlayerStats().getLastLocation().clone().add(0, 3, 0), EntityType.FIREWORK);
+                            FireworkMeta fireworkMeta = fw.getFireworkMeta();
+                            for (int d = 0; d < 3; d++) {
+                                FireworkEffect.Builder builder = FireworkEffect.builder();
+                                builder.flicker(true);
+                                builder.trail(true);
+                                builder.with(FireworkEffect.Type.BALL);
+                                builder.withColor(colors.get(i));
+                                int second = (i + d + 1) % 3;
+                                int third = (i + d + 2) % 3;
+                                builder.withFade(colors.get(second), colors.get(third));
+                                fireworkMeta.addEffect(builder.build());
+                            }
+                            fireworkMeta.setPower(0);
+                            fw.setFireworkMeta(fireworkMeta);
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    fw.detonate();
+                                }
+                            }.runTaskLater(UHCCore.getPlugin(), 2L);
+                        }
                         //lgp.sendMessage(UHCCore.getPrefix() + ChatColor.AQUA + " +" + WINNED_BONUS + ChatColor.GOLD + " ⛁ " + ChatColor.AQUA + "(winned)");
                     } else if (noWinners) {
                         lgp.sendTitle("§7§lÉgalité", "§8Personne n'a gagné...", 5, 200, 5);
@@ -305,9 +328,6 @@ public class ClassicGame extends UHCGameImpl {
                 lgp.sendMessage(UHCCore.getPrefix() + " " + ChatColor.BLUE + "Nobody won the game");
             else
                 lgp.sendMessage(UHCCore.getPrefix() + " " + ChatColor.BLUE + winners.get(0).getName() + " won the game");
-            lgp.setGameData(new PlayerGameData(null));
-            lgp.setGameInformation(new GameInformation());
-            lgp.setChat(UHCCore.DEFAULT_CHAT);
         }
 
         Comparator<Map.Entry<UHCPlayer, Integer>> valueComparator = new Comparator<Map.Entry<UHCPlayer, Integer>>() {
@@ -363,6 +383,9 @@ public class ClassicGame extends UHCGameImpl {
             parameter.getGameSpawn().getWorld().getWorldBorder().setCenter(parameter.getGameSpawn());
             for (UHCPlayer lgp : getSpectatorsAndAlivePlayers()) {
                 resetPlayer(lgp);
+                lgp.setGameData(new PlayerGameData(null));
+                lgp.setGameInformation(new GameInformation());
+                lgp.setChat(UHCCore.DEFAULT_CHAT);
             }
             parameter.getGameSpawn().getWorld().getWorldBorder().setSize(parameter.getBaseRadius() * 2);
             alivePlayers.clear();
@@ -380,6 +403,9 @@ public class ClassicGame extends UHCGameImpl {
                         parameter.getGameSpawn().getWorld().getWorldBorder().setCenter(parameter.getGameSpawn());
                         for (UHCPlayer lgp : getSpectatorsAndAlivePlayers()) {
                             resetPlayer(lgp);
+                            lgp.setGameData(new PlayerGameData(null));
+                            lgp.setGameInformation(new GameInformation());
+                            lgp.setChat(UHCCore.DEFAULT_CHAT);
                         }
                         parameter.getGameSpawn().getWorld().getWorldBorder().setSize(parameter.getBaseRadius() * 2);
                         alivePlayers.clear();
@@ -423,15 +449,22 @@ public class ClassicGame extends UHCGameImpl {
 
         player.getGameData().setPlayerState(PlayerState.DEAD);
 
-        if (player.getGameInformation().getAttributeOrDefault("killer", new Attribute<>(null)).getObject() != null) {
-            Chat.broadcastMessage(player.getName() + " was killed by " + ((UHCPlayer) player.getGameInformation().getAttribute("killer").getObject()).getName(), getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
-        } else if (reason == Reason.KILLED_BY_MOB) {
-            Chat.broadcastMessage(player.getName() + " died by a mob", getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
-        } else if (reason == Reason.DISCONNECTED) {
-            Chat.broadcastMessage(player.getName() + " died, he had an internet problem in my opinion !", getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
-        } else {
-            Chat.broadcastMessage(player.getName() + " died", getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
-        }
+        if (reason instanceof ReasonSlainByPlayer) {
+            for (UHCPlayer spectatorsAndAlivePlayer : getSpectatorsAndAlivePlayers()) {
+                try {
+                    spectatorsAndAlivePlayer.sendMessage(String.format(player.getName() + " " + spectatorsAndAlivePlayer.getLanguage().getMessage(((ReasonSlainByPlayer) reason).getMessage()), ((ReasonSlainByPlayer) reason).getKiller().getName()));
+                } catch (CannotFindMessageException e) {
+                    UHCCore.handleCannotFindMessageException(e, spectatorsAndAlivePlayer);
+                }
+            }
+        } else if (reason instanceof BroadcastReason)
+            for (UHCPlayer spectatorsAndAlivePlayer : getSpectatorsAndAlivePlayers()) {
+                try {
+                    spectatorsAndAlivePlayer.sendMessage(player.getName() + " " + spectatorsAndAlivePlayer.getLanguage().getMessage(((BroadcastReason) reason).getMessage()));
+                } catch (CannotFindMessageException e) {
+                    UHCCore.handleCannotFindMessageException(e, spectatorsAndAlivePlayer);
+                }
+            }
 
         alivePlayers.remove(player);
         spectate(player);

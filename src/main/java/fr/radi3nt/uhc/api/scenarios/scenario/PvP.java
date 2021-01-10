@@ -13,6 +13,7 @@ import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
 import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioCommand;
+import fr.radi3nt.uhc.uhc.UHCCore;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -40,6 +41,7 @@ public class PvP extends Scenario {
     public static ScenarioData getData() {
         return new ScenarioData("PvP").setItemStack(new ItemStack(Material.DIAMOND_SWORD)).setDescription("PvP option of the game");
     }
+
     @Override
     public void register() {
         super.register();
@@ -62,9 +64,7 @@ public class PvP extends Scenario {
                                         alivePlayer.sendMessage(String.format(alivePlayer.getLanguage().getMessage(getMessagesId() + "soon.second"), secondes));
                                     }
                                 } catch (CannotFindMessageException e) {
-                                    alivePlayer.sendMessage(Language.NO_MESSAGE);
-                                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                                    Logger.getGeneralLogger().log(e);
+                                    UHCCore.handleCannotFindMessageException(e, alivePlayer);
                                 }
                             }
                         }

@@ -102,7 +102,7 @@ public class AutoBreak extends Scenario {
                         }
                         i++;
                     }
-                }.runTaskTimer(UHCCore.getPlugin(), time * 20 / 10, time * 20 / 10);
+                }.runTaskTimer(UHCCore.getPlugin(), time * 20L / 10, time * 20L / 10);
             }
         }
     }

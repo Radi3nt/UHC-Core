@@ -3,7 +3,6 @@ package fr.radi3nt.uhc.api.player;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
@@ -60,7 +59,7 @@ public class PlayerStatus {
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
             this.setFood(player.getFoodLevel());
-            this.setMaxHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+            this.setMaxHealth(player.getMaxHealth());
             this.setHealth(player.getHealth());
             this.setXp(player.getTotalExperience());
             this.setInventory(player.getInventory());
@@ -189,7 +188,7 @@ public class PlayerStatus {
                     if (effect.getDuration() > 9999 * 20)
                         duration = 99999999 * 20;
 
-                    PotionEffect potionEffect = new PotionEffect(potion.getKey().getType(), (int) duration, effect.getAmplifier(), effect.isAmbient(), effect.hasParticles(), effect.getColor());
+                    PotionEffect potionEffect = new PotionEffect(potion.getKey().getType(), (int) duration, effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
                     getPlayer().addPotionEffect(potionEffect);
                 }
             }
@@ -231,7 +230,7 @@ public class PlayerStatus {
 
     public void updateMaxHealth() {
         if (isOnline())
-            getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
+            getPlayer().setMaxHealth(maxHealth);
     }
 
     public void addMessages(String message) {

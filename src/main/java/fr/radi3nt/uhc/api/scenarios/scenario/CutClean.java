@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -27,12 +28,8 @@ public class CutClean extends Scenario {
         materials.put(Material.PORK, Material.GRILLED_PORK);
     }
 
-    public static String getName() {
-        return "CutClean";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.IRON_INGOT);
+    public static ScenarioData getData() {
+        return new ScenarioData("CutClean").setItemStack(new ItemStack(Material.IRON_INGOT)).setDescription("Auto smelt items");
     }
 
     @Override

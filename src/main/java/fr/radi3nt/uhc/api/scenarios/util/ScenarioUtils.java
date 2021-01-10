@@ -60,10 +60,10 @@ public class ScenarioUtils {
             Logger.getGeneralLogger().logInConsole(UHCCore.getPrefix() + ChatColor.DARK_RED  + " Cannot add scenario " + scenarioClass.getSimpleName() + " to repertoried scenarios: no scenario id");
             return;
         }
-        List<ScenarioData> repertoriedScenariosName = new ArrayList<>();
+        List<String> repertoriedScenariosName = new ArrayList<>();
         for (Class<? extends Scenario> repertoriedScenariosClass : Scenario.getRepertoriedScenariosClasses()) {
             try {
-                repertoriedScenariosName.add(((ScenarioData) repertoriedScenariosClass.getMethod("getData").invoke(null)));
+                repertoriedScenariosName.add(((ScenarioData) repertoriedScenariosClass.getMethod("getData").invoke(null)).getName());
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
@@ -72,7 +72,7 @@ public class ScenarioUtils {
                 noSuchMethodException.printStackTrace();
             }
         }
-        if (repertoriedScenariosName.contains(name)) {
+        if (repertoriedScenariosName.contains(name.getName())) {
             Logger.getGeneralLogger().logInConsole(UHCCore.getPrefix() + ChatColor.DARK_RED  + " Cannot add scenario " + scenarioClass.getTypeName() + " to repertoried scenarios: scenario id is duplicated");
             return;
         }

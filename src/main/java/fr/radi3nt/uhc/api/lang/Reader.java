@@ -57,7 +57,7 @@ public class Reader {
     public void copyLocalToLang() {
         URI uri = null;
         try {
-            uri = UHCCore.class.getResource("/langs").toURI(); //todo plugins
+            uri = UHCCore.class.getResource("/langs").toURI();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GameInformation {
 
-    private HashMap<String, Attribute<?>> attributes = new HashMap<>();
+    private final HashMap<String, Attribute<?>> attributes = new HashMap<>();
 
     public void putAttribute(String key, Attribute<?> attribute) {
         attributes.put(key, attribute);
@@ -22,6 +22,9 @@ public class GameInformation {
 
     public Attribute<?> getAttribute(String key) {
          return attributes.get(key);
+    }
+    public boolean isAttribute(String key) {
+         return attributes.get(key)!=null;
     }
     public Attribute<?> getAttributeOrDefault(String key, Attribute<?> object) {
          return attributes.getOrDefault(key, object);

@@ -2,6 +2,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import org.bukkit.Material;
@@ -39,12 +40,8 @@ public class HastyBoys extends Scenario {
         enchantable.add(Material.DIAMOND_SPADE);
     }
 
-    public static String getName() {
-        return "HastyBoys";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.DIAMOND_PICKAXE);
+    public static ScenarioData getData() {
+        return new ScenarioData("HastyBoys").setItemStack(new ItemStack(Material.REDSTONE_ORE)).setDescription("Allow tools to be faster");
     }
 
     @EventHandler

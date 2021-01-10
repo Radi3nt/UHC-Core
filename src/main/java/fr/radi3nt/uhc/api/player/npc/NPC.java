@@ -232,8 +232,8 @@ public class NPC {
 		this.setField(packet, "c", location.getX());
 		this.setField(packet, "d", location.getY());
 		this.setField(packet, "e", location.getZ());
-		this.setField(packet, "f", fix_head ? (byte) ((int) location.getYaw() * 256.0F / 360.0F) : 0);
-		this.setField(packet, "g", fix_head ? (byte) ((int) location.getPitch() * 256.0F / 360.0F) : 0);
+		this.setField(packet, "f", fix_head ? getFixRotation(location.getYaw()) : 0);
+		this.setField(packet, "g", fix_head ? getFixRotation(location.getPitch()) : 0);
 		this.setField(packet, "h", this.dataWatcher);
 		this.addToTabList();
 		this.sendPacket(packet);
@@ -588,8 +588,8 @@ public class NPC {
 		this.setField(packet, "b", location.getX());
 		this.setField(packet, "c", location.getY());
 		this.setField(packet, "d", location.getZ());
-		this.setField(packet, "e", (byte) location.getYaw());
-		this.setField(packet, "f", (byte) location.getPitch());
+		this.setField(packet, "e", getFixRotation(location.getYaw()));
+		this.setField(packet, "f", getFixRotation(location.getPitch()));
 		this.setField(packet, "g", onGround);
 		this.sendPacket(packet);
 		this.rotateHead(location.getPitch(), location.getYaw());
@@ -601,19 +601,20 @@ public class NPC {
 	 * rotate npc head to pitch and yaw.
 	 */
 	public void rotateHead(float pitch, float yaw) {
-		PacketPlayOutEntity.PacketPlayOutEntityLook packet = new PacketPlayOutEntity.PacketPlayOutEntityLook(this.entityId, getFixRotation(yaw), (byte) pitch, true);
+		PacketPlayOutEntity.PacketPlayOutEntityLook packet = new PacketPlayOutEntity.PacketPlayOutEntityLook(this.entityId, getFixRotation(yaw), getFixRotation(pitch), true);
 		PacketPlayOutEntityHeadRotation packet_1 = new PacketPlayOutEntityHeadRotation();
 		this.setField(packet_1, "a", this.entityId);
 		this.setField(packet_1, "b", getFixRotation(yaw));
 		this.sendPacket(packet);
 		this.sendPacket(packet_1);
+
 	}
 
 	
 	
 	
 	/*
-	 * These methods below are not usefull.
+	 * These methods below are not useful.
 	 */
 	
 	private <T> void setDataWatcherObject(DataWatcherObject<T> datawatcherobject, Object t0) {
@@ -632,13 +633,9 @@ public class NPC {
 		PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(this.entityId, this.dataWatcher, true);
 		sendPacket(packet);
 	}
-	
-	private byte getFixRotation(float yawpitch) {
-		return (byte) ((int) (location.getYaw() * 256.0F / 360.0F));
-	}
 
-	private byte getFixRotationYaw(float yawpitch) {
-		return (byte) ((int) (yawpitch * 256.0F / 360.0F));
+	private byte getFixRotation(float yawpitch) {
+		return (byte) (yawpitch / 360.0F * 256.0F);
 	}
 
 	public byte getDirection(Location location) {
@@ -895,10 +892,10 @@ public class NPC {
 		this.setField(packet, "g", false);
 		this.sendPacket(packet, player);
 
-		PacketPlayOutEntity.PacketPlayOutEntityLook packet1 = new PacketPlayOutEntity.PacketPlayOutEntityLook(specStand, getFixRotationYaw(yawW), (byte) 0, true);
+		PacketPlayOutEntity.PacketPlayOutEntityLook packet1 = new PacketPlayOutEntity.PacketPlayOutEntityLook(specStand, getFixRotation(yawW), (byte) 0, true);
 		PacketPlayOutEntityHeadRotation packet_1 = new PacketPlayOutEntityHeadRotation();
 		this.setField(packet_1, "a", specStand);
-		this.setField(packet_1, "b", getFixRotationYaw(yawW));
+		this.setField(packet_1, "b", getFixRotation(yawW));
 		this.sendPacket(packet1, player);
 		this.sendPacket(packet_1, player);
 

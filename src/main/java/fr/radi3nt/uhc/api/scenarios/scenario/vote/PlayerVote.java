@@ -9,8 +9,10 @@ import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.lang.lang.Language;
+import fr.radi3nt.uhc.api.player.PlayerState;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioCommand;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
@@ -41,12 +43,8 @@ public class PlayerVote extends Scenario {
     }
 
 
-    public static String getName() {
-        return "Vote";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.SIGN);
+    public static ScenarioData getData() {
+        return new ScenarioData("Vote").setItemStack(new ItemStack(Material.SIGN)).setDescription("Allows player to vote");
     }
 
     private static HashMap<UHCPlayer, Integer> convertVotesToMap(Vote[] votes) {
@@ -68,14 +66,14 @@ public class PlayerVote extends Scenario {
                         Bukkit.getPluginManager().callEvent(new VoteStartEvent(game, this));
                         proceedPreVote();
                     }
-                    if (tick % ((timeBetweenVotes * 20)) == 0) {
+                    if ((tick % (timeBetweenVotes * 20)) == timeToVote*20) {
                         VoteEndEvent voteEndEvent = new VoteEndEvent(game, convertMapToArray(votes), this);
                         Bukkit.getPluginManager().callEvent(voteEndEvent);
                         if (voteEndEvent.isCancelled()) {
                             votes.clear();
                         }
                     }
-                    if (tick % ((timeBetweenVotes * 20) + (timeBeforeAnnounce * 20)) == 0) {
+                    if ((tick % (timeBetweenVotes * 20)) == (timeToVote*20) + (timeBeforeAnnounce * 20)) {
                         VoteAnnouncementEvent voteEndEvent = new VoteAnnouncementEvent(game, convertMapToArray(votes), this);
                         Bukkit.getPluginManager().callEvent(voteEndEvent);
                         if (!voteEndEvent.isCancelled()) {
@@ -96,7 +94,7 @@ public class PlayerVote extends Scenario {
                 if (playerCanVotes) {
                     UHCPlayer target = game.getUHCPlayerInThisGame(command.getArgs()[1]);
                     if (target != null) {
-                        if (target.isPlaying() && target.getGameData().getGame().equals(sender.getGameData().getGame())) {
+                        if (target.isPlaying() && target.getGameData().getPlayerState()== PlayerState.ALIVE && target.getGameData().getGame().equals(sender.getGameData().getGame())) {
                                 boolean hasVoted = false;
                                 for (Map.Entry<Vote, Integer> entry : this.getVotes().entrySet()) {
                                     Vote vote = entry.getKey();
@@ -129,11 +127,9 @@ public class PlayerVote extends Scenario {
         } else {
             for (UHCPlayer deadAndAlivePlayer : game.getSpectatorsAndAlivePlayers()) {
                 try {
-                    deadAndAlivePlayer.sendMessage(deadAndAlivePlayer.getLanguage().getMessage(String.format(getMessagesId() + "deactivated", minPlayerToVote)));
+                    deadAndAlivePlayer.sendMessage(String.format(deadAndAlivePlayer.getLanguage().getMessage(getMessagesId() + "deactivated"), minPlayerToVote));
                 } catch (CannotFindMessageException e) {
-                    deadAndAlivePlayer.sendMessage(Language.NO_MESSAGE);
-                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                    Logger.getGeneralLogger().log(e);
+                    UHCCore.handleCannotFindMessageException(e, deadAndAlivePlayer);
                 }
             }
         }
@@ -195,9 +191,7 @@ public class PlayerVote extends Scenario {
                         try {
                             lgp.sendMessage(getMessage(lgp.getLanguage(), "message.seconds").replace("%voteSeconds%", String.valueOf(seconds)));
                         } catch (CannotFindMessageException e) {
-                            lgp.sendMessage(Language.NO_MESSAGE);
-                            Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
-
+                            UHCCore.handleCannotFindMessageException(e, lgp);
                         }
                     }
                 }
@@ -207,8 +201,7 @@ public class PlayerVote extends Scenario {
                         try {
                             lgp.sendMessage(getMessage(lgp.getLanguage(), "message.minutes").replace("%voteMinutes%", String.valueOf(minutes)));
                         } catch (CannotFindMessageException e) {
-                            lgp.sendMessage(Language.NO_MESSAGE);
-                            Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                            UHCCore.handleCannotFindMessageException(e, lgp);
                         }
                     }
                 } else {
@@ -216,8 +209,7 @@ public class PlayerVote extends Scenario {
                         try {
                             lgp.sendMessage(getMessage(lgp.getLanguage(), "message.minutesSeconds").replace("%voteMinutes%", String.valueOf(minutes)).replace("%voteSeconds%", String.valueOf(seconds)));
                         } catch (CannotFindMessageException e) {
-                            lgp.sendMessage(Language.NO_MESSAGE);
-                            Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                            UHCCore.handleCannotFindMessageException(e, lgp);
                         }
                     }
                 }
@@ -230,8 +222,7 @@ public class PlayerVote extends Scenario {
                 try {
                     lgp.sendMessage(getMessage(lgp.getLanguage(), "message.minutesSeconds").replace("%voteMinutes%", String.valueOf(minutes)).replace("%voteSeconds%", String.valueOf(seconds)));
                 } catch (CannotFindMessageException e) {
-                    lgp.sendMessage(Language.NO_MESSAGE);
-                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                    UHCCore.handleCannotFindMessageException(e, lgp);
                 }
             }
         }
@@ -240,17 +231,16 @@ public class PlayerVote extends Scenario {
     private void sendResults(String name, int votes) {
         for (UHCPlayer lgp : game.getSpectatorsAndAlivePlayers()) {
             try {
-                lgp.sendMessage(getMessage(lgp.getLanguage(), "results.header").replace("%votedName%", name).replace("%numberVotes%", String.valueOf(votes)));
+                lgp.sendMessage(getMessage(lgp.getLanguage(), "results.player").replace("%votedName%", name).replace("%numberVotes%", String.valueOf(votes)));
             } catch (CannotFindMessageException e) {
-                lgp.sendMessage(Language.NO_MESSAGE);
-                Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                UHCCore.handleCannotFindMessageException(e, lgp);
             }
             lgp.getPlayer().playSound(lgp.getPlayer().getLocation(), Sound.ENTITY_ARROW_HIT, SoundCategory.AMBIENT, 1f, 1f);
         }
     }
 
     private void sendNullResults() {
-        Chat.broadcastIdMessage(getMessagesId() + "null", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
+        Chat.broadcastIdMessage(getMessagesId() + "results.null", game.getSpectatorsAndAlivePlayers().toArray(new UHCPlayer[0]));
     }
 
     private void applyResults(UHCPlayer lgp) {

@@ -7,6 +7,7 @@ import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioCommand;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
@@ -35,12 +36,8 @@ public class OreLimiter extends Scenario {
         oreLimit.put(Material.DIAMOND_ORE, 17);
     }
 
-    public static String getName() {
-        return "OreLimiter";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.DIAMOND_ORE);
+    public static ScenarioData getData() {
+        return new ScenarioData("OreLimiter").setItemStack(new ItemStack(Material.DIAMOND_ORE)).setDescription("Limit the amount of ores a player can mine in a game");
     }
 
 

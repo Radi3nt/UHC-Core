@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
@@ -31,17 +32,17 @@ public class LimitedEnchants extends Scenario {
         super(game);
         disabledEnchantement.add(Enchantment.ARROW_FIRE);
         disabledEnchantement.add(Enchantment.FIRE_ASPECT);
-        limitedEnchants.put(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+        limitedEnchants.put(Enchantment.PROTECTION_ENVIRONMENTAL, 3);
         limitedEnchants.put(Enchantment.DAMAGE_ALL, 4);
 
         //todo add auto assassin
     }
 
-    public static String getName() {
-        return "LimitedEnchants";
+    public static ScenarioData getData() {
+        return new ScenarioData("LimitedEnchantment").setItemStack(getItem()).setDescription("Forbid and limits enchentements");
     }
 
-    public static ItemStack getItem() {
+    public static ItemStack getItem() { //todo message
         ItemStack itemStack = new ItemStack(Material.DIAMOND_SWORD);
         itemStack.addEnchantment(Enchantment.FIRE_ASPECT, 1);
         return itemStack;
@@ -54,6 +55,7 @@ public class LimitedEnchants extends Scenario {
             if (isActive()) {
                 for (int i = 0; i < e.getOffers().length; i++) {
                     EnchantmentOffer offer = e.getOffers()[i];
+                    if (offer!=null)
                     if (disabledEnchantement.contains(offer.getEnchantment())) {
                         e.getOffers()[i] = null;
                     }
@@ -95,7 +97,9 @@ public class LimitedEnchants extends Scenario {
                 if (current == null) {
                     return;
                 }
-                e.getItem().getItemMeta().getEnchants().clear();
+                for (Enchantment enchantment : e.getItem().getItemMeta().getEnchants().keySet()) {
+                    e.getItem().removeEnchantment(enchantment);
+                }
                 e.getItem().getItemMeta().getEnchants().putAll((this.checkEnchant(e.getEnchantsToAdd(), e.getEnchanter(), current)).getEnchantments());
 
                 /*
@@ -183,4 +187,7 @@ public class LimitedEnchants extends Scenario {
         return result;
     }
 
+    public List<UHCPlayer> getBypassedPlayer() {
+        return bypassedPlayer;
+    }
 }

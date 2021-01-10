@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.game;
 import fr.radi3nt.uhc.api.events.UHCGameEndsEvent;
 import fr.radi3nt.uhc.api.events.UHCGameStartsEvent;
 import fr.radi3nt.uhc.api.game.instances.GameData;
+import fr.radi3nt.uhc.api.game.reasons.Reason;
 import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
@@ -90,7 +91,11 @@ public abstract class UHCGameImpl implements UHCGame {
 
         unregisterAndDeactivateAllScenario();
 
-        gameTimer.cancel();
+        try {
+            gameTimer.cancel();
+        } catch (IllegalStateException e) {
+            //If the game has not started ?
+        }
         _end(winners, fast);
         Path log = Paths.get(UHCCore.getPlugin().getDataFolder() + "/logs/game");
         data.getLogChat().archive(log, uuid);
@@ -114,7 +119,7 @@ public abstract class UHCGameImpl implements UHCGame {
         else
             game.getScenarios().addAll(scenarios);
 
-        UHCCore.getGameQueue().add(game);
+        UHCCore.getGameQueue().add(0, game);
     }
 
     public void kill(UHCPlayer player, Reason reason, Location playerloc) {

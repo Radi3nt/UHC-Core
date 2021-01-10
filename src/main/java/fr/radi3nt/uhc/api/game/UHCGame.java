@@ -1,6 +1,7 @@
 package fr.radi3nt.uhc.api.game;
 
 import fr.radi3nt.uhc.api.game.instances.GameData;
+import fr.radi3nt.uhc.api.game.reasons.Reason;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
 import fr.radi3nt.uhc.api.scenarios.scenario.PvP;

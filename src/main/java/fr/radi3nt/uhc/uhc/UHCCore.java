@@ -7,6 +7,7 @@ package fr.radi3nt.uhc.uhc;
 import fr.radi3nt.uhc.api.chats.Chat;
 import fr.radi3nt.uhc.api.chats.GeneralChat;
 import fr.radi3nt.uhc.api.command.UHCCommands;
+import fr.radi3nt.uhc.api.exeptions.common.CannotFindMessageException;
 import fr.radi3nt.uhc.api.game.GameType;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.game.instances.DefaultsParameters;
@@ -37,12 +38,14 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.*;
 
 public final class UHCCore extends JavaPlugin implements Listener {
 
     public static final Chat DEFAULT_CHAT = new GeneralChat();
     public static final String DEFAULT_LANG_ID = "fr";
+    private static final SecureRandom random = new SecureRandom();
 
     private static final Set<UHCPlayer> players = new HashSet<>();
     private static final List<UHCGame> gameQueue = new ArrayList<>();
@@ -107,7 +110,7 @@ public final class UHCCore extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new SmallFeaturesListener(), this);
 
 
-        getServer().getPluginManager().registerEvents(new DamageEvent(), this);
+        getServer().getPluginManager().registerEvents(new DeathEvent(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerChatEvent(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerDie(), this);
         getServer().getPluginManager().registerEvents(new OnPlayerMoveEvent(), this);
@@ -175,8 +178,12 @@ public final class UHCCore extends JavaPlugin implements Listener {
             Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.RED + "Registered PlaceHolders");
             RegisterEvents();
             Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.RED + "Registered Events");
-            registerDefaultScenarios();
-            Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.RED + "Loading Default Scenarios");
+            try {
+                registerDefaultScenarios();
+                Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.RED + "Loading Default Scenarios");
+            } catch (Exception e) {
+                Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.DARK_RED + "Couldn't load default scenarios, some scenarios could be missing");
+            }
             RegisterCommands();
             Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.RED + "Registered Commands");
 
@@ -190,7 +197,9 @@ public final class UHCCore extends JavaPlugin implements Listener {
             try {
                 Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.DARK_RED + "Something went wrong, please restart your server");
                 Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.AQUA + "--------------------------------------");
+                e.printStackTrace();
                 Logger.getGeneralLogger().log(e);
+                Logger.getGeneralLogger().logInConsole(ChatColor.GOLD + "[UHC] " + ChatColor.AQUA + "--------------------------------------");
             } catch (Exception e1) {
                 System.out.println("[UHC] Cannot start plugin due to an internal error:");
                 e.printStackTrace();
@@ -261,7 +270,7 @@ public final class UHCCore extends JavaPlugin implements Listener {
         ScenarioUtils.addScenario(WorldBorder.class);
         ScenarioUtils.addScenario(StartInvincibility.class);
         ScenarioUtils.addScenario(CenterDistance.class);
-        ScenarioUtils.addScenario(Meetup.class);
+        //ScenarioUtils.addScenario(Meetup.class);
         ScenarioUtils.addScenario(MeetupAlert.class);
 
     }
@@ -275,16 +284,8 @@ public final class UHCCore extends JavaPlugin implements Listener {
             System.out.println("[UHC] Cannot archive logger !");
         }
 
-        /*
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            UHCPlayer lgp = UHCPlayer.thePlayer(onlinePlayer);
-            if (lgp.isPlaying())
-                lgp.getGameData().getGame().end(new ArrayList<>(), true);
-        }
-
-         */
-
-        for (UHCGame game : UHCCore.getGameQueue()) {
+        for (int i1 = 0; i1 < UHCCore.getGameQueue().size(); i1++) {
+            UHCGame game = UHCCore.getGameQueue().get(i1);
             game.end(null, true);
         }
 
@@ -304,7 +305,20 @@ public final class UHCCore extends JavaPlugin implements Listener {
         HoloStats.getCachedHolo().clear();
     }
 
+    public static void handleCannotFindMessageException(CannotFindMessageException e, UHCPlayer player) {
+        player.sendMessage(Language.NO_MESSAGE);
+        handleCannotFindMessageException(e);
+    }
+
+    public static void handleCannotFindMessageException(CannotFindMessageException e) {
+        Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
+    }
+
     public static Set<GameType> getRegisteredGames() {
         return registeredGames;
+    }
+
+    public static SecureRandom getRandom() {
+        return random;
     }
 }

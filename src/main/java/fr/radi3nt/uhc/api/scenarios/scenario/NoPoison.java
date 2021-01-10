@@ -2,6 +2,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,12 +15,8 @@ public class NoPoison extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "NoPoison";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.POISONOUS_POTATO);
+    public static ScenarioData getData() {
+        return new ScenarioData("NoPoison").setItemStack(new ItemStack(Material.POISONOUS_POTATO)).setDescription("Cancel poison damage");
     }
 
     @EventHandler

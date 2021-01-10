@@ -10,7 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class Updater {
+public final class Updater {
 
     private final String urlBase;
     private final String currentVersion;

@@ -62,8 +62,7 @@ public abstract class Chat {
                 try {
                     player.sendMessage(player.getLanguage().getMessage(messageID, player));
                 } catch (CannotFindMessageException e) {
-                    player.sendMessage(Language.NO_MESSAGE);
-                    Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                    UHCCore.handleCannotFindMessageException(e, player);
                 }
             }
         }

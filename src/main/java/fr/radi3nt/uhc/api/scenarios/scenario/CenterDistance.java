@@ -7,7 +7,9 @@ import fr.radi3nt.uhc.api.lang.Logger;
 import fr.radi3nt.uhc.api.lang.lang.Language;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.utilis.Maths;
+import fr.radi3nt.uhc.uhc.UHCCore;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -35,12 +37,8 @@ public class CenterDistance extends Scenario {
         DistanceAnnounce.add(2000);
     }
 
-    public static String getName() {
-        return "CenterDistance";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.COMPASS);
+    public static ScenarioData getData() {
+        return new ScenarioData("CenterDistance").setItemStack(new ItemStack(Material.COMPASS)).setDescription("Display your distance from 0 0");
     }
 
     @Override
@@ -56,9 +54,7 @@ public class CenterDistance extends Scenario {
                     try {
                         disM = getMessage(lgp.getLanguage(), "normal");
                     } catch (CannotFindMessageException e) {
-                        lgp.sendMessage(Language.NO_MESSAGE);
-                        Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
-                        Logger.getGeneralLogger().log(e);
+                        UHCCore.handleCannotFindMessageException(e);
                     }
                     String disS = "NaN";
                     int maxNumber = 0;
@@ -82,8 +78,7 @@ public class CenterDistance extends Scenario {
                         try {
                             disS = getMessage(lgp.getLanguage(), "normal").replace("%1%", String.valueOf(maxNumber));
                         } catch (CannotFindMessageException e) {
-                            lgp.sendMessage(Language.NO_MESSAGE);
-                            Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot fond message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                            UHCCore.handleCannotFindMessageException(e);
                         }
                     }
                     lgp.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(disS));

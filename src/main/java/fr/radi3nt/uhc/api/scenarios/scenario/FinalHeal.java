@@ -7,6 +7,7 @@ import fr.radi3nt.uhc.api.game.GameTimer;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioCommand;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
@@ -24,12 +25,7 @@ public class FinalHeal extends Scenario {
         super(game);
     }
 
-    public static String getName() {
-        return "FinalHeal";
-    }
-
-    public static ItemStack getItem() {
-        return new ItemStack(Material.GOLDEN_APPLE);
+    public static ScenarioData getData() { return new ScenarioData("FinalHeal").setItemStack(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 0, (byte) 1)).setDescription("Add a final heal at a certain amount of time");
     }
 
     @Override
@@ -47,7 +43,7 @@ public class FinalHeal extends Scenario {
     private void doFinalHeal() {
         for (UHCPlayer lgPlayer : game.getAlivePlayers()) {
             lgPlayer.getPlayerStats().refresh();
-            lgPlayer.getPlayerStats().setHealth(lgPlayer.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+            lgPlayer.getPlayerStats().setHealth(lgPlayer.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
             lgPlayer.getPlayerStats().update();
         }
         UHCCore.broadcastMessage(UHCCore.getPrefix() + " " + ChatColor.GOLD + "Final heal >" + ChatColor.AQUA + " All players have been healed");

@@ -4,7 +4,7 @@ import fr.radi3nt.uhc.api.game.UHCGame;
 
 public class PlayerGameData {
 
-    private UHCGame game;
+    private final UHCGame game;
     private PlayerState playerState = PlayerState.NOT_PLAYING;
 
     public PlayerGameData(UHCGame game) {

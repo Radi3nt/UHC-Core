@@ -3,6 +3,7 @@ package fr.radi3nt.uhc.api.scenarios.scenario;
 import fr.radi3nt.uhc.api.game.UHCGame;
 import fr.radi3nt.uhc.api.player.UHCPlayer;
 import fr.radi3nt.uhc.api.scenarios.Scenario;
+import fr.radi3nt.uhc.api.scenarios.ScenarioData;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioGetter;
 import fr.radi3nt.uhc.api.scenarios.util.ScenarioSetter;
 import fr.radi3nt.uhc.uhc.UHCCore;
@@ -36,13 +37,8 @@ public class FastPlace extends Scenario {
         super(game);
     }
 
-    public static ItemStack getItem() {
-        return new ItemStack(Material.IRON_SPADE);
-    }
+    public static ScenarioData getData() { return new ScenarioData("FastPlace").setItemStack(new ItemStack(Material.IRON_SPADE)).setDescription("Fast placing blocks");}
 
-    public static String getName() {
-        return "FastPlace";
-    }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) { //todo PlayerAnimationEvent

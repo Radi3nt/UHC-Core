@@ -27,6 +27,7 @@ public class GameCommand implements CommandArg {
 
     @Override
     public void onCommand(CommandUtilis utilis) throws NoArgsException, NoPermissionException, NoUHCPlayerException {
+        requirePermission(utilis.getSender(), "uhc.game.manage", "");
         if (utilis.requireMinArgs(2)) {
             GameType game = null;
             for (GameType registeredGame : UHCCore.getRegisteredGames()) {
@@ -46,12 +47,12 @@ public class GameCommand implements CommandArg {
                     for (UHCGame uhcGame : UHCCore.getGameQueue()) {
                         if (uhcGame.getClass().equals(game.getGameClass()) && uhcGame.getState()==GameState.LOBBY) {
                             UHCCore.getGameQueue().remove(uhcGame);
-                            UHCCore.getGameQueue().add(uhcGame);
+                            UHCCore.getGameQueue().add(0, uhcGame);
                             return;
                         }
                     }
                     try {
-                        UHCCore.getGameQueue().add(game.getGameClass().getConstructor().newInstance());
+                        UHCCore.getGameQueue().add(0, game.getGameClass().getConstructor().newInstance());
                     } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                         Logger.getGeneralLogger().log(e);
                     }
@@ -99,6 +100,7 @@ public class GameCommand implements CommandArg {
             arrayList.add("add");
             arrayList.add("select");
             arrayList.add("join");
+            arrayList.removeIf(s1 -> !s1.startsWith(utilis.getArgs()[1]));
         }
         return arrayList;
     }

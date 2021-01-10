@@ -23,7 +23,6 @@ public class ClassicGameTimer extends GameTimer {
 
     private static final int MAX_EXCEPTIONS = 40;
 
-    private final int shift = 1000;
     private boolean waiting = true;
     private int exceptionNumber = 0;
 
@@ -119,8 +118,7 @@ public class ClassicGameTimer extends GameTimer {
                         try {
                             gamePlayer.sendTitle(ChatColor.GOLD + gamePlayer.getLanguage().getMessage("game.timer.start.title", gamePlayer), gamePlayer.getLanguage().getMessage("game.timer.start.subtitle", gamePlayer), 20, 20 * 3, 20);
                         } catch (CannotFindMessageException e) {
-                            gamePlayer.sendMessage(Language.NO_MESSAGE);
-                            Logger.getGeneralLogger().logInConsole(ChatColor.DARK_RED + "Cannot find message " + e.getMessage() + " for language " + e.getLanguage().getId());
+                            UHCCore.handleCannotFindMessageException(e, gamePlayer);
                         }
                             gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.BLOCK_END_PORTAL_SPAWN, SoundCategory.AMBIENT, 1f, 1f);
                             gamePlayer.getPlayer().setWalkSpeed(0.2F);
@@ -139,11 +137,13 @@ public class ClassicGameTimer extends GameTimer {
                 waiting = false;
             }
         }
+
         for (UHCPlayer lgp : game.getAlivePlayers()) {
             lgp.getPlayerStats().refresh();
             if (lgp.isOnline())
                 lgp.getPlayer().setCompassTarget(game.getParameters().getGameSpawn());
         }
+
         try {
             ScenarioUtils.tickAll(this, getTicks());
         } catch (Exception e) {
@@ -189,7 +189,7 @@ public class ClassicGameTimer extends GameTimer {
         }
         i--;
 
-        setScore(ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective); //todo tro longue barres
+        setScore(ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective); //todo https://stackoverflow.com/questions/1235179/simple-way-to-repeat-a-string
         i--;
 
 
@@ -252,7 +252,7 @@ public class ClassicGameTimer extends GameTimer {
         }
         i--;
 
-        setScore(ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective); //todo tro longue barres
+        setScore(ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "                       ", i, objective);
         i--;
 
         String text;
